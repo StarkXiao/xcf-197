@@ -1,0 +1,90 @@
+import { LEVELS } from '../data/gameData';
+
+const HomePage = ({ onStartGame, onSelectLevel, unlockedLevel = 1, highScores = {} }) => {
+  return (
+    <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-8">
+      <div className="text-center mb-12">
+        <div className="text-6xl mb-4 animate-float">🌟</div>
+        <h1 className="text-4xl md:text-5xl font-bold text-star-gold mb-4 glow-text">
+          星塔占卜
+        </h1>
+        <p className="text-lg text-star-cyan mb-2">
+          修复破碎情书
+        </p>
+        <p className="text-sm text-white/60 max-w-md">
+          翻开神秘的星纹卡牌，配对相同的星座，
+          逐步修复那封被星光撕碎的情书...
+        </p>
+      </div>
+
+      <button
+        onClick={() => onStartGame(1)}
+        className="btn-star text-lg px-12 py-4 mb-10 animate-pulse-slow"
+      >
+        ✨ 开始占卜 ✨
+      </button>
+
+      <div className="w-full max-w-md">
+        <h3 className="text-lg font-bold text-star-gold mb-4 text-center">
+          选择关卡
+        </h3>
+        <div className="space-y-3">
+          {LEVELS.map((level) => {
+            const isUnlocked = level.id <= unlockedLevel;
+            const highScore = highScores[level.id] || 0;
+
+            return (
+              <div
+                key={level.id}
+                className={`p-4 rounded-xl border-2 transition-all cursor-pointer
+                  ${isUnlocked
+                    ? 'border-star-gold/50 bg-star-purple/30 hover:bg-star-purple/50 hover:border-star-gold'
+                    : 'border-gray-600/30 bg-gray-800/30 opacity-50 cursor-not-allowed'
+                  }
+                `}
+                onClick={() => isUnlocked && onSelectLevel(level.id)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="text-2xl">
+                      {isUnlocked ? '⭐' : '🔒'}
+                    </div>
+                    <div>
+                      <div className={`font-bold ${isUnlocked ? 'text-white' : 'text-gray-500'}`}>
+                        第 {level.id} 关 · {level.name}
+                      </div>
+                      <div className="text-sm text-white/60">
+                        {level.description}
+                      </div>
+                    </div>
+                  </div>
+                  {highScore > 0 && (
+                    <div className="text-right">
+                      <div className="text-star-gold text-sm font-bold">
+                        {highScore}
+                      </div>
+                      <div className="text-xs text-white/40">
+                        最高分
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-4 mt-2 text-xs text-white/50">
+                  <span>⏱️ {level.timeLimit}秒</span>
+                  <span>🃏 {level.pairs}对</span>
+                  <span>🎯 {level.baseScore}分</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mt-8 text-center text-xs text-white/40">
+        <p>💡 提示：快速连续配对可获得连击加分</p>
+      </div>
+    </div>
+  );
+};
+
+export default HomePage;
