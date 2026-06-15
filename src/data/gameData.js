@@ -163,3 +163,157 @@ export const getStarById = (id) => {
 export const getLevelById = (id) => {
   return LEVELS.find(level => level.id === id);
 };
+
+export const HIDDEN_ENDINGS = [
+  {
+    id: 'ending-1',
+    name: '星河守护者',
+    description: '集齐所有星星碎片，成为星塔的永恒守护者',
+    requirement: '收集全部12个星座碎片',
+    reward: '专属头像框 · 星河守护者',
+    rewardType: 'frame',
+    icon: '🌌',
+    unlocked: false
+  },
+  {
+    id: 'ending-2',
+    name: '情书收藏家',
+    description: '修复完整的情书，解锁真结局',
+    requirement: '通关全部5个章节并获得3星评价',
+    reward: '隐藏剧情 · 跨越时空的告白',
+    rewardType: 'story',
+    icon: '💌',
+    unlocked: false
+  },
+  {
+    id: 'ending-3',
+    name: '命运占卜师',
+    description: '在限定时间内完成所有挑战',
+    requirement: '所有关卡用时少于时间限制的50%',
+    reward: '特殊称号 · 命运占卜师',
+    rewardType: 'title',
+    icon: '🔮',
+    unlocked: false
+  }
+];
+
+export const REWARDS = [
+  {
+    id: 'reward-1',
+    name: '新手徽章',
+    description: '完成第一章获得',
+    icon: '🎖️',
+    rarity: 'common',
+    unlocked: false
+  },
+  {
+    id: 'reward-2',
+    name: '星光闪耀',
+    description: '单局连击达到5次',
+    icon: '✨',
+    rarity: 'rare',
+    unlocked: false
+  },
+  {
+    id: 'reward-3',
+    name: '完美通关',
+    description: '任意关卡获得3星评价',
+    icon: '🏆',
+    rarity: 'epic',
+    unlocked: false
+  },
+  {
+    id: 'reward-4',
+    name: '银河旅人',
+    description: '累计游戏时长超过1小时',
+    icon: '🚀',
+    rarity: 'epic',
+    unlocked: false
+  },
+  {
+    id: 'reward-5',
+    name: '星塔之巅',
+    description: '通关全部章节',
+    icon: '👑',
+    rarity: 'legendary',
+    unlocked: false
+  },
+  {
+    id: 'reward-6',
+    name: '情书大师',
+    description: '解锁所有隐藏结局',
+    icon: '📜',
+    rarity: 'legendary',
+    unlocked: false
+  }
+];
+
+export const CHAPTER_STORIES = [
+  {
+    id: 1,
+    title: '星之序章',
+    subtitle: '初识星纹',
+    content: `在星塔的最底层，你第一次接触到了神秘的星纹卡牌。
+星光流转间，你感受到了一股古老的力量在召唤着你。
+"翻开卡牌吧，"一个悠远的声音说道，"命运的齿轮已经开始转动..."`,
+    image: '🌅'
+  },
+  {
+    id: 2,
+    title: '月光私语',
+    subtitle: '月下告白',
+    content: `皎洁的月光洒落在星塔上，你翻开了第二张卡牌。
+卡片上的星座图案仿佛在月光下活了过来，
+向你诉说着一个关于勇气与告白的故事...`,
+    image: '🌙'
+  },
+  {
+    id: 3,
+    title: '银河情书',
+    subtitle: '跨越星河',
+    content: `银河在你眼前展开，每一颗星星都是一封情书。
+你开始理解，这些星纹背后承载着怎样的深情。
+"跨越银河的爱恋，终将在星塔之巅重逢..."`,
+    image: '🌌'
+  },
+  {
+    id: 4,
+    title: '星座誓言',
+    subtitle: '十二见证',
+    content: `十二星座齐聚，它们将作为你们爱情的见证。
+每一个星座都代表着一种品质：
+勇敢、温柔、忠诚、浪漫、智慧、坚持...`,
+    image: '⭐'
+  },
+  {
+    id: 5,
+    title: '星塔终章',
+    subtitle: '情书修复',
+    content: `你终于登上了星塔之巅，所有的碎片汇聚在一起。
+那封被星光撕碎的情书，在你手中缓缓复原。
+信中的每个字，都闪烁着星辰的光芒...`,
+    image: '🏰'
+  }
+];
+
+export const getRarityColor = (rarity) => {
+  const colors = {
+    common: '#9ca3af',
+    rare: '#3b82f6',
+    epic: '#a855f7',
+    legendary: '#f59e0b'
+  };
+  return colors[rarity] || colors.common;
+};
+
+export const getHiddenEndingById = (id) => {
+  return HIDDEN_ENDINGS.find(ending => ending.id === id);
+};
+
+export const getRewardById = (id) => {
+  return REWARDS.find(reward => reward.id === id);
+};
+
+export const getChapterStoryById = (id) => {
+  return CHAPTER_STORIES.find(story => story.id === id);
+};

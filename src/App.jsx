@@ -2,13 +2,16 @@ import { useState, useEffect } from 'react';
 import HomePage from './pages/HomePage';
 import GamePage from './pages/GamePage';
 import ResultPage from './pages/ResultPage';
+import ArchivePage from './pages/ArchivePage';
 import StarryBackground from './components/StarryBackground';
-import { LEVELS } from './data/gameData';
+import { LEVELS, getLevelById } from './data/gameData';
+import { useArchive } from './hooks/useArchive';
 
 const PAGES = {
   HOME: 'home',
   GAME: 'game',
-  RESULT: 'result'
+  RESULT: 'result',
+  ARCHIVE: 'archive'
 };
 
 function App() {
@@ -18,6 +21,7 @@ function App() {
   const [isWin, setIsWin] = useState(false);
   const [unlockedLevel, setUnlockedLevel] = useState(1);
   const [highScores, setHighScores] = useState({});
+  const archive = useArchive();
 
   useEffect(() => {
     const savedProgress = localStorage.getItem('starTowerProgress');
@@ -63,11 +67,46 @@ function App() {
     }
   };
 
+  const getStarsRating = (levelId, timeLeft, moves) => {
+    const level = getLevelById(levelId);
+    if (!level) return 1;
+    const timeRatio = timeLeft / level.timeLimit;
+    const moveRatio = (level.pairs * 2) / moves;
+    if (timeRatio > 0.5 && moveRatio > 0.8) return 3;
+    if (timeRatio > 0.3 && moveRatio > 0.5) return 2;
+    return 1;
+  };
+
   const handleWin = (result) => {
     setIsWin(true);
     setGameResult(result);
     setCurrentPage(PAGES.RESULT);
     saveProgress(result.levelId, result.score);
+
+    const level = getLevelById(result.levelId);
+    if (level) {
+      archive.collectFragmentsFromLevel(level.stars);
+      archive.unlockChapter(result.levelId);
+      archive.updateLetterProgress(result.levelId);
+
+      const stars = getStarsRating(result.levelId, result.timeLeft, result.moves);
+      archive.setChapterStarRating(result.levelId, stars);
+
+      if (result.maxCombo) {
+        archive.updateMaxCombo(result.maxCombo);
+      }
+
+      const timeUsed = level.timeLimit - result.timeLeft;
+      archive.addPlayTime(timeUsed);
+    }
+  };
+
+  const handleOpenArchive = () => {
+    setCurrentPage(PAGES.ARCHIVE);
+  };
+
+  const handleBackFromArchive = () => {
+    setCurrentPage(PAGES.HOME);
   };
 
   const handleLose = (result) => {
@@ -107,6 +146,7 @@ function App() {
         <HomePage
           onStartGame={handleStartGame}
           onSelectLevel={handleSelectLevel}
+          onOpenArchive={handleOpenArchive}
           unlockedLevel={unlockedLevel}
           highScores={highScores}
         />
@@ -130,6 +170,13 @@ function App() {
           onNextLevel={handleNextLevel}
           onHome={handleHome}
           hasNextLevel={hasNextLevel}
+        />
+      )}
+
+      {currentPage === PAGES.ARCHIVE && (
+        <ArchivePage
+          archive={archive}
+          onBack={handleBackFromArchive}
         />
       )}
     </div>

@@ -1,6 +1,6 @@
 import { LEVELS } from '../data/gameData';
 
-const HomePage = ({ onStartGame, onSelectLevel, unlockedLevel = 1, highScores = {} }) => {
+const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, unlockedLevel = 1, highScores = {} }) => {
   return (
     <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-8">
       <div className="text-center mb-12">
@@ -17,12 +17,21 @@ const HomePage = ({ onStartGame, onSelectLevel, unlockedLevel = 1, highScores = 
         </p>
       </div>
 
-      <button
-        onClick={() => onStartGame(1)}
-        className="btn-star text-lg px-12 py-4 mb-10 animate-pulse-slow"
-      >
-        ✨ 开始占卜 ✨
-      </button>
+      <div className="flex flex-col sm:flex-row gap-4 mb-10">
+        <button
+          onClick={() => onStartGame(1)}
+          className="btn-star text-lg px-12 py-4 animate-pulse-slow"
+        >
+          ✨ 开始占卜 ✨
+        </button>
+        <button
+          onClick={onOpenArchive}
+          className="px-8 py-4 rounded-full font-bold transition-all
+            border-2 border-star-cyan/50 text-star-cyan hover:bg-star-cyan/10 hover:border-star-cyan hover:shadow-lg hover:shadow-star-cyan/30"
+        >
+          🏛️ 星塔档案馆
+        </button>
+      </div>
 
       <div className="w-full max-w-md">
         <h3 className="text-lg font-bold text-star-gold mb-4 text-center">
