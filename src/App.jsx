@@ -98,6 +98,10 @@ function App() {
 
       const timeUsed = level.timeLimit - result.timeLeft;
       archive.addPlayTime(timeUsed);
+
+      if (result.timeLeft > level.timeLimit * 0.5) {
+        archive.incrementFastLevel();
+      }
     }
   };
 
