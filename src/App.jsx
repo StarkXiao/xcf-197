@@ -3,15 +3,20 @@ import HomePage from './pages/HomePage';
 import GamePage from './pages/GamePage';
 import ResultPage from './pages/ResultPage';
 import ArchivePage from './pages/ArchivePage';
+import DailyChallengePage from './pages/DailyChallengePage';
+import DailyChallengeGamePage from './pages/DailyChallengeGamePage';
 import StarryBackground from './components/StarryBackground';
 import { LEVELS, getLevelById } from './data/gameData';
 import { useArchive } from './hooks/useArchive';
+import { useDailyChallenge } from './hooks/useDailyChallenge';
 
 const PAGES = {
   HOME: 'home',
   GAME: 'game',
   RESULT: 'result',
-  ARCHIVE: 'archive'
+  ARCHIVE: 'archive',
+  DAILY_CHALLENGE: 'daily-challenge',
+  DAILY_CHALLENGE_GAME: 'daily-challenge-game'
 };
 
 function App() {
@@ -22,6 +27,7 @@ function App() {
   const [unlockedLevel, setUnlockedLevel] = useState(1);
   const [highScores, setHighScores] = useState({});
   const archive = useArchive();
+  const dailyChallenge = useDailyChallenge();
 
   useEffect(() => {
     const savedProgress = localStorage.getItem('starTowerProgress');
@@ -140,6 +146,22 @@ function App() {
     setCurrentPage(PAGES.HOME);
   };
 
+  const handleOpenDailyChallenge = () => {
+    setCurrentPage(PAGES.DAILY_CHALLENGE);
+  };
+
+  const handleBackFromDailyChallenge = () => {
+    setCurrentPage(PAGES.HOME);
+  };
+
+  const handleStartDailyChallenge = () => {
+    setCurrentPage(PAGES.DAILY_CHALLENGE_GAME);
+  };
+
+  const handleDailyChallengeComplete = () => {
+    setCurrentPage(PAGES.DAILY_CHALLENGE);
+  };
+
   const hasNextLevel = currentLevel < LEVELS.length;
 
   return (
@@ -151,6 +173,7 @@ function App() {
           onStartGame={handleStartGame}
           onSelectLevel={handleSelectLevel}
           onOpenArchive={handleOpenArchive}
+          onOpenDailyChallenge={handleOpenDailyChallenge}
           unlockedLevel={unlockedLevel}
           highScores={highScores}
         />
@@ -181,6 +204,23 @@ function App() {
         <ArchivePage
           archive={archive}
           onBack={handleBackFromArchive}
+        />
+      )}
+
+      {currentPage === PAGES.DAILY_CHALLENGE && (
+        <DailyChallengePage
+          dailyChallenge={dailyChallenge}
+          onStartChallenge={handleStartDailyChallenge}
+          onBack={handleBackFromDailyChallenge}
+        />
+      )}
+
+      {currentPage === PAGES.DAILY_CHALLENGE_GAME && (
+        <DailyChallengeGamePage
+          key="daily-challenge-game"
+          dailyChallenge={dailyChallenge}
+          onBack={handleBackFromDailyChallenge}
+          onComplete={handleDailyChallengeComplete}
         />
       )}
     </div>

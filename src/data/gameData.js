@@ -317,3 +317,227 @@ export const getRewardById = (id) => {
 export const getChapterStoryById = (id) => {
   return CHAPTER_STORIES.find(story => story.id === id);
 };
+
+export const DAILY_CHALLENGE_THEMES = [
+  {
+    id: 'theme-love',
+    name: '恋爱运势',
+    icon: '💕',
+    description: '今日的爱情运势如何？',
+    color: '#ff6b9d',
+    bonusType: 'score',
+    bonusValue: 1.5
+  },
+  {
+    id: 'theme-career',
+    name: '事业运势',
+    icon: '💼',
+    description: '工作上将有什么机遇？',
+    color: '#3b82f6',
+    bonusType: 'combo',
+    bonusValue: 2
+  },
+  {
+    id: 'theme-wealth',
+    name: '财运亨通',
+    icon: '💰',
+    description: '财富之门是否为你敞开？',
+    color: '#fbbf24',
+    bonusType: 'score',
+    bonusValue: 1.3
+  },
+  {
+    id: 'theme-health',
+    name: '健康运势',
+    icon: '🏃',
+    description: '身体状态今日如何？',
+    color: '#10b981',
+    bonusType: 'time',
+    bonusValue: 30
+  },
+  {
+    id: 'theme-friendship',
+    name: '人际运势',
+    icon: '🤝',
+    description: '人际关系会有什么变化？',
+    color: '#8b5cf6',
+    bonusType: 'combo',
+    bonusValue: 1.5
+  },
+  {
+    id: 'theme-luck',
+    name: '幸运之星',
+    icon: '🍀',
+    description: '今日的幸运指数如何？',
+    color: '#14b8a6',
+    bonusType: 'score',
+    bonusValue: 2
+  },
+  {
+    id: 'theme-dream',
+    name: '梦境解析',
+    icon: '🌙',
+    description: '昨夜的梦境预示着什么？',
+    color: '#6366f1',
+    bonusType: 'time',
+    bonusValue: 60
+  },
+  {
+    id: 'theme-destiny',
+    name: '命运之轮',
+    icon: '🎡',
+    description: '命运的齿轮开始转动...',
+    color: '#ec4899',
+    bonusType: 'score',
+    bonusValue: 1.8
+  }
+];
+
+export const DAILY_CHALLENGE_TASKS = [
+  {
+    id: 'task-combo-5',
+    name: '连击大师',
+    description: '单局达成5次连击',
+    icon: '⚡',
+    requirement: { type: 'combo', value: 5 },
+    reward: { type: 'points', value: 500 },
+    difficulty: 'easy'
+  },
+  {
+    id: 'task-combo-10',
+    name: '连击传说',
+    description: '单局达成10次连击',
+    icon: '🔥',
+    requirement: { type: 'combo', value: 10 },
+    reward: { type: 'points', value: 1500 },
+    difficulty: 'hard'
+  },
+  {
+    id: 'task-time-60',
+    name: '光速配对',
+    description: '剩余时间超过60秒完成',
+    icon: '⏱️',
+    requirement: { type: 'timeLeft', value: 60 },
+    reward: { type: 'points', value: 800 },
+    difficulty: 'medium'
+  },
+  {
+    id: 'task-moves-12',
+    name: '精准无误',
+    description: '用不超过12步完成配对',
+    icon: '🎯',
+    requirement: { type: 'moves', value: 12 },
+    reward: { type: 'points', value: 1000 },
+    difficulty: 'hard'
+  },
+  {
+    id: 'task-stars-3',
+    name: '完美三星',
+    description: '获得3星评价',
+    icon: '⭐',
+    requirement: { type: 'stars', value: 3 },
+    reward: { type: 'points', value: 1200 },
+    difficulty: 'medium'
+  },
+  {
+    id: 'task-no-mistake',
+    name: '零失误',
+    description: '全程没有配对错误',
+    icon: '💯',
+    requirement: { type: 'perfect', value: true },
+    reward: { type: 'points', value: 2000 },
+    difficulty: 'legendary'
+  },
+  {
+    id: 'task-fast-complete',
+    name: '极速通关',
+    description: '在45秒内完成挑战',
+    icon: '🚀',
+    requirement: { type: 'completeTime', value: 45 },
+    reward: { type: 'points', value: 1800 },
+    difficulty: 'legendary'
+  },
+  {
+    id: 'task-score-5000',
+    name: '高分达人',
+    description: '单局得分超过5000',
+    icon: '🏆',
+    requirement: { type: 'score', value: 5000 },
+    reward: { type: 'points', value: 1000 },
+    difficulty: 'easy'
+  }
+];
+
+export const DAILY_CHALLENGE_REWARDS = [
+  {
+    id: 'daily-reward-1',
+    rank: 1,
+    name: '每日冠军',
+    icon: '👑',
+    reward: '专属称号 · 每日占卜师',
+    bonusPoints: 3000,
+    rarity: 'legendary'
+  },
+  {
+    id: 'daily-reward-2',
+    rank: 2,
+    name: '每日亚军',
+    icon: '🥈',
+    reward: '星光碎片 ×10',
+    bonusPoints: 2000,
+    rarity: 'epic'
+  },
+  {
+    id: 'daily-reward-3',
+    rank: 3,
+    name: '每日季军',
+    icon: '🥉',
+    reward: '星光碎片 ×5',
+    bonusPoints: 1000,
+    rarity: 'epic'
+  },
+  {
+    id: 'daily-reward-4',
+    rank: 'top10',
+    name: '每日十强',
+    icon: '🌟',
+    reward: '星光碎片 ×3',
+    bonusPoints: 500,
+    rarity: 'rare'
+  },
+  {
+    id: 'daily-reward-5',
+    rank: 'participation',
+    name: '参与奖励',
+    icon: '🎁',
+    reward: '星光碎片 ×1',
+    bonusPoints: 100,
+    rarity: 'common'
+  }
+];
+
+export const getDailyThemeById = (id) => {
+  return DAILY_CHALLENGE_THEMES.find(theme => theme.id === id);
+};
+
+export const getDailyTaskById = (id) => {
+  return DAILY_CHALLENGE_TASKS.find(task => task.id === id);
+};
+
+export const getDailyRewardByRank = (rank) => {
+  if (rank === 1) return DAILY_CHALLENGE_REWARDS[0];
+  if (rank === 2) return DAILY_CHALLENGE_REWARDS[1];
+  if (rank === 3) return DAILY_CHALLENGE_REWARDS[2];
+  if (rank <= 10) return DAILY_CHALLENGE_REWARDS[3];
+  return DAILY_CHALLENGE_REWARDS[4];
+};
+
+export const getDifficultyColor = (difficulty) => {
+  const colors = {
+    easy: '#10b981',
+    medium: '#fbbf24',
+    hard: '#f97316',
+    legendary: '#ec4899'
+  };
+  return colors[difficulty] || colors.easy;
+};
