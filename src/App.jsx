@@ -9,6 +9,8 @@ import DailyChallengeGamePage from './pages/DailyChallengeGamePage';
 import AchievementWallPage from './pages/AchievementWallPage';
 import DivinationShopPage from './pages/DivinationShopPage';
 import StoryCorridorPage from './pages/StoryCorridorPage';
+import SeasonChallengePage from './pages/SeasonChallengePage';
+import SeasonSettlementPage from './pages/SeasonSettlementPage';
 import StarryBackground from './components/StarryBackground';
 import AchievementUnlockModal from './components/AchievementUnlockModal';
 import StoryChoiceModal from './components/StoryChoiceModal';
@@ -17,6 +19,7 @@ import { useArchive } from './hooks/useArchive';
 import { useDailyChallenge } from './hooks/useDailyChallenge';
 import { useAchievements } from './hooks/useAchievements';
 import { useShop } from './hooks/useShop';
+import { useSeasonChallenge } from './hooks/useSeasonChallenge';
 
 const PAGES = {
   HOME: 'home',
@@ -28,7 +31,9 @@ const PAGES = {
   DAILY_CHALLENGE_GAME: 'daily-challenge-game',
   ACHIEVEMENT: 'achievement',
   SHOP: 'shop',
-  STORY_CORRIDOR: 'story-corridor'
+  STORY_CORRIDOR: 'story-corridor',
+  SEASON_CHALLENGE: 'season-challenge',
+  SEASON_SETTLEMENT: 'season-settlement'
 };
 
 function App() {
@@ -44,6 +49,7 @@ function App() {
   const dailyChallenge = useDailyChallenge();
   const achievements = useAchievements(archive);
   const shop = useShop();
+  const seasonChallenge = useSeasonChallenge();
 
   useEffect(() => {
     const savedProgress = localStorage.getItem('starTowerProgress');
@@ -123,6 +129,22 @@ function App() {
       if (result.timeLeft > level.timeLimit * 0.5) {
         archive.incrementFastLevel();
       }
+
+      seasonChallenge.updateStatsOnWin({
+        levelId: result.levelId,
+        stars,
+        maxCombo: result.maxCombo || 0,
+        timeLeft: result.timeLeft,
+        moves: result.moves,
+        isPerfect: result.timeLeft === level.timeLimit
+      });
+
+      const basePoints = 10;
+      const starBonus = stars * 5;
+      const comboBonus = Math.floor((result.maxCombo || 0) / 3) * 2;
+      const timeBonus = result.timeLeft > level.timeLimit * 0.5 ? 5 : 0;
+      const totalPoints = basePoints + starBonus + comboBonus + timeBonus;
+      seasonChallenge.addSeasonPoints(totalPoints, stars);
     }
 
     const branch = getStoryBranchByChapter(result.levelId);
@@ -236,6 +258,22 @@ function App() {
     }
   };
 
+  const handleOpenSeasonChallenge = () => {
+    setCurrentPage(PAGES.SEASON_CHALLENGE);
+  };
+
+  const handleBackFromSeasonChallenge = () => {
+    setCurrentPage(PAGES.HOME);
+  };
+
+  const handleOpenSeasonSettlement = () => {
+    setCurrentPage(PAGES.SEASON_SETTLEMENT);
+  };
+
+  const handleBackFromSeasonSettlement = () => {
+    setCurrentPage(PAGES.HOME);
+  };
+
   const handleHomeFromResult = () => {
     achievements.clearNewAchievements();
     handleHome();
@@ -267,11 +305,13 @@ function App() {
           onOpenAchievements={handleOpenAchievements}
           onOpenShop={handleOpenShop}
           onOpenStoryCorridor={handleOpenStoryCorridor}
+          onOpenSeasonChallenge={handleOpenSeasonChallenge}
           unlockedLevel={unlockedLevel}
           highScores={highScores}
           collectedStars={archive.collectedFragments.length}
           achievements={achievements}
           shop={shop}
+          seasonChallenge={seasonChallenge}
         />
       )}
 
@@ -350,6 +390,21 @@ function App() {
         <StoryCorridorPage
           archive={archive}
           onBack={handleBackFromStoryCorridor}
+        />
+      )}
+
+      {currentPage === PAGES.SEASON_CHALLENGE && (
+        <SeasonChallengePage
+          seasonChallenge={seasonChallenge}
+          onBack={handleBackFromSeasonChallenge}
+          onOpenSettlement={handleOpenSeasonSettlement}
+        />
+      )}
+
+      {currentPage === PAGES.SEASON_SETTLEMENT && (
+        <SeasonSettlementPage
+          seasonChallenge={seasonChallenge}
+          onBack={handleBackFromSeasonSettlement}
         />
       )}
 

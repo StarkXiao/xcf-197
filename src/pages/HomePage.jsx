@@ -1,6 +1,9 @@
-import { LEVELS, getAchievementStats, CURRENCY_INFO, CURRENCY_TYPES } from '../data/gameData';
+import { LEVELS, getAchievementStats, CURRENCY_INFO, CURRENCY_TYPES, getCurrentSeason } from '../data/gameData';
 
-const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, onOpenDailyChallenge, onOpenAchievements, onOpenShop, onOpenStoryCorridor, unlockedLevel = 1, highScores = {}, collectedStars = 0, achievements, shop }) => {
+const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, onOpenDailyChallenge, onOpenAchievements, onOpenShop, onOpenStoryCorridor, onOpenSeasonChallenge, unlockedLevel = 1, highScores = {}, collectedStars = 0, achievements, shop, seasonChallenge }) => {
+  const currentSeason = getCurrentSeason();
+  const hasUnclaimedRewards = seasonChallenge?.unclaimedStageRewardsCount > 0 || 
+                              seasonChallenge?.unclaimedTaskRewardsCount > 0;
   const achievementStats = achievements ? getAchievementStats(achievements.unlockedAchievements) : null;
   return (
     <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-8">
@@ -125,7 +128,7 @@ const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, 
       )}
 
       {onOpenStoryCorridor && (
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row gap-4 mb-4">
           <button
             onClick={onOpenStoryCorridor}
             className="px-8 py-4 rounded-full font-bold transition-all
@@ -136,6 +139,36 @@ const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, 
             <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full animate-bounce">
               NEW
             </span>
+          </button>
+        </div>
+      )}
+
+      {onOpenSeasonChallenge && seasonChallenge && (
+        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+          <button
+            onClick={onOpenSeasonChallenge}
+            className="px-8 py-4 rounded-full font-bold transition-all
+              border-2 border-indigo-400/50 text-indigo-300 hover:bg-indigo-500/10 hover:border-indigo-400 hover:shadow-lg hover:shadow-indigo-400/30
+              relative overflow-hidden group"
+            style={{
+              background: `linear-gradient(135deg, ${currentSeason.primaryColor}22 0%, ${currentSeason.secondaryColor}22 100%)`,
+              borderColor: `${currentSeason.primaryColor}66`
+            }}
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              <span className="text-xl">{currentSeason.icon}</span>
+              <span>{currentSeason.name}</span>
+            </span>
+            {hasUnclaimedRewards && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full animate-pulse font-bold">
+                {seasonChallenge.unclaimedStageRewardsCount + seasonChallenge.unclaimedTaskRewardsCount}
+              </span>
+            )}
+            {!hasUnclaimedRewards && (
+              <span className="absolute -top-1 -right-1 bg-indigo-500 text-white text-xs px-2 py-0.5 rounded-full animate-bounce">
+                NEW
+              </span>
+            )}
           </button>
         </div>
       )}

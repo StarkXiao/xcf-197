@@ -1932,3 +1932,424 @@ export const getCharacterAffectionSummary = (affectionMap = {}) => {
 
   return { total, maxAffection, maxCharId, unlockedCount };
 };
+
+export const SEASON_THEMES = [
+  {
+    id: 'season-1',
+    name: '星河守护者',
+    subtitle: 'S1 · 守护星河的誓言',
+    description: '在这个赛季中，你将化身为星河守护者，通过完成各种挑战来守护星塔的和平与安宁。',
+    icon: '🌌',
+    primaryColor: '#6366f1',
+    secondaryColor: '#8b5cf6',
+    accentColor: '#a855f7',
+    startDate: '2026-06-01',
+    endDate: '2026-07-31',
+    durationDays: 61,
+    maxLevel: 50,
+    pointsPerLevel: 100,
+    bonusMultiplier: 1.5
+  }
+];
+
+export const SEASON_CYCLE_TASK_TYPES = {
+  DAILY: 'daily',
+  WEEKLY: 'weekly',
+  CHALLENGE: 'challenge'
+};
+
+export const SEASON_DAILY_TASKS = [
+  {
+    id: 'daily-login',
+    name: '每日签到',
+    description: '登录游戏完成每日签到',
+    icon: '📅',
+    type: SEASON_CYCLE_TASK_TYPES.DAILY,
+    requirement: { type: 'login', value: 1 },
+    reward: { type: 'seasonPoints', value: 10 },
+    difficulty: 'easy'
+  },
+  {
+    id: 'daily-play-1',
+    name: '初次挑战',
+    description: '完成任意1局游戏',
+    icon: '🎮',
+    type: SEASON_CYCLE_TASK_TYPES.DAILY,
+    requirement: { type: 'playCount', value: 1 },
+    reward: { type: 'seasonPoints', value: 15 },
+    difficulty: 'easy'
+  },
+  {
+    id: 'daily-play-3',
+    name: '星塔常客',
+    description: '完成任意3局游戏',
+    icon: '🎯',
+    type: SEASON_CYCLE_TASK_TYPES.DAILY,
+    requirement: { type: 'playCount', value: 3 },
+    reward: { type: 'seasonPoints', value: 25 },
+    difficulty: 'easy'
+  },
+  {
+    id: 'daily-win-1',
+    name: '首胜奖励',
+    description: '赢得任意1局游戏',
+    icon: '🏆',
+    type: SEASON_CYCLE_TASK_TYPES.DAILY,
+    requirement: { type: 'winCount', value: 1 },
+    reward: { type: 'seasonPoints', value: 20 },
+    difficulty: 'easy'
+  },
+  {
+    id: 'daily-combo-3',
+    name: '连击练习',
+    description: '单局达成3次连击',
+    icon: '⚡',
+    type: SEASON_CYCLE_TASK_TYPES.DAILY,
+    requirement: { type: 'maxCombo', value: 3 },
+    reward: { type: 'seasonPoints', value: 15 },
+    difficulty: 'easy'
+  },
+  {
+    id: 'daily-stars-2',
+    name: '双星闪耀',
+    description: '任意关卡获得2星及以上评价',
+    icon: '⭐',
+    type: SEASON_CYCLE_TASK_TYPES.DAILY,
+    requirement: { type: 'stars', value: 2 },
+    reward: { type: 'seasonPoints', value: 20 },
+    difficulty: 'medium'
+  },
+  {
+    id: 'daily-shop',
+    name: '商店浏览',
+    description: '打开占卜商店页面',
+    icon: '🏪',
+    type: SEASON_CYCLE_TASK_TYPES.DAILY,
+    requirement: { type: 'visitShop', value: 1 },
+    reward: { type: 'seasonPoints', value: 5 },
+    difficulty: 'easy'
+  },
+  {
+    id: 'daily-achievement',
+    name: '成就追寻',
+    description: '打开成就墙页面',
+    icon: '🏅',
+    type: SEASON_CYCLE_TASK_TYPES.DAILY,
+    requirement: { type: 'visitAchievement', value: 1 },
+    reward: { type: 'seasonPoints', value: 5 },
+    difficulty: 'easy'
+  }
+];
+
+export const SEASON_WEEKLY_TASKS = [
+  {
+    id: 'weekly-win-5',
+    name: '周常胜利',
+    description: '本周赢得5局游戏',
+    icon: '🎖️',
+    type: SEASON_CYCLE_TASK_TYPES.WEEKLY,
+    requirement: { type: 'winCount', value: 5 },
+    reward: { type: 'seasonPoints', value: 50 },
+    difficulty: 'medium'
+  },
+  {
+    id: 'weekly-combo-8',
+    name: '连击大师',
+    description: '本周单局最高连击达到8次',
+    icon: '🔥',
+    type: SEASON_CYCLE_TASK_TYPES.WEEKLY,
+    requirement: { type: 'maxCombo', value: 8 },
+    reward: { type: 'seasonPoints', value: 60 },
+    difficulty: 'medium'
+  },
+  {
+    id: 'weekly-stars-3',
+    name: '完美三星',
+    description: '本周任意关卡获得3星评价',
+    icon: '🌟',
+    type: SEASON_CYCLE_TASK_TYPES.WEEKLY,
+    requirement: { type: 'threeStarCount', value: 1 },
+    reward: { type: 'seasonPoints', value: 40 },
+    difficulty: 'medium'
+  },
+  {
+    id: 'weekly-level-3',
+    name: '进阶挑战',
+    description: '本周通关第3关或更高难度关卡',
+    icon: '🏔️',
+    type: SEASON_CYCLE_TASK_TYPES.WEEKLY,
+    requirement: { type: 'levelComplete', value: 3 },
+    reward: { type: 'seasonPoints', value: 70 },
+    difficulty: 'hard'
+  },
+  {
+    id: 'weekly-play-10',
+    name: '勤勉玩家',
+    description: '本周完成10局游戏',
+    icon: '⏰',
+    type: SEASON_CYCLE_TASK_TYPES.WEEKLY,
+    requirement: { type: 'playCount', value: 10 },
+    reward: { type: 'seasonPoints', value: 80 },
+    difficulty: 'medium'
+  },
+  {
+    id: 'weekly-daily',
+    name: '持之以恒',
+    description: '本周完成4次每日任务',
+    icon: '📆',
+    type: SEASON_CYCLE_TASK_TYPES.WEEKLY,
+    requirement: { type: 'dailyTaskComplete', value: 4 },
+    reward: { type: 'seasonPoints', value: 50 },
+    difficulty: 'easy'
+  },
+  {
+    id: 'weekly-shop',
+    name: '消费达人',
+    description: '本周在商店消费1000星尘',
+    icon: '💰',
+    type: SEASON_CYCLE_TASK_TYPES.WEEKLY,
+    requirement: { type: 'shopSpend', value: 1000 },
+    reward: { type: 'seasonPoints', value: 45 },
+    difficulty: 'medium'
+  },
+  {
+    id: 'weekly-no-mistake',
+    name: '零失误挑战',
+    description: '本周完成1次零失误对局',
+    icon: '💯',
+    type: SEASON_CYCLE_TASK_TYPES.WEEKLY,
+    requirement: { type: 'perfect', value: 1 },
+    reward: { type: 'seasonPoints', value: 100 },
+    difficulty: 'hard'
+  }
+];
+
+export const SEASON_CHALLENGE_TASKS = [
+  {
+    id: 'challenge-all-levels',
+    name: '星塔征服者',
+    description: '本赛季通关所有关卡',
+    icon: '👑',
+    type: SEASON_CYCLE_TASK_TYPES.CHALLENGE,
+    requirement: { type: 'allLevelsComplete', value: true },
+    reward: { type: 'seasonPoints', value: 200 },
+    difficulty: 'legendary'
+  },
+  {
+    id: 'challenge-all-3stars',
+    name: '完美主义者',
+    description: '本赛季所有关卡获得3星评价',
+    icon: '🏅',
+    type: SEASON_CYCLE_TASK_TYPES.CHALLENGE,
+    requirement: { type: 'allThreeStars', value: true },
+    reward: { type: 'seasonPoints', value: 300 },
+    difficulty: 'legendary'
+  },
+  {
+    id: 'challenge-combo-15',
+    name: '连击传说',
+    description: '本赛季单局最高连击达到15次',
+    icon: '💥',
+    type: SEASON_CYCLE_TASK_TYPES.CHALLENGE,
+    requirement: { type: 'maxCombo', value: 15 },
+    reward: { type: 'seasonPoints', value: 250 },
+    difficulty: 'legendary'
+  },
+  {
+    id: 'challenge-play-50',
+    name: '狂热玩家',
+    description: '本赛季累计完成50局游戏',
+    icon: '🎮',
+    type: SEASON_CYCLE_TASK_TYPES.CHALLENGE,
+    requirement: { type: 'playCount', value: 50 },
+    reward: { type: 'seasonPoints', value: 180 },
+    difficulty: 'hard'
+  },
+  {
+    id: 'challenge-win-30',
+    name: '常胜将军',
+    description: '本赛季累计赢得30局游戏',
+    icon: '⚔️',
+    type: SEASON_CYCLE_TASK_TYPES.CHALLENGE,
+    requirement: { type: 'winCount', value: 30 },
+    reward: { type: 'seasonPoints', value: 220 },
+    difficulty: 'hard'
+  },
+  {
+    id: 'challenge-collect-12',
+    name: '星海收藏家',
+    description: '本赛季收集全部12颗星星碎片',
+    icon: '📚',
+    type: SEASON_CYCLE_TASK_TYPES.CHALLENGE,
+    requirement: { type: 'collectedFragments', value: 12 },
+    reward: { type: 'seasonPoints', value: 280 },
+    difficulty: 'hard'
+  },
+  {
+    id: 'challenge-achievement-15',
+    name: '成就猎人',
+    description: '本赛季解锁15个成就',
+    icon: '🎯',
+    type: SEASON_CYCLE_TASK_TYPES.CHALLENGE,
+    requirement: { type: 'achievementCount', value: 15 },
+    reward: { type: 'seasonPoints', value: 200 },
+    difficulty: 'hard'
+  },
+  {
+    id: 'challenge-all-endings',
+    name: '命运探索者',
+    description: '本赛季解锁所有隐藏结局',
+    icon: '🔮',
+    type: SEASON_CYCLE_TASK_TYPES.CHALLENGE,
+    requirement: { type: 'allEndings', value: true },
+    reward: { type: 'seasonPoints', value: 350 },
+    difficulty: 'legendary'
+  }
+];
+
+export const SEASON_STAGE_REWARDS = [
+  { level: 5, name: '初级守护者', icon: '🎁', reward: { type: 'stardust', value: 500 }, rarity: 'common', description: '达到5级即可领取' },
+  { level: 10, name: '星光徽章', icon: '🎖️', reward: { type: 'title', value: 'title-season-1' }, rarity: 'rare', description: '达到10级解锁专属称号' },
+  { level: 15, name: '星尘宝箱', icon: '📦', reward: { type: 'stardust', value: 1000 }, rarity: 'common', description: '达到15级即可领取' },
+  { level: 20, name: '皮肤解锁·星河', icon: '🎨', reward: { type: 'skin', value: 'skin-galaxy' }, rarity: 'epic', description: '达到20级解锁星河主题皮肤' },
+  { level: 25, name: '星光碎片', icon: '💎', reward: { type: 'starShards', value: 20 }, rarity: 'rare', description: '达到25级即可领取' },
+  { level: 30, name: '高级守护者', icon: '🏆', reward: { type: 'title', value: 'title-season-2' }, rarity: 'epic', description: '达到30级解锁高级称号' },
+  { level: 35, name: '星尘大礼包', icon: '🎁', reward: { type: 'stardust', value: 2000 }, rarity: 'rare', description: '达到35级即可领取' },
+  { level: 40, name: '皮肤解锁·极光', icon: '🎨', reward: { type: 'skin', value: 'skin-aurora' }, rarity: 'epic', description: '达到40级解锁极光主题皮肤' },
+  { level: 45, name: '传说碎片', icon: '💎', reward: { type: 'starShards', value: 50 }, rarity: 'epic', description: '达到45级即可领取' },
+  { level: 50, name: '星河至尊', icon: '👑', reward: { type: 'skin', value: 'skin-cosmic' }, rarity: 'legendary', description: '达到50级解锁传说级宇宙皮肤' }
+];
+
+export const SEASON_THEME_SKINS = [
+  {
+    id: 'skin-default',
+    name: '经典星光',
+    description: '默认的星空主题皮肤',
+    icon: '⭐',
+    rarity: 'common',
+    isDefault: true,
+    theme: {
+      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%)',
+      cardColor: '#2d1b69',
+      cardBorder: '#4c1d95',
+      textPrimary: '#ffffff',
+      textSecondary: '#a5b4fc',
+      accent: '#8b5cf6',
+      glow: 'rgba(139, 92, 246, 0.5)'
+    }
+  },
+  {
+    id: 'skin-galaxy',
+    name: '星河守护者',
+    description: '深邃银河主题，紫蓝色调如梦如幻',
+    icon: '🌌',
+    rarity: 'epic',
+    isDefault: false,
+    theme: {
+      background: 'linear-gradient(135deg, #312e81 0%, #4c1d95 50%, #581c87 100%)',
+      cardColor: '#4c1d95',
+      cardBorder: '#7c3aed',
+      textPrimary: '#ede9fe',
+      textSecondary: '#c4b5fd',
+      accent: '#a78bfa',
+      glow: 'rgba(167, 139, 250, 0.6)'
+    }
+  },
+  {
+    id: 'skin-aurora',
+    name: '极光之舞',
+    description: '绚烂极光主题，绿紫渐变绚丽夺目',
+    icon: '🌈',
+    rarity: 'epic',
+    isDefault: false,
+    theme: {
+      background: 'linear-gradient(135deg, #064e3b 0%, #065f46 25%, #4c1d95 75%, #581c87 100%)',
+      cardColor: '#064e3b',
+      cardBorder: '#10b981',
+      textPrimary: '#ecfdf5',
+      textSecondary: '#6ee7b7',
+      accent: '#34d399',
+      glow: 'rgba(52, 211, 153, 0.6)'
+    }
+  },
+  {
+    id: 'skin-cosmic',
+    name: '宇宙至尊',
+    description: '传说级宇宙主题，金紫色调尽显尊贵',
+    icon: '👑',
+    rarity: 'legendary',
+    isDefault: false,
+    theme: {
+      background: 'linear-gradient(135deg, #451a03 0%, #78350f 25%, #4c1d95 60%, #581c87 100%)',
+      cardColor: '#78350f',
+      cardBorder: '#fbbf24',
+      textPrimary: '#fef3c7',
+      textSecondary: '#fcd34d',
+      accent: '#f59e0b',
+      glow: 'rgba(251, 191, 36, 0.7)'
+    }
+  }
+];
+
+export const SEASON_TITLES = [
+  {
+    id: 'title-season-1',
+    name: '星河守护者',
+    icon: '🌌',
+    rarity: 'rare',
+    description: 'S1赛季达到10级解锁',
+    unlocked: false
+  },
+  {
+    id: 'title-season-2',
+    name: '高级守护者',
+    icon: '🏆',
+    rarity: 'epic',
+    description: 'S1赛季达到30级解锁',
+    unlocked: false
+  },
+  {
+    id: 'title-season-3',
+    name: '星河至尊',
+    icon: '👑',
+    rarity: 'legendary',
+    description: 'S1赛季达到50级解锁',
+    unlocked: false
+  }
+];
+
+export const getCurrentSeason = () => {
+  return SEASON_THEMES[0];
+};
+
+export const getSeasonTaskById = (taskId) => {
+  return [...SEASON_DAILY_TASKS, ...SEASON_WEEKLY_TASKS, ...SEASON_CHALLENGE_TASKS].find(t => t.id === taskId);
+};
+
+export const getSeasonStageRewardByLevel = (level) => {
+  return SEASON_STAGE_REWARDS.find(r => r.level === level);
+};
+
+export const getSeasonSkinById = (skinId) => {
+  return SEASON_THEME_SKINS.find(s => s.id === skinId);
+};
+
+export const getSeasonTitleById = (titleId) => {
+  return SEASON_TITLES.find(t => t.id === titleId);
+};
+
+export const getSeasonLevelProgress = (currentPoints, pointsPerLevel = 100) => {
+  const level = Math.floor(currentPoints / pointsPerLevel) + 1;
+  const currentLevelPoints = currentPoints % pointsPerLevel;
+  const nextLevelPoints = pointsPerLevel;
+  const progress = (currentLevelPoints / nextLevelPoints) * 100;
+  return { level, currentLevelPoints, nextLevelPoints, progress };
+};
+
+export const SEASON_POINT_RULES = {
+  levelComplete: { 1: 5, 2: 8, 3: 12, 4: 18, 5: 25 },
+  starBonus: { 1: 0, 2: 3, 3: 8 },
+  comboBonus: 1,
+  perfectBonus: 10,
+  dailyChallengeBonus: 15
+};
