@@ -186,12 +186,26 @@ function App() {
   };
 
   const handleOpenAchievementsFromResult = () => {
-    achievements.clearNewAchievements();
     setCurrentPage(PAGES.ACHIEVEMENT);
   };
 
   const handleCloseAchievementModal = () => {
+    achievements.closeModal();
+  };
+
+  const handleHomeFromResult = () => {
     achievements.clearNewAchievements();
+    handleHome();
+  };
+
+  const handleNextLevelFromResult = () => {
+    achievements.clearNewAchievements();
+    handleNextLevel();
+  };
+
+  const handleRestartFromResult = () => {
+    achievements.clearNewAchievements();
+    handleRestart();
   };
 
   const hasNextLevel = currentLevel < LEVELS.length;
@@ -229,9 +243,9 @@ function App() {
         <ResultPage
           isWin={isWin}
           result={gameResult}
-          onRestart={handleRestart}
-          onNextLevel={handleNextLevel}
-          onHome={handleHome}
+          onRestart={handleRestartFromResult}
+          onNextLevel={handleNextLevelFromResult}
+          onHome={handleHomeFromResult}
           hasNextLevel={hasNextLevel}
           achievements={achievements}
           onOpenAchievements={handleOpenAchievementsFromResult}

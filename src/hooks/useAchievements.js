@@ -25,6 +25,7 @@ export const useAchievements = (archive) => {
   const [equippedTitle, setEquippedTitle] = useState(null);
   const [newAchievements, setNewAchievements] = useState([]);
   const [showUnlockAnimation, setShowUnlockAnimation] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const stateRef = useRef({});
 
@@ -154,8 +155,9 @@ export const useAchievements = (archive) => {
     });
 
     if (achievementIds.length > 0) {
-      setNewAchievements(achievementIds);
+      setNewAchievements(prev => [...new Set([...prev, ...achievementIds])]);
       setShowUnlockAnimation(true);
+      setShowModal(true);
     }
   }, [saveAchievements]);
 
@@ -174,18 +176,110 @@ export const useAchievements = (archive) => {
     return true;
   }, [unlockedTitles, saveAchievements]);
 
+  const closeModal = useCallback(() => {
+    setShowModal(false);
+  }, []);
+
   const clearNewAchievements = useCallback(() => {
     setNewAchievements([]);
     setShowUnlockAnimation(false);
+    setShowModal(false);
   }, []);
 
+  const getAchievementProgress = useCallback((achievement, archiveState) => {
+    if (!achievement?.condition) return { current: 0, total: 1, percentage: 0 };
+    
+    const cond = achievement.condition;
+    let current = 0;
+    let total = cond.value || 1;
+    const state = archiveState || (archive ? {
+      collectedFragments: archive.collectedFragments,
+      unlockedChapters: archive.unlockedChapters,
+      chapterStars: archive.chapterStars,
+      totalPlayTime: archive.totalPlayTime,
+      maxCombo: archive.maxCombo,
+      letterProgress: archive.letterProgress,
+      fastLevelCount: archive.fastLevelCount,
+      unlockedEndings: archive.unlockedEndings
+    } : {});
+
+    switch (cond.type) {
+      case 'unlockedLevel':
+        current = state.unlockedChapters ? Math.max(...state.unlockedChapters, 0) : 0;
+        total = cond.value;
+        break;
+
+      case 'collectedFragments':
+        current = state.collectedFragments?.length || 0;
+        total = cond.value;
+        break;
+
+      case 'rareFragments':
+        current = getRareFragmentsCount(state.collectedFragments || []);
+        total = cond.value;
+        break;
+
+      case 'legendaryFragments':
+        current = getLegendaryFragmentsCount(state.collectedFragments || []);
+        total = cond.value;
+        break;
+
+      case 'maxCombo':
+        current = state.maxCombo || 0;
+        total = cond.value;
+        break;
+
+      case 'threeStarCount':
+        current = getThreeStarCount(state.chapterStars || {});
+        total = cond.value;
+        break;
+
+      case 'fastLevelCount':
+        current = state.fastLevelCount || 0;
+        total = cond.value;
+        break;
+
+      case 'totalPlayTime':
+        current = state.totalPlayTime || 0;
+        total = cond.value;
+        break;
+
+      case 'unlockedEndings':
+        current = state.unlockedEndings?.length || 0;
+        total = cond.value;
+        break;
+
+      case 'letterProgress':
+        current = state.letterProgress || 0;
+        total = cond.value;
+        break;
+
+      default:
+        current = 0;
+        total = cond.value || 1;
+    }
+
+    const percentage = total > 0 ? Math.min(100, Math.round((current / total) * 100)) : 0;
+    
+    return {
+      current,
+      total,
+      percentage,
+      isComplete: current >= total
+    };
+  }, [archive]);
+
   const getAchievementsWithStatus = useCallback(() => {
-    return ACHIEVEMENTS.map(achv => ({
-      ...achv,
-      unlocked: unlockedAchievements.includes(achv.id),
-      isNew: newAchievements.includes(achv.id)
-    }));
-  }, [unlockedAchievements, newAchievements]);
+    return ACHIEVEMENTS.map(achv => {
+      const progress = getAchievementProgress(achv);
+      return {
+        ...achv,
+        unlocked: unlockedAchievements.includes(achv.id),
+        isNew: newAchievements.includes(achv.id),
+        progress
+      };
+    });
+  }, [unlockedAchievements, newAchievements, getAchievementProgress]);
 
   const getTitlesWithStatus = useCallback(() => {
     return TITLES.map(title => ({
@@ -240,10 +334,13 @@ export const useAchievements = (archive) => {
     equippedTitle,
     newAchievements,
     showUnlockAnimation,
+    showModal,
     checkAndUnlockAchievements,
     unlockAchievements,
     equipTitle,
+    closeModal,
     clearNewAchievements,
+    getAchievementProgress,
     getAchievementsWithStatus,
     getTitlesWithStatus,
     getEquippedTitleInfo,

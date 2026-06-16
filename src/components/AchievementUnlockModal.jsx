@@ -1,7 +1,7 @@
 import { getRarityInfo, getAchievementById, getTitleById } from '../data/gameData';
 
 const AchievementUnlockModal = ({ achievements, onClose }) => {
-  if (!achievements.showUnlockAnimation || achievements.newAchievements.length === 0) {
+  if (!achievements.showModal || achievements.newAchievements.length === 0) {
     return null;
   }
 
