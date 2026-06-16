@@ -49,7 +49,7 @@ function App() {
   const dailyChallenge = useDailyChallenge();
   const achievements = useAchievements(archive);
   const shop = useShop();
-  const seasonChallenge = useSeasonChallenge();
+  const seasonChallenge = useSeasonChallenge(archive, achievements, shop);
 
   useEffect(() => {
     const savedProgress = localStorage.getItem('starTowerProgress');
@@ -218,6 +218,7 @@ function App() {
   };
 
   const handleOpenAchievements = () => {
+    seasonChallenge.recordPageVisit('achievement');
     setCurrentPage(PAGES.ACHIEVEMENT);
   };
 
@@ -234,6 +235,7 @@ function App() {
   };
 
   const handleOpenShop = () => {
+    seasonChallenge.recordPageVisit('shop');
     setCurrentPage(PAGES.SHOP);
   };
 
@@ -291,9 +293,30 @@ function App() {
 
   const hasNextLevel = currentLevel < LEVELS.length;
 
+  const skinTheme = seasonChallenge?.getCurrentSkinTheme?.() || {
+    background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%)',
+    cardColor: '#2d1b69',
+    cardBorder: '#4c1d95',
+    textPrimary: '#ffffff',
+    textSecondary: '#a5b4fc',
+    accent: '#8b5cf6',
+    glow: 'rgba(139, 92, 246, 0.5)'
+  };
+
   return (
-    <div className="relative min-h-screen w-full overflow-hidden">
-      <StarryBackground />
+    <div 
+      className="relative min-h-screen w-full overflow-hidden"
+      style={{
+        '--skin-bg': skinTheme.background,
+        '--skin-card': skinTheme.cardColor,
+        '--skin-card-border': skinTheme.cardBorder,
+        '--skin-text': skinTheme.textPrimary,
+        '--skin-text-secondary': skinTheme.textSecondary,
+        '--skin-accent': skinTheme.accent,
+        '--skin-glow': skinTheme.glow
+      }}
+    >
+      <StarryBackground skinTheme={skinTheme} />
 
       {currentPage === PAGES.HOME && (
         <HomePage
@@ -323,6 +346,7 @@ function App() {
           onWin={handleWin}
           onLose={handleLose}
           shop={shop}
+          skinTheme={skinTheme}
         />
       )}
 
@@ -367,6 +391,7 @@ function App() {
           dailyChallenge={dailyChallenge}
           onBack={handleBackFromDailyChallenge}
           onComplete={handleDailyChallengeComplete}
+          skinTheme={skinTheme}
         />
       )}
 
@@ -383,6 +408,7 @@ function App() {
           onBack={handleBackFromShop}
           onStartGame={handleStartGameFromShop}
           unlockedLevel={unlockedLevel}
+          seasonChallenge={seasonChallenge}
         />
       )}
 

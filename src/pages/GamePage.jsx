@@ -6,7 +6,7 @@ import { useTimer } from '../hooks/useTimer';
 import { useScore } from '../hooks/useScore';
 import { getLevelById, ITEM_EFFECT_TYPES, getItemEffectInfo, getShopItemById } from '../data/gameData';
 
-const GamePage = ({ levelId, onBack, onWin, onLose, shop }) => {
+const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
   const level = getLevelById(levelId);
   const [showLetterModal, setShowLetterModal] = useState(false);
   const [showPauseModal, setShowPauseModal] = useState(false);
@@ -273,7 +273,12 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop }) => {
         </div>
       )}
 
-      <div className="flex justify-around items-center mb-4 bg-star-purple/30 rounded-xl p-3">
+      <div className="flex justify-around items-center mb-4 rounded-xl p-3"
+        style={{ 
+          backgroundColor: `${skinTheme?.cardColor || '#2d1b69'}4d`,
+          border: `1px solid ${skinTheme?.cardBorder || '#4c1d95'}40`
+        }}
+      >
         <div className="text-center">
           <div className="text-xs text-white/50">时间</div>
           <div className={`text-lg font-bold ${timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-star-cyan'}`}>
@@ -361,6 +366,7 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop }) => {
                 card={card}
                 onClick={handleCardClick}
                 disabled={isLocked || (gameStatus !== 'playing' && gameStatus !== 'idle')}
+                skinTheme={skinTheme}
               />
             </div>
           ))}

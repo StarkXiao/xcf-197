@@ -3,7 +3,7 @@ import ShopItem from '../components/ShopItem';
 import Modal from '../components/Modal';
 import { SHOP_CATEGORIES, SHOP_TIPS, CURRENCY_INFO, getItemEffectInfo, getRarityInfo, LEVELS, getLevelById } from '../data/gameData';
 
-const DivinationShopPage = ({ shop, onBack, onStartGame, unlockedLevel = 999 }) => {
+const DivinationShopPage = ({ shop, onBack, onStartGame, unlockedLevel = 999, seasonChallenge }) => {
   const [activeTab, setActiveTab] = useState('shop');
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -42,6 +42,9 @@ const DivinationShopPage = ({ shop, onBack, onStartGame, unlockedLevel = 999 }) 
 
   const handlePurchase = (itemId, quantity = 1) => {
     const result = shop.purchaseItem(itemId, quantity);
+    if (result.success && seasonChallenge) {
+      seasonChallenge.recordShopSpend(result.price);
+    }
     showMessage(result.message, result.success ? 'success' : 'error');
   };
 

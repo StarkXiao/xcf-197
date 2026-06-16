@@ -22,7 +22,7 @@ const createDailyChallengeLevel = (config) => {
   };
 };
 
-const DailyChallengeGamePage = ({ dailyChallenge, onBack, onComplete }) => {
+const DailyChallengeGamePage = ({ dailyChallenge, onBack, onComplete, skinTheme }) => {
   const challengeConfig = dailyChallenge.getChallengeConfig();
   const [challengeLevel] = useState(() => createDailyChallengeLevel(challengeConfig));
   const [showThemeModal, setShowThemeModal] = useState(true);
@@ -294,6 +294,7 @@ const DailyChallengeGamePage = ({ dailyChallenge, onBack, onComplete }) => {
               card={card}
               onClick={handleCardClick}
               disabled={isLocked || (gameStatus !== 'playing' && gameStatus !== 'idle')}
+              skinTheme={skinTheme}
             />
           ))}
         </div>

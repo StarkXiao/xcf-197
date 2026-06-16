@@ -16,7 +16,7 @@ html, body, #root {
 
 body {
   font-family: 'Georgia', serif;
-  background: linear-gradient(135deg, #0a0a1f 0%, #1a1a3e 50%, #0a0a1f 100%);
+  background: var(--skin-bg, linear-gradient(135deg, #0a0a1f 0%, #1a1a3e 50%, #0a0a1f 100%));
   color: #fff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -56,8 +56,8 @@ body {
 }
 
 .card-back {
-  background: linear-gradient(145deg, #2d1b69 0%, #1e3a5f 100%);
-  border: 2px solid rgba(255, 215, 0, 0.3);
+  background: linear-gradient(145deg, var(--skin-card, #2d1b69) 0%, var(--skin-card-dark, #1e3a5f) 100%);
+  border: 2px solid var(--skin-card-border, rgba(255, 215, 0, 0.3));
 }
 
 .card-matched {
@@ -127,7 +127,7 @@ body {
 }
 
 .glow-text {
-  text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700;
+  text-shadow: 0 0 10px var(--skin-accent, #ffd700), 0 0 20px var(--skin-accent, #ffd700), 0 0 30px var(--skin-accent, #ffd700);
 }
 
 .btn-star {
@@ -164,14 +164,14 @@ body {
 }
 
 .modal-content {
-  background: linear-gradient(145deg, #1a1a3e 0%, #2d1b69 100%);
-  border: 2px solid rgba(255, 215, 0, 0.5);
+  background: linear-gradient(145deg, #1a1a3e 0%, var(--skin-card, #2d1b69) 100%);
+  border: 2px solid var(--skin-accent, rgba(255, 215, 0, 0.5));
   border-radius: 16px;
   padding: 32px;
   max-width: 90%;
   max-height: 90%;
   overflow-y: auto;
-  box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 30px var(--skin-glow, rgba(255, 215, 0, 0.3));
   animation: modalIn 0.3s ease-out;
 }
 
@@ -293,8 +293,8 @@ body {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #ffd700;
-  box-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700;
+  background: var(--skin-accent, #ffd700);
+  box-shadow: 0 0 10px var(--skin-accent, #ffd700), 0 0 20px var(--skin-accent, #ffd700);
   animation: pulse 2s ease-in-out infinite;
 }
 

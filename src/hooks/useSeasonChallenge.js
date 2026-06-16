@@ -418,16 +418,23 @@ export const useSeasonChallenge = (archive, achievements, shop) => {
       setCompletedTasks(newCompleted);
       saveSeasonChallenge({ completedTasks: newCompleted });
     }
+
+    setTimeout(() => {
+      checkTaskCompletion();
+    }, 100);
     
     return newlyCompleted;
-  }, [currentSeason, completedTasks, dailyTasks, weeklyTasks, challengeTasks, saveSeasonChallenge]);
+  }, [currentSeason, completedTasks, dailyTasks, weeklyTasks, challengeTasks, saveSeasonChallenge, checkTaskCompletion]);
 
   const recordShopSpend = useCallback((amount) => {
     const newStats = { ...seasonStats };
     newStats.shopSpend += amount;
     setSeasonStats(newStats);
     saveSeasonChallenge({ seasonStats: newStats });
-  }, [seasonStats, saveSeasonChallenge]);
+    setTimeout(() => {
+      checkTaskCompletion();
+    }, 100);
+  }, [seasonStats, saveSeasonChallenge, checkTaskCompletion]);
 
   const claimTaskReward = useCallback((taskId) => {
     if (claimedTasks[taskId] || !completedTasks[taskId]) {
