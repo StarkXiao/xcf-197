@@ -205,8 +205,13 @@ function App() {
     setCurrentPage(PAGES.HOME);
   };
 
-  const handleStartGameFromShop = () => {
-    setCurrentPage(PAGES.HOME);
+  const handleStartGameFromShop = (levelId) => {
+    if (levelId) {
+      setCurrentLevel(levelId);
+      setCurrentPage(PAGES.GAME);
+    } else {
+      setCurrentPage(PAGES.HOME);
+    }
   };
 
   const handleHomeFromResult = () => {
@@ -314,6 +319,7 @@ function App() {
           shop={shop}
           onBack={handleBackFromShop}
           onStartGame={handleStartGameFromShop}
+          unlockedLevel={unlockedLevel}
         />
       )}
 

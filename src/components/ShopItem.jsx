@@ -8,9 +8,9 @@ const ShopItem = ({ item, onPurchase, onSelect, onShowDetail, shop, quantity = 1
   const ownedQuantity = shop?.getItemQuantity?.(item.id) || 0;
   const dailyLimitRemaining = shop?.getDailyLimitRemaining?.(item.id);
   const isSelected = shop?.isItemSelected?.(item.id);
-  const canAfford = shop?.canAfford?.(item, quantity);
   const hasDiscount = item.discount && item.discount > 0;
   const finalPrice = hasDiscount ? Math.floor(item.price * (1 - item.discount)) : item.price;
+  const canAfford = shop?.canAfford?.(item, quantity, item.discount || 0);
 
   const handlePurchase = () => {
     if (onPurchase) {

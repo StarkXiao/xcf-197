@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import ShopItem from '../components/ShopItem';
 import Modal from '../components/Modal';
-import { SHOP_CATEGORIES, SHOP_TIPS, CURRENCY_INFO, getItemEffectInfo, getRarityInfo } from '../data/gameData';
+import { SHOP_CATEGORIES, SHOP_TIPS, CURRENCY_INFO, getItemEffectInfo, getRarityInfo, LEVELS, getLevelById } from '../data/gameData';
 
-const DivinationShopPage = ({ shop, onBack, onStartGame }) => {
+const DivinationShopPage = ({ shop, onBack, onStartGame, unlockedLevel = 999 }) => {
   const [activeTab, setActiveTab] = useState('shop');
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -11,6 +11,7 @@ const DivinationShopPage = ({ shop, onBack, onStartGame }) => {
   const [purchaseQuantity, setPurchaseQuantity] = useState(1);
   const [message, setMessage] = useState(null);
   const [timeUntilReset, setTimeUntilReset] = useState(0);
+  const [showLevelSelectModal, setShowLevelSelectModal] = useState(false);
 
   useEffect(() => {
     const updateTimeUntilReset = () => {
@@ -64,8 +65,13 @@ const DivinationShopPage = ({ shop, onBack, onStartGame }) => {
   };
 
   const handleStartWithItems = () => {
+    setShowLevelSelectModal(true);
+  };
+
+  const handleSelectLevel = (levelId) => {
+    setShowLevelSelectModal(false);
     if (onStartGame) {
-      onStartGame();
+      onStartGame(levelId);
     }
   };
 
@@ -428,9 +434,9 @@ const DivinationShopPage = ({ shop, onBack, onStartGame }) => {
               </div>
               <button
                 onClick={handleBulkPurchase}
-                disabled={!shop.canAfford(selectedItem, purchaseQuantity)}
+                disabled={!shop.canAfford(selectedItem, purchaseQuantity, selectedItem.discount || 0)}
                 className={`flex-1 py-3 rounded-lg font-bold transition-all
-                  ${shop.canAfford(selectedItem, purchaseQuantity)
+                  ${shop.canAfford(selectedItem, purchaseQuantity, selectedItem.discount || 0)
                     ? 'bg-star-gold text-star-dark hover:bg-star-gold/80 active:scale-95'
                     : 'bg-gray-600 text-gray-400 cursor-not-allowed'
                   }
@@ -492,6 +498,48 @@ const DivinationShopPage = ({ shop, onBack, onStartGame }) => {
               <p key={idx} className="text-sm text-white/70">{tip}</p>
             ))}
           </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={showLevelSelectModal}
+        onClose={() => setShowLevelSelectModal(false)}
+        title="选择关卡"
+      >
+        <div className="space-y-3 max-h-80 overflow-y-auto">
+          {LEVELS.map((level, index) => {
+            const levelId = index + 1;
+            const isUnlocked = levelId <= unlockedLevel;
+            return (
+              <button
+                key={levelId}
+                onClick={() => isUnlocked && handleSelectLevel(levelId)}
+                disabled={!isUnlocked}
+                className={`w-full p-4 rounded-xl text-left transition-all
+                  ${isUnlocked
+                    ? 'bg-star-purple/30 hover:bg-star-purple/50 border border-star-gold/30 hover:border-star-gold/60'
+                    : 'bg-gray-800/30 border border-gray-700/30 cursor-not-allowed opacity-50'
+                  }
+                `}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-bold text-white">
+                      第 {levelId} 关 · {level.name}
+                    </div>
+                    <div className="text-xs text-white/50 mt-1">
+                      {level.pairs} 对星纹 · {level.timeLimit}秒
+                    </div>
+                  </div>
+                  {isUnlocked ? (
+                    <span className="text-star-gold">▶</span>
+                  ) : (
+                    <span className="text-gray-500">🔒</span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </Modal>
     </div>

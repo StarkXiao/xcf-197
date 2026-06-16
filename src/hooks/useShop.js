@@ -157,14 +157,15 @@ export const useShop = () => {
     return newAmount;
   }, [starShards, saveShop]);
 
-  const canAfford = useCallback((item, quantity = 1) => {
+  const canAfford = useCallback((item, quantity = 1, discount = 0) => {
     if (!item) return false;
     const totalPrice = item.price * quantity;
+    const finalPrice = Math.floor(totalPrice * (1 - discount));
     
     if (item.currency === CURRENCY_TYPES.STARDUST) {
-      return stardust >= totalPrice;
+      return stardust >= finalPrice;
     } else if (item.currency === CURRENCY_TYPES.STAR_SHARD) {
-      return starShards >= totalPrice;
+      return starShards >= finalPrice;
     }
     return false;
   }, [stardust, starShards]);
@@ -191,14 +192,14 @@ export const useShop = () => {
       return { success: false, message: `今日限购${item.dailyLimit}个，已购${dailyPurchaseCount[itemId] || 0}个` };
     }
 
+    const discount = dailyItems.find(d => d.id === itemId)?.discount || 0;
     const totalPrice = item.price * quantity;
-    if (!canAfford(item, quantity)) {
+    const finalPrice = Math.floor(totalPrice * (1 - discount));
+    
+    if (!canAfford(item, quantity, discount)) {
       const currencyInfo = item.currency === CURRENCY_TYPES.STARDUST ? '星尘' : '星光碎片';
       return { success: false, message: `${currencyInfo}不足` };
     }
-
-    const discount = dailyItems.find(d => d.id === itemId)?.discount || 0;
-    const finalPrice = Math.floor(totalPrice * (1 - discount));
 
     if (item.currency === CURRENCY_TYPES.STARDUST) {
       const newStardust = stardust - finalPrice;
@@ -293,19 +294,18 @@ export const useShop = () => {
   const applyItemEffects = useCallback((gameConfig) => {
     const effects = {};
     let modifiedConfig = { ...gameConfig };
+    const newInventory = { ...inventory };
 
     selectedItems.forEach(itemId => {
       const item = getShopItemById(itemId);
       if (!item) return;
 
-      const newInventory = { ...inventory };
       if (newInventory[itemId] > 0) {
         newInventory[itemId] -= 1;
         if (newInventory[itemId] <= 0) {
           delete newInventory[itemId];
         }
       }
-      setInventory(newInventory);
 
       switch (item.effectType) {
         case ITEM_EFFECT_TYPES.TIME_EXTEND:
@@ -335,8 +335,9 @@ export const useShop = () => {
       }
     });
 
+    setInventory(newInventory);
     setActiveEffects(effects);
-    saveShop({ inventory });
+    saveShop({ inventory: newInventory, selectedItems: [] });
     setSelectedItems([]);
 
     return { modifiedConfig, effects };
