@@ -2353,3 +2353,211 @@ export const SEASON_POINT_RULES = {
   perfectBonus: 10,
   dailyChallengeBonus: 15
 };
+
+export const WORKSHOP_LETTERS = [
+  {
+    id: 'wl-1',
+    name: '星尘之恋',
+    description: '用星辰碎片拼接的第一封情书',
+    icon: '💌',
+    rarity: 'common',
+    fragments: [
+      { id: 'wf-1-1', text: '当第一缕星光穿透夜幕', levelRequired: 1 },
+      { id: 'wf-1-2', text: '我便在银河的尽头等你的身影', levelRequired: 2 },
+      { id: 'wf-1-3', text: '每一次心跳都是星辰的低语', levelRequired: 3 },
+      { id: 'wf-1-4', text: '愿这份爱如北极星般永恒', levelRequired: 4 },
+      { id: 'wf-1-5', text: '穿越时空，只为与你相遇', levelRequired: 5 }
+    ],
+    completeText: '当第一缕星光穿透夜幕，我便在银河的尽头等你的身影。每一次心跳都是星辰的低语，愿这份爱如北极星般永恒，穿越时空，只为与你相遇。',
+    unlockCondition: '通关第1关即可开始拼接'
+  },
+  {
+    id: 'wl-2',
+    name: '月光告白',
+    description: '月色下最温柔的倾诉',
+    icon: '🌙',
+    rarity: 'rare',
+    fragments: [
+      { id: 'wf-2-1', text: '月光洒落你的发梢', levelRequired: 1 },
+      { id: 'wf-2-2', text: '银色的丝线将两颗心悄悄相连', levelRequired: 2 },
+      { id: 'wf-2-3', text: '我听见织女在云端轻叹', levelRequired: 3 },
+      { id: 'wf-2-4', text: '那是千年未变的深情守望', levelRequired: 4 },
+      { id: 'wf-2-5', text: '愿化月光入你怀，此生不相离', levelRequired: 5 }
+    ],
+    completeText: '月光洒落你的发梢，银色的丝线将两颗心悄悄相连。我听见织女在云端轻叹，那是千年未变的深情守望。愿化月光入你怀，此生不相离。',
+    unlockCondition: '收集5个星座碎片'
+  },
+  {
+    id: 'wl-3',
+    name: '银河誓言',
+    description: '横跨银河的永恒之誓',
+    icon: '🌌',
+    rarity: 'epic',
+    fragments: [
+      { id: 'wf-3-1', text: '银河为证，星辰为誓', levelRequired: 2 },
+      { id: 'wf-3-2', text: '我愿渡过千万光年的距离', levelRequired: 3 },
+      { id: 'wf-3-3', text: '只为在你身旁停留一刻', levelRequired: 4 },
+      { id: 'wf-3-4', text: '即使宇宙终将冷却', levelRequired: 5 },
+      { id: 'wf-3-5', text: '我对你的爱也将如恒星般燃烧', levelRequired: 5 }
+    ],
+    completeText: '银河为证，星辰为誓，我愿渡过千万光年的距离，只为在你身旁停留一刻。即使宇宙终将冷却，我对你的爱也将如恒星般燃烧。',
+    unlockCondition: '通关第3关'
+  },
+  {
+    id: 'wl-4',
+    name: '天琴绝响',
+    description: '天琴座守护者谱写的永恒恋歌',
+    icon: '🎶',
+    rarity: 'epic',
+    fragments: [
+      { id: 'wf-4-1', text: '琴弦震动，音符化作漫天流萤', levelRequired: 3 },
+      { id: 'wf-4-2', text: '每一只萤火虫都载着我未说出口的话', levelRequired: 3 },
+      { id: 'wf-4-3', text: '它们飞过星河，穿越银河', levelRequired: 4 },
+      { id: 'wf-4-4', text: '在你的窗前化作一道温柔的光', levelRequired: 5 },
+      { id: 'wf-4-5', text: '那是我——用一生演奏的安眠曲', levelRequired: 5 }
+    ],
+    completeText: '琴弦震动，音符化作漫天流萤，每一只萤火虫都载着我未说出口的话。它们飞过星河，穿越银河，在你的窗前化作一道温柔的光。那是我——用一生演奏的安眠曲。',
+    unlockCondition: '解锁天琴座守护者故事'
+  },
+  {
+    id: 'wl-5',
+    name: '双鱼永恒',
+    description: '爱神赐予的至高情书',
+    icon: '💞',
+    rarity: 'legendary',
+    fragments: [
+      { id: 'wf-5-1', text: '两条鱼在星河中相遇', levelRequired: 4 },
+      { id: 'wf-5-2', text: '丝带将它们的尾巴系在一起', levelRequired: 4 },
+      { id: 'wf-5-3', text: '从此，一尾向东，一尾向西', levelRequired: 5 },
+      { id: 'wf-5-4', text: '却永远被爱的羁绊牵引着', levelRequired: 5 },
+      { id: 'wf-5-5', text: '这就是永恒——不在于相守，而在于不弃', levelRequired: 5 }
+    ],
+    completeText: '两条鱼在星河中相遇，丝带将它们的尾巴系在一起。从此，一尾向东，一尾向西，却永远被爱的羁绊牵引着。这就是永恒——不在于相守，而在于不弃。',
+    unlockCondition: '收集全部12个星座碎片'
+  }
+];
+
+export const SPECIAL_SENTENCES = [
+  {
+    id: 'ss-1',
+    text: '你是我的北极星，无论走多远，抬头便能找到归途。',
+    author: '北极星守护者',
+    rarity: 'rare',
+    unlockCondition: { type: 'collectedFragments', value: 3 },
+    icon: '⭐',
+    bgStyle: 'stardust'
+  },
+  {
+    id: 'ss-2',
+    text: '真正的勇气不是无畏，而是明知前路艰险仍选择守护你。',
+    author: '猎户座守护者',
+    rarity: 'rare',
+    unlockCondition: { type: 'unlockedLevel', value: 2 },
+    icon: '🏹',
+    bgStyle: 'moonlight'
+  },
+  {
+    id: 'ss-3',
+    text: '七星指引的不是方向，而是通往你心中最柔软之处。',
+    author: '北斗七星守护者',
+    rarity: 'epic',
+    unlockCondition: { type: 'threeStarCount', value: 2 },
+    icon: '✨',
+    bgStyle: 'aurora'
+  },
+  {
+    id: 'ss-4',
+    text: '等待并不可怕，可怕的是再也不想等待你。',
+    author: '织女星守护者',
+    rarity: 'epic',
+    unlockCondition: { type: 'unlockedLevel', value: 3 },
+    icon: '🧵',
+    bgStyle: 'galaxy'
+  },
+  {
+    id: 'ss-5',
+    text: '即使是最亮的光，也需要有人来守护它的温度。',
+    author: '天狼星守护者',
+    rarity: 'rare',
+    unlockCondition: { type: 'maxCombo', value: 5 },
+    icon: '🔆',
+    bgStyle: 'sunrise'
+  },
+  {
+    id: 'ss-6',
+    text: '被困在暗礁上的那些年，我学会了一件事——真正的美丽来自不屈的灵魂。',
+    author: '仙女座守护者',
+    rarity: 'epic',
+    unlockCondition: { type: 'collectedFragments', value: 6 },
+    icon: '👑',
+    bgStyle: 'nebula'
+  },
+  {
+    id: 'ss-7',
+    text: '千年来没有人能听懂我的琴音，直到你出现。',
+    author: '天琴座守护者',
+    rarity: 'epic',
+    unlockCondition: { type: 'unlockedLevel', value: 4 },
+    icon: '🎵',
+    bgStyle: 'moonlight'
+  },
+  {
+    id: 'ss-8',
+    text: '我不善言辞，只会用行动证明——暗影是你的屏障，毒刺是你的利刃。',
+    author: '天蝎座守护者',
+    rarity: 'rare',
+    unlockCondition: { type: 'letterProgress', value: 3 },
+    icon: '🦂',
+    bgStyle: 'eclipse'
+  },
+  {
+    id: 'ss-9',
+    text: '征服万千星辰，不如守护一人。',
+    author: '狮子座守护者',
+    rarity: 'epic',
+    unlockCondition: { type: 'threeStarCount', value: 3 },
+    icon: '🦁',
+    bgStyle: 'sunrise'
+  },
+  {
+    id: 'ss-10',
+    text: '你是让我们真正完整的第三个灵魂。从此，三魂永不离散。',
+    author: '双子座守护者',
+    rarity: 'legendary',
+    unlockCondition: { type: 'collectedFragments', value: 10 },
+    icon: '👯',
+    bgStyle: 'galaxy'
+  },
+  {
+    id: 'ss-11',
+    text: '爱不需要理由，只需要——永远在一起。',
+    author: '双鱼座守护者',
+    rarity: 'legendary',
+    unlockCondition: { type: 'collectedFragments', value: 12 },
+    icon: '🐟',
+    bgStyle: 'aurora'
+  },
+  {
+    id: 'ss-12',
+    text: '我等待了千年，只为找到配得上这份信任的人。',
+    author: '处女座守护者',
+    rarity: 'legendary',
+    unlockCondition: { type: 'unlockedLevel', value: 5 },
+    icon: '⚖️',
+    bgStyle: 'nebula'
+  }
+];
+
+export const POSTER_THEMES = [
+  { id: 'poster-stardust', name: '星尘漫天', bgColor: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', textColor: '#e0e7ff', accentColor: '#818cf8' },
+  { id: 'poster-moonlight', name: '月色温柔', bgColor: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%)', textColor: '#e0e7ff', accentColor: '#a5b4fc' },
+  { id: 'poster-sunrise', name: '破晓之光', bgColor: 'linear-gradient(135deg, #451a03 0%, #92400e 50%, #b45309 100%)', textColor: '#fef3c7', accentColor: '#fbbf24' },
+  { id: 'poster-galaxy', name: '银河之恋', bgColor: 'linear-gradient(135deg, #0f0f23 0%, #2d1b69 50%, #581c87 100%)', textColor: '#f5f3ff', accentColor: '#c084fc' },
+  { id: 'poster-aurora', name: '极光之舞', bgColor: 'linear-gradient(135deg, #064e3b 0%, #065f46 50%, #4c1d95 100%)', textColor: '#ecfdf5', accentColor: '#34d399' },
+  { id: 'poster-nebula', name: '星云秘境', bgColor: 'linear-gradient(135deg, #4a044e 0%, #86198f 50%, #be185d 100%)', textColor: '#fdf2f8', accentColor: '#f472b6' },
+  { id: 'poster-eclipse', name: '暗影低语', bgColor: 'linear-gradient(135deg, #0a0a0a 0%, #1c1917 50%, #292524 100%)', textColor: '#d6d3d1', accentColor: '#fb923c' }
+];
+
+export const getWorkshopLetterById = (id) => WORKSHOP_LETTERS.find(l => l.id === id);
+export const getSpecialSentenceById = (id) => SPECIAL_SENTENCES.find(s => s.id === id);
+export const getPosterThemeById = (id) => POSTER_THEMES.find(t => t.id === id);

@@ -11,6 +11,7 @@ import DivinationShopPage from './pages/DivinationShopPage';
 import StoryCorridorPage from './pages/StoryCorridorPage';
 import SeasonChallengePage from './pages/SeasonChallengePage';
 import SeasonSettlementPage from './pages/SeasonSettlementPage';
+import LetterWorkshopPage from './pages/LetterWorkshopPage';
 import StarryBackground from './components/StarryBackground';
 import AchievementUnlockModal from './components/AchievementUnlockModal';
 import StoryChoiceModal from './components/StoryChoiceModal';
@@ -20,6 +21,7 @@ import { useDailyChallenge } from './hooks/useDailyChallenge';
 import { useAchievements } from './hooks/useAchievements';
 import { useShop } from './hooks/useShop';
 import { useSeasonChallenge } from './hooks/useSeasonChallenge';
+import { useLetterWorkshop } from './hooks/useLetterWorkshop';
 
 const PAGES = {
   HOME: 'home',
@@ -33,7 +35,8 @@ const PAGES = {
   SHOP: 'shop',
   STORY_CORRIDOR: 'story-corridor',
   SEASON_CHALLENGE: 'season-challenge',
-  SEASON_SETTLEMENT: 'season-settlement'
+  SEASON_SETTLEMENT: 'season-settlement',
+  LETTER_WORKSHOP: 'letter-workshop'
 };
 
 function App() {
@@ -50,6 +53,7 @@ function App() {
   const achievements = useAchievements(archive);
   const shop = useShop();
   const seasonChallenge = useSeasonChallenge(archive, achievements, shop);
+  const letterWorkshop = useLetterWorkshop(archive);
 
   useEffect(() => {
     const savedProgress = localStorage.getItem('starTowerProgress');
@@ -276,6 +280,14 @@ function App() {
     setCurrentPage(PAGES.HOME);
   };
 
+  const handleOpenLetterWorkshop = () => {
+    setCurrentPage(PAGES.LETTER_WORKSHOP);
+  };
+
+  const handleBackFromLetterWorkshop = () => {
+    setCurrentPage(PAGES.HOME);
+  };
+
   const handleHomeFromResult = () => {
     achievements.clearNewAchievements();
     handleHome();
@@ -329,12 +341,14 @@ function App() {
           onOpenShop={handleOpenShop}
           onOpenStoryCorridor={handleOpenStoryCorridor}
           onOpenSeasonChallenge={handleOpenSeasonChallenge}
+          onOpenLetterWorkshop={handleOpenLetterWorkshop}
           unlockedLevel={unlockedLevel}
           highScores={highScores}
           collectedStars={archive.collectedFragments.length}
           achievements={achievements}
           shop={shop}
           seasonChallenge={seasonChallenge}
+          letterWorkshop={letterWorkshop}
         />
       )}
 
@@ -431,6 +445,14 @@ function App() {
         <SeasonSettlementPage
           seasonChallenge={seasonChallenge}
           onBack={handleBackFromSeasonSettlement}
+        />
+      )}
+
+      {currentPage === PAGES.LETTER_WORKSHOP && (
+        <LetterWorkshopPage
+          workshop={letterWorkshop}
+          archive={archive}
+          onBack={handleBackFromLetterWorkshop}
         />
       )}
 
