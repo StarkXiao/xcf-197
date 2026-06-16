@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { STAR_PATTERNS, LEVELS, HIDDEN_ENDINGS, REWARDS } from '../data/gameData';
 
+const getThreeStarCount = (chapterStars) => {
+  return Object.values(chapterStars).filter(stars => stars >= 3).length;
+};
+
 export const useArchive = () => {
   const [collectedFragments, setCollectedFragments] = useState([]);
   const [unlockedEndings, setUnlockedEndings] = useState([]);
@@ -140,40 +144,104 @@ export const useArchive = () => {
     return rewardsChanged;
   }, [saveArchive]);
 
-  const runAllChecks = useCallback((overrides = {}) => {
-    const endingsChanged = checkEndingConditions(overrides);
-    if (endingsChanged) {
-      const newEndings = stateRef.current.unlockedEndings;
-      checkRewardConditions({ ...overrides, unlockedEndings: newEndings });
-    } else {
-      checkRewardConditions(overrides);
-    }
-  }, [checkEndingConditions, checkRewardConditions]);
-
-  const collectFragment = useCallback((starId) => {
-    if (!collectedFragments.includes(starId)) {
-      const newFragments = [...collectedFragments, starId];
-      setCollectedFragments(newFragments);
-      saveArchive({ collectedFragments: newFragments });
-      runAllChecks({ collectedFragments: newFragments });
-    }
-  }, [collectedFragments, saveArchive, runAllChecks]);
-
-  const collectFragmentsFromLevel = useCallback((levelStars) => {
-    const newFragments = [...collectedFragments];
+  const checkStarUnlockConditions = useCallback((overrides = {}) => {
+    const s = { ...stateRef.current, ...overrides };
+    const newFragments = [...s.collectedFragments];
     let changed = false;
-    levelStars.forEach(starId => {
-      if (!newFragments.includes(starId)) {
-        newFragments.push(starId);
+
+    const stateToCheck = {
+      unlockedChapters: s.unlockedChapters,
+      chapterStars: s.chapterStars,
+      totalPlayTime: s.totalPlayTime,
+      unlockedEndings: overrides.unlockedEndings || s.unlockedEndings
+    };
+
+    const threeStarCount = getThreeStarCount(stateToCheck.chapterStars);
+
+    STAR_PATTERNS.forEach((star) => {
+      if (newFragments.includes(star.id)) return;
+
+      const cond = star.unlockConditionData;
+      if (!cond) return;
+
+      let shouldUnlock = false;
+
+      switch (cond.type) {
+        case 'level':
+          shouldUnlock = stateToCheck.unlockedChapters.includes(cond.value);
+          break;
+
+        case 'threeStarCount':
+          shouldUnlock = threeStarCount >= cond.value;
+          break;
+
+        case 'playTime':
+          shouldUnlock = stateToCheck.totalPlayTime >= cond.value;
+          break;
+
+        case 'allEndings':
+          shouldUnlock = stateToCheck.unlockedEndings.length >= (HIDDEN_ENDINGS ? HIDDEN_ENDINGS.length : 3);
+          break;
+
+        default:
+          shouldUnlock = false;
+      }
+
+      if (shouldUnlock) {
+        newFragments.push(star.id);
         changed = true;
       }
     });
+
     if (changed) {
       setCollectedFragments(newFragments);
       saveArchive({ collectedFragments: newFragments });
-      runAllChecks({ collectedFragments: newFragments });
     }
-  }, [collectedFragments, saveArchive, runAllChecks]);
+
+    return { changed, newFragments };
+  }, [saveArchive]);
+
+  const runAllChecks = useCallback((overrides = {}, depth = 0) => {
+    if (depth > 3) return;
+
+    const endingsChanged = checkEndingConditions(overrides);
+
+    let latestUnlockedEndings = overrides.unlockedEndings || stateRef.current.unlockedEndings;
+    if (endingsChanged) {
+      latestUnlockedEndings = stateRef.current.unlockedEndings;
+    }
+
+    const rewardsOverrides = { ...overrides, unlockedEndings: latestUnlockedEndings };
+    checkRewardConditions(rewardsOverrides);
+
+    const starOverrides = { ...overrides, unlockedEndings: latestUnlockedEndings };
+    const starResult = checkStarUnlockConditions(starOverrides);
+
+    if (starResult.changed) {
+      const latestRewards = stateRef.current.unlockedRewards;
+      checkRewardConditions({
+        collectedFragments: starResult.newFragments,
+        unlockedEndings: latestUnlockedEndings,
+        unlockedRewards: latestRewards
+      });
+      const finalEndings = checkEndingConditions({
+        collectedFragments: starResult.newFragments,
+        unlockedChapters: stateRef.current.unlockedChapters,
+        chapterStars: stateRef.current.chapterStars,
+        fastLevelCount: stateRef.current.fastLevelCount
+      });
+      if (finalEndings) {
+        runAllChecks({
+          collectedFragments: starResult.newFragments,
+          unlockedEndings: stateRef.current.unlockedEndings
+        }, depth + 1);
+      }
+    }
+  }, [checkEndingConditions, checkRewardConditions, checkStarUnlockConditions]);
+
+  const collectFragmentsFromLevel = useCallback((levelStars) => {
+    runAllChecks({});
+  }, [runAllChecks]);
 
   const unlockChapter = useCallback((chapterId) => {
     if (!unlockedChapters.includes(chapterId)) {
@@ -282,6 +350,17 @@ export const useArchive = () => {
     localStorage.removeItem('starTowerArchive');
   };
 
+  const initializedRef = useRef(false);
+  useEffect(() => {
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+    const timer = setTimeout(() => {
+      runAllChecks({});
+    }, 50);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [runAllChecks]);
+
   return {
     collectedFragments,
     unlockedEndings,
@@ -293,7 +372,7 @@ export const useArchive = () => {
     maxCombo,
     letterProgress,
     fastLevelCount,
-    collectFragment,
+    checkStarUnlockConditions,
     collectFragmentsFromLevel,
     unlockChapter,
     setChapterStarRating,
