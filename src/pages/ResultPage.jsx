@@ -1,7 +1,18 @@
-import { getLevelById, FULL_LETTER } from '../data/gameData';
+import { useState, useEffect } from 'react';
+import { getLevelById, FULL_LETTER, getRarityInfo, getAchievementById, getTitleById } from '../data/gameData';
 
-const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLevel }) => {
+const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLevel, achievements, onOpenAchievements }) => {
   const level = getLevelById(result?.levelId || 1);
+  const [showAchievementSection, setShowAchievementSection] = useState(false);
+
+  useEffect(() => {
+    if (achievements?.newAchievements?.length > 0) {
+      const timer = setTimeout(() => {
+        setShowAchievementSection(true);
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [achievements?.newAchievements?.length]);
 
   const getStarsRating = () => {
     if (!isWin) return 0;
@@ -88,6 +99,96 @@ const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLeve
             </div>
           </div>
         </div>
+
+        {isWin && achievements?.newAchievements?.length > 0 && showAchievementSection && (
+          <div className="bg-star-purple/30 rounded-2xl p-5 mb-6 border border-star-gold/30 animate-slide-in">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🏆</span>
+                <span className="font-bold text-star-gold">成就解锁</span>
+                <span className="text-xs bg-star-gold/20 text-star-gold px-2 py-0.5 rounded-full">
+                  新解锁 ×{achievements.newAchievements.length}
+                </span>
+              </div>
+              {onOpenAchievements && (
+                <button
+                  onClick={onOpenAchievements}
+                  className="text-xs text-star-cyan hover:text-star-cyan/80 transition-colors"
+                >
+                  查看全部 →
+                </button>
+              )}
+            </div>
+
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+              {achievements.newAchievements.map((achvId, index) => {
+                const achievement = getAchievementById(achvId);
+                if (!achievement) return null;
+                const rarityInfo = getRarityInfo(achievement.rarity);
+                
+                return (
+                  <div
+                    key={achievement.id}
+                    className={`flex-shrink-0 w-24 p-3 rounded-xl border-2 rarity-${achievement.rarity} bg-star-purple/50 text-center animate-slide-in`}
+                    style={{
+                      animationDelay: `${index * 0.15}s`
+                    }}
+                  >
+                    <div
+                      className="text-3xl mb-1"
+                      style={{
+                        filter: `drop-shadow(0 0 6px ${rarityInfo.color})`
+                      }}
+                    >
+                      {achievement.icon}
+                    </div>
+                    <div
+                      className="text-xs font-bold truncate"
+                      style={{ color: rarityInfo.color }}
+                    >
+                      {achievement.name}
+                    </div>
+                    <div className="text-[10px] text-star-gold mt-1">
+                      +{achievement.points}点
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {achievements.newAchievements.some(id => {
+              const achv = getAchievementById(id);
+              return achv?.titleReward;
+            }) && (
+              <div className="mt-3 pt-3 border-t border-star-gold/20">
+                <div className="text-xs text-star-cyan mb-2">🎖️ 解锁新称号</div>
+                <div className="flex gap-2 flex-wrap">
+                  {achievements.newAchievements
+                    .map(id => getAchievementById(id))
+                    .filter(achv => achv?.titleReward)
+                    .map(achv => {
+                      const title = getTitleById(achv.titleReward);
+                      if (!title) return null;
+                      const rarityInfo = getRarityInfo(title.rarity);
+                      return (
+                        <div
+                          key={title.id}
+                          className="flex items-center gap-1 px-2 py-1 rounded-full text-xs"
+                          style={{
+                            backgroundColor: `${rarityInfo.color}20`,
+                            color: rarityInfo.color
+                          }}
+                        >
+                          <span>{title.icon}</span>
+                          <span>{title.name}</span>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {isWin && level?.letterFragment && (
           <div className="letter-fragment p-6 mb-8 max-w-sm mx-auto">

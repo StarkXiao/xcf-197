@@ -685,3 +685,370 @@ export const getStarAlbumStats = (collectedFragments = []) => {
     byRarity
   };
 };
+
+export const ACHIEVEMENT_CATEGORIES = [
+  {
+    id: 'journey',
+    name: '星途征程',
+    icon: '🛤️',
+    description: '与关卡进度相关的成就'
+  },
+  {
+    id: 'collection',
+    name: '星海收藏家',
+    icon: '📚',
+    description: '与收集星星碎片相关的成就'
+  },
+  {
+    id: 'skill',
+    name: '技艺殿堂',
+    icon: '⚔️',
+    description: '考验游戏技巧的成就'
+  },
+  {
+    id: 'legend',
+    name: '传说秘境',
+    icon: '🌟',
+    description: '稀有的隐藏成就'
+  }
+];
+
+export const ACHIEVEMENTS = [
+  {
+    id: 'achv-1',
+    name: '初入星塔',
+    description: '完成第1关',
+    icon: '🎖️',
+    rarity: 'common',
+    category: 'journey',
+    condition: { type: 'unlockedLevel', value: 1 },
+    titleReward: null,
+    points: 10
+  },
+  {
+    id: 'achv-2',
+    name: '月光旅人',
+    description: '完成第2关',
+    icon: '🌙',
+    rarity: 'common',
+    category: 'journey',
+    condition: { type: 'unlockedLevel', value: 2 },
+    titleReward: null,
+    points: 20
+  },
+  {
+    id: 'achv-3',
+    name: '银河漫游者',
+    description: '完成第3关',
+    icon: '🌌',
+    rarity: 'rare',
+    category: 'journey',
+    condition: { type: 'unlockedLevel', value: 3 },
+    titleReward: null,
+    points: 30
+  },
+  {
+    id: 'achv-4',
+    name: '星座守护者',
+    description: '完成第4关',
+    icon: '⭐',
+    rarity: 'rare',
+    category: 'journey',
+    condition: { type: 'unlockedLevel', value: 4 },
+    titleReward: 'title-1',
+    points: 50
+  },
+  {
+    id: 'achv-5',
+    name: '星塔之巅',
+    description: '通关全部章节',
+    icon: '👑',
+    rarity: 'legendary',
+    category: 'journey',
+    condition: { type: 'unlockedLevel', value: 5 },
+    titleReward: 'title-2',
+    points: 100
+  },
+  {
+    id: 'achv-6',
+    name: '星之收藏家',
+    description: '收集5颗星星碎片',
+    icon: '✨',
+    rarity: 'common',
+    category: 'collection',
+    condition: { type: 'collectedFragments', value: 5 },
+    titleReward: null,
+    points: 20
+  },
+  {
+    id: 'achv-7',
+    name: '星座图鉴师',
+    description: '收集全部12颗星星碎片',
+    icon: '📖',
+    rarity: 'epic',
+    category: 'collection',
+    condition: { type: 'collectedFragments', value: 12 },
+    titleReward: 'title-3',
+    points: 80
+  },
+  {
+    id: 'achv-8',
+    name: '稀有猎人',
+    description: '收集所有稀有及以上星星',
+    icon: '💎',
+    rarity: 'rare',
+    category: 'collection',
+    condition: { type: 'rareFragments', value: 9 },
+    titleReward: null,
+    points: 40
+  },
+  {
+    id: 'achv-9',
+    name: '传说追寻者',
+    description: '收集所有传说级星星',
+    icon: '🌟',
+    rarity: 'epic',
+    category: 'collection',
+    condition: { type: 'legendaryFragments', value: 3 },
+    titleReward: null,
+    points: 60
+  },
+  {
+    id: 'achv-10',
+    name: '连击新手',
+    description: '单局达成5次连击',
+    icon: '⚡',
+    rarity: 'common',
+    category: 'skill',
+    condition: { type: 'maxCombo', value: 5 },
+    titleReward: null,
+    points: 15
+  },
+  {
+    id: 'achv-11',
+    name: '连击大师',
+    description: '单局达成8次连击',
+    icon: '🔥',
+    rarity: 'rare',
+    category: 'skill',
+    condition: { type: 'maxCombo', value: 8 },
+    titleReward: null,
+    points: 35
+  },
+  {
+    id: 'achv-12',
+    name: '连击传说',
+    description: '单局达成12次连击',
+    icon: '💥',
+    rarity: 'epic',
+    category: 'skill',
+    condition: { type: 'maxCombo', value: 12 },
+    titleReward: 'title-4',
+    points: 70
+  },
+  {
+    id: 'achv-13',
+    name: '初次三星',
+    description: '任意关卡获得3星评价',
+    icon: '🏆',
+    rarity: 'rare',
+    category: 'skill',
+    condition: { type: 'threeStarCount', value: 1 },
+    titleReward: null,
+    points: 30
+  },
+  {
+    id: 'achv-14',
+    name: '完美三星',
+    description: '全部关卡获得3星评价',
+    icon: '🏅',
+    rarity: 'legendary',
+    category: 'skill',
+    condition: { type: 'threeStarCount', value: 5 },
+    titleReward: 'title-5',
+    points: 120
+  },
+  {
+    id: 'achv-15',
+    name: '时间管理大师',
+    description: '单关剩余时间超过50%',
+    icon: '⏱️',
+    rarity: 'rare',
+    category: 'skill',
+    condition: { type: 'fastLevelCount', value: 1 },
+    titleReward: null,
+    points: 25
+  },
+  {
+    id: 'achv-16',
+    name: '极速挑战',
+    description: '所有关卡剩余时间超过50%',
+    icon: '🚀',
+    rarity: 'epic',
+    category: 'skill',
+    condition: { type: 'fastLevelCount', value: 5 },
+    titleReward: 'title-6',
+    points: 90
+  },
+  {
+    id: 'achv-17',
+    name: '星光时长',
+    description: '累计游戏时长超过30分钟',
+    icon: '⏰',
+    rarity: 'common',
+    category: 'legend',
+    condition: { type: 'totalPlayTime', value: 1800 },
+    titleReward: null,
+    points: 20
+  },
+  {
+    id: 'achv-18',
+    name: '星塔常客',
+    description: '累计游戏时长超过2小时',
+    icon: '🕐',
+    rarity: 'rare',
+    category: 'legend',
+    condition: { type: 'totalPlayTime', value: 7200 },
+    titleReward: null,
+    points: 40
+  },
+  {
+    id: 'achv-19',
+    name: '命运占卜师',
+    description: '解锁所有隐藏结局',
+    icon: '🔮',
+    rarity: 'legendary',
+    category: 'legend',
+    condition: { type: 'unlockedEndings', value: 3 },
+    titleReward: 'title-7',
+    points: 150
+  },
+  {
+    id: 'achv-20',
+    name: '情书修复师',
+    description: '修复完整的情书',
+    icon: '💌',
+    rarity: 'epic',
+    category: 'legend',
+    condition: { type: 'letterProgress', value: 5 },
+    titleReward: 'title-8',
+    points: 100
+  }
+];
+
+export const TITLES = [
+  {
+    id: 'title-1',
+    name: '星座守护者',
+    icon: '⭐',
+    rarity: 'rare',
+    description: '守护十二星座的勇士',
+    unlocked: false
+  },
+  {
+    id: 'title-2',
+    name: '星塔之巅',
+    icon: '👑',
+    rarity: 'legendary',
+    description: '登上星塔之巅的传奇人物',
+    unlocked: false
+  },
+  {
+    id: 'title-3',
+    name: '星座图鉴师',
+    icon: '📖',
+    rarity: 'epic',
+    description: '熟知所有星座的博学者',
+    unlocked: false
+  },
+  {
+    id: 'title-4',
+    name: '连击传说',
+    icon: '💥',
+    rarity: 'epic',
+    description: '连击的终极诠释者',
+    unlocked: false
+  },
+  {
+    id: 'title-5',
+    name: '完美三星',
+    icon: '🏅',
+    rarity: 'legendary',
+    description: '所有关卡完美通关的大师',
+    unlocked: false
+  },
+  {
+    id: 'title-6',
+    name: '极速挑战者',
+    icon: '🚀',
+    rarity: 'epic',
+    description: '速度与技巧的完美结合',
+    unlocked: false
+  },
+  {
+    id: 'title-7',
+    name: '命运占卜师',
+    icon: '🔮',
+    rarity: 'legendary',
+    description: '知晓所有命运奥秘的占卜师',
+    unlocked: false
+  },
+  {
+    id: 'title-8',
+    name: '情书修复师',
+    icon: '💌',
+    rarity: 'epic',
+    description: '让破碎情书重获新生的匠人',
+    unlocked: false
+  }
+];
+
+export const getAchievementById = (id) => {
+  return ACHIEVEMENTS.find(achv => achv.id === id);
+};
+
+export const getTitleById = (id) => {
+  return TITLES.find(title => title.id === id);
+};
+
+export const getAchievementsByCategory = (categoryId) => {
+  return ACHIEVEMENTS.filter(achv => achv.category === categoryId);
+};
+
+export const getTotalAchievementPoints = (unlockedAchievements = []) => {
+  return ACHIEVEMENTS
+    .filter(achv => unlockedAchievements.includes(achv.id))
+    .reduce((sum, achv) => sum + achv.points, 0);
+};
+
+export const getAchievementStats = (unlockedAchievements = []) => {
+  const total = ACHIEVEMENTS.length;
+  const unlocked = unlockedAchievements.length;
+  const byRarity = {};
+  const byCategory = {};
+
+  Object.keys(RARITY_INFO).forEach(rarity => {
+    const achvs = ACHIEVEMENTS.filter(a => a.rarity === rarity);
+    byRarity[rarity] = {
+      total: achvs.length,
+      unlocked: achvs.filter(a => unlockedAchievements.includes(a.id)).length
+    };
+  });
+
+  ACHIEVEMENT_CATEGORIES.forEach(cat => {
+    const achvs = getAchievementsByCategory(cat.id);
+    byCategory[cat.id] = {
+      total: achvs.length,
+      unlocked: achvs.filter(a => unlockedAchievements.includes(a.id)).length
+    };
+  });
+
+  return {
+    total,
+    unlocked,
+    percentage: Math.round((unlocked / total) * 100),
+    byRarity,
+    byCategory,
+    totalPoints: getTotalAchievementPoints(unlockedAchievements)
+  };
+};
