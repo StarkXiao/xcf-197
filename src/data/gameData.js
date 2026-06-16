@@ -3156,3 +3156,211 @@ export const calculateCommissionStars = (commission, timeLeft, moves) => {
   if (timeRatio >= criteria[2].minTimeRatio && moveRatio >= criteria[2].minMoveRatio) return 2;
   return 1;
 };
+
+export const STAR_RAIL_CHAIN_LEVELS = [
+  {
+    level: 1,
+    name: '星轨初现',
+    comboRequired: 3,
+    scoreMultiplier: 1.5,
+    glowIntensity: 0.3,
+    cardEffect: 'glow',
+    color: '#60a5fa',
+    particleCount: 5,
+    description: '星轨之力开始流动'
+  },
+  {
+    level: 2,
+    name: '星轨闪耀',
+    comboRequired: 5,
+    scoreMultiplier: 2,
+    glowIntensity: 0.6,
+    cardEffect: 'pulse',
+    color: '#a78bfa',
+    particleCount: 10,
+    description: '星光愈发璀璨'
+  },
+  {
+    level: 3,
+    name: '星轨共鸣',
+    comboRequired: 8,
+    scoreMultiplier: 2.5,
+    glowIntensity: 0.8,
+    cardEffect: 'rainbow',
+    color: '#f472b6',
+    particleCount: 15,
+    description: '群星开始共鸣'
+  },
+  {
+    level: 4,
+    name: '星轨传说',
+    comboRequired: 12,
+    scoreMultiplier: 3,
+    glowIntensity: 1,
+    cardEffect: 'supernova',
+    color: '#fbbf24',
+    particleCount: 25,
+    description: '传说级星轨之力觉醒'
+  },
+  {
+    level: 5,
+    name: '星轨神话',
+    comboRequired: 16,
+    scoreMultiplier: 4,
+    glowIntensity: 1.2,
+    cardEffect: 'cosmic',
+    color: '#f59e0b',
+    particleCount: 35,
+    description: '超越传说的神话之境'
+  }
+];
+
+export const STAR_RAIL_TITLES = [
+  {
+    id: 'sr-title-1',
+    name: '星轨学徒',
+    icon: '✨',
+    requiredCombo: 3,
+    rarity: 'common',
+    description: '初次触及星轨之力'
+  },
+  {
+    id: 'sr-title-2',
+    name: '星轨行者',
+    icon: '🌟',
+    requiredCombo: 5,
+    rarity: 'rare',
+    description: '在星光中自由行走'
+  },
+  {
+    id: 'sr-title-3',
+    name: '星轨大师',
+    icon: '💫',
+    requiredCombo: 8,
+    rarity: 'epic',
+    description: '掌握星轨共鸣之法'
+  },
+  {
+    id: 'sr-title-4',
+    name: '星轨传说',
+    icon: '🌠',
+    requiredCombo: 12,
+    rarity: 'legendary',
+    description: '传说级别的星轨使用者'
+  },
+  {
+    id: 'sr-title-5',
+    name: '星轨神话',
+    icon: '🌌',
+    requiredCombo: 16,
+    rarity: 'legendary',
+    description: '超越传说的存在'
+  }
+];
+
+export const STAR_RAIL_STORY_EVENTS = [
+  {
+    id: 'sr-event-1',
+    triggerCombo: 3,
+    title: '星轨初醒',
+    description: '你感觉到一股神秘的力量在指尖流动...',
+    choices: [
+      {
+        id: 'sr-1-a',
+        text: '追寻这股力量的来源',
+        effect: { type: 'scoreBonus', value: 500 },
+        result: '你顺着星光的指引，发现了隐藏的星轨之力。获得额外分数奖励！'
+      },
+      {
+        id: 'sr-1-b',
+        text: '继续专注于配对',
+        effect: { type: 'comboBoost', value: 1 },
+        result: '你选择专注于眼前的挑战，星轨之力默默守护着你。连击计数+1！'
+      }
+    ]
+  },
+  {
+    id: 'sr-event-2',
+    triggerCombo: 5,
+    title: '星光共鸣',
+    description: '卡牌之间开始产生奇妙的共鸣，星星在你眼前闪烁...',
+    choices: [
+      {
+        id: 'sr-2-a',
+        text: '聆听星光的低语',
+        effect: { type: 'hint', value: 2 },
+        result: '星光向你揭示了两对卡牌的位置。获得2次提示机会！'
+      },
+      {
+        id: 'sr-2-b',
+        text: '顺势引导星轨之力',
+        effect: { type: 'timeBonus', value: 15 },
+        result: '你引导星轨之力延长了时间。获得15秒额外时间！'
+      }
+    ]
+  },
+  {
+    id: 'sr-event-3',
+    triggerCombo: 8,
+    title: '星轨觉醒',
+    description: '星轨之力完全觉醒，整个牌面都在闪耀着璀璨的光芒...',
+    choices: [
+      {
+        id: 'sr-3-a',
+        text: '释放星轨之力',
+        effect: { type: 'matchPair', value: 1 },
+        result: '星轨之力自动完成了一对配对！'
+      },
+      {
+        id: 'sr-3-b',
+        text: '积蓄更多力量',
+        effect: { type: 'multiplierBoost', value: 0.5 },
+        result: '你选择积蓄力量，分数倍率永久提升0.5！'
+      }
+    ]
+  },
+  {
+    id: 'sr-event-4',
+    triggerCombo: 12,
+    title: '传说降临',
+    description: '传说级星轨之力降临！星空为你而闪耀...',
+    choices: [
+      {
+        id: 'sr-4-a',
+        text: '接受星轨的祝福',
+        effect: { type: 'multiplierBoost', value: 1 },
+        result: '星轨的祝福降临，分数倍率提升1倍！'
+      },
+      {
+        id: 'sr-4-b',
+        text: '挑战更高的境界',
+        effect: { type: 'perfectStart', value: true },
+        result: '你选择挑战自我，下一次配对将获得完美开局效果！'
+      }
+    ]
+  }
+];
+
+export const getStarRailChainLevel = (combo) => {
+  let currentLevel = null;
+  for (const level of STAR_RAIL_CHAIN_LEVELS) {
+    if (combo >= level.comboRequired) {
+      currentLevel = level;
+    }
+  }
+  return currentLevel;
+};
+
+export const getStarRailTitle = (maxCombo) => {
+  let currentTitle = null;
+  for (const title of STAR_RAIL_TITLES) {
+    if (maxCombo >= title.requiredCombo) {
+      currentTitle = title;
+    }
+  }
+  return currentTitle;
+};
+
+export const getStarRailStoryEvent = (combo) => {
+  return STAR_RAIL_STORY_EVENTS.find(event => event.triggerCombo === combo);
+};

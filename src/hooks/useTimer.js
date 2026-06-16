@@ -56,6 +56,10 @@ export const useTimer = (initialTime, isRunning = false, onTimeUp = null) => {
     setTimeLeft(newTime);
   }, [initialTime, stopTimer]);
 
+  const addTime = useCallback((seconds) => {
+    setTimeLeft(prev => prev + seconds);
+  }, []);
+
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -76,6 +80,7 @@ export const useTimer = (initialTime, isRunning = false, onTimeUp = null) => {
     formattedTime: formatTime(timeLeft),
     startTimer,
     stopTimer,
-    resetTimer
+    resetTimer,
+    addTime
   };
 };

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getLevelById, FULL_LETTER, getRarityInfo, getAchievementById, getTitleById } from '../data/gameData';
+import { getLevelById, FULL_LETTER, getRarityInfo, getAchievementById, getTitleById, getStarRailTitle } from '../data/gameData';
 
 const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLevel, achievements, onOpenAchievements }) => {
   const level = getLevelById(result?.levelId || 1);
@@ -66,7 +66,7 @@ const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLeve
           </div>
         )}
 
-        <div className="bg-star-purple/30 rounded-2xl p-6 mb-8 border border-star-gold/20">
+        <div className="bg-star-purple/30 rounded-2xl p-6 mb-6 border border-star-gold/20">
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center">
               <div className="text-xs text-white/50 mb-1">最终得分</div>
@@ -99,6 +99,34 @@ const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLeve
             </div>
           </div>
         </div>
+
+        {result?.railTitle && (
+          <div 
+            className="rounded-2xl p-5 mb-6 border-2 text-center animate-slide-in"
+            style={{ 
+              backgroundColor: `${getRarityInfo(result.railTitle.rarity)?.color}20`,
+              borderColor: `${getRarityInfo(result.railTitle.rarity)?.color}60`,
+              boxShadow: `0 0 20px ${getRarityInfo(result.railTitle.rarity)?.color}30`
+            }}
+          >
+            <div className="text-xs text-white/60 mb-2">🌟 星轨专属称号</div>
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <span className="text-3xl">{result.railTitle.icon}</span>
+              <span 
+                className="text-xl font-bold"
+                style={{ color: getRarityInfo(result.railTitle.rarity)?.color }}
+              >
+                {result.railTitle.name}
+              </span>
+            </div>
+            <div className="text-xs text-white/60">
+              {result.railTitle.description}
+            </div>
+            <div className="text-xs text-star-gold/80 mt-2">
+              最高连击: x{result.railMaxCombo || result.maxCombo || 0}
+            </div>
+          </div>
+        )}
 
         {isWin && achievements?.newAchievements?.length > 0 && showAchievementSection && (
           <div className="bg-star-purple/30 rounded-2xl p-5 mb-6 border border-star-gold/30 animate-slide-in">

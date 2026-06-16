@@ -4,7 +4,8 @@ import Modal from '../components/Modal';
 import { useGameLogic } from '../hooks/useGameLogic';
 import { useTimer } from '../hooks/useTimer';
 import { useScore } from '../hooks/useScore';
-import { getLevelById, ITEM_EFFECT_TYPES, getItemEffectInfo, getShopItemById } from '../data/gameData';
+import { useStarRailChain } from '../hooks/useStarRailChain';
+import { getLevelById, ITEM_EFFECT_TYPES, getItemEffectInfo, getShopItemById, getRarityInfo, getStarRailChainLevel } from '../data/gameData';
 
 const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
   const level = getLevelById(levelId);
@@ -18,7 +19,12 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
   const [protectCount, setProtectCount] = useState(0);
   const [showProtectAnimation, setShowProtectAnimation] = useState(false);
   const [rewardInfo, setRewardInfo] = useState(null);
+  const [showRailLevelUp, setShowRailLevelUp] = useState(false);
+  const [railLevelUpInfo, setRailLevelUpInfo] = useState(null);
+  const [showStoryEventModal, setShowStoryEventModal] = useState(false);
+  const [storyEventResult, setStoryEventResult] = useState(null);
   const prevMatchedRef = useRef(0);
+  const prevRailLevelRef = useRef(null);
   const effectsAppliedRef = useRef(false);
 
   const {
@@ -48,7 +54,8 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     isTimerRunning,
     startTimer,
     stopTimer,
-    resetTimer
+    resetTimer,
+    addTime
   } = useTimer(adjustedTimeLimit, false, () => {
     setGameStatus('lost');
   });
@@ -61,6 +68,25 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     resetScore,
     setScore
   } = useScore(level?.baseScore || 1000);
+
+  const {
+    combo: railCombo,
+    maxCombo: railMaxCombo,
+    currentLevel: railLevel,
+    isChainActive,
+    showStoryEvent,
+    currentStoryEvent,
+    scoreMultiplier: railMultiplier,
+    baseMultiplier: railBaseMultiplier,
+    bonusMultiplier: railBonusMultiplier,
+    handleMatch: handleRailMatch,
+    handleMistake: handleRailMistake,
+    applyStoryChoice: applyRailStoryChoice,
+    closeStoryEvent: closeRailStoryEvent,
+    resetChain: resetRailChain,
+    getTitle: getRailTitle,
+    getNextLevel: getNextRailLevel
+  } = useStarRailChain();
 
   useEffect(() => {
     if (shop && shop.selectedItems.length > 0 && !effectsAppliedRef.current && gameStatus === 'idle') {
@@ -96,22 +122,41 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     if (matchedPairs.length > prevMatchedRef.current) {
       prevMatchedRef.current = matchedPairs.length;
       
-      let points = addMatchScore(timeLeft, adjustedTimeLimit, moves);
+      const newRailCombo = handleRailMatch();
+      
+      const currentRailLevel = getStarRailChainLevel(newRailCombo);
+      if (currentRailLevel && (!prevRailLevelRef.current || currentRailLevel.level > prevRailLevelRef.current.level)) {
+        prevRailLevelRef.current = currentRailLevel;
+        setRailLevelUpInfo(currentRailLevel);
+        setShowRailLevelUp(true);
+        setTimeout(() => setShowRailLevelUp(false), 2000);
+      }
+      
+      const basePoints = addMatchScore(timeLeft, adjustedTimeLimit, moves);
+      
+      const currentMultiplier = railMultiplier > 1 ? railMultiplier : 1;
+      const bonusPoints = currentMultiplier > 1 ? Math.floor(basePoints * (currentMultiplier - 1)) : 0;
+      
+      let finalPoints = basePoints + bonusPoints;
       
       if (shop) {
-        points = shop.calculateFinalScore(points);
+        finalPoints = shop.calculateFinalScore(finalPoints);
         
         if (combo > 1) {
           const comboBonus = shop.calculateComboBonus(combo * 50);
-          points += comboBonus - (combo * 50);
+          finalPoints += comboBonus - (combo * 50);
         }
       }
       
-      setEarnedPoints(points);
+      if (bonusPoints > 0) {
+        setScore(prev => prev + bonusPoints);
+      }
+      
+      setEarnedPoints(finalPoints);
       setShowPointsPopup(true);
       setTimeout(() => setShowPointsPopup(false), 1000);
     }
-  }, [matchedPairs.length, timeLeft, adjustedTimeLimit, moves, addMatchScore, shop, combo]);
+  }, [matchedPairs.length, timeLeft, adjustedTimeLimit, moves, addMatchScore, shop, combo, handleRailMatch, railMultiplier, setScore]);
 
   useEffect(() => {
     if (gameStatus === 'won') {
@@ -123,14 +168,19 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
         setRewardInfo(reward);
       }
       
+      const railTitle = getRailTitle();
+      
       const timer = setTimeout(() => {
         onWin && onWin({
           score: shop ? shop.calculateFinalScore(score) : score,
           timeLeft,
           moves,
           levelId,
-          maxCombo,
-          rewardInfo
+          maxCombo: Math.max(maxCombo, railMaxCombo),
+          rewardInfo,
+          railMaxCombo,
+          railTitle,
+          railLevel
         });
       }, 1500);
       return () => clearTimeout(timer);
@@ -139,17 +189,22 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
       if (shop) {
         shop.resetActiveEffects();
       }
+      
+      const railTitle = getRailTitle();
+      
       const timer = setTimeout(() => {
         onLose && onLose({
           score,
           timeLeft: 0,
           moves,
-          levelId
+          levelId,
+          railMaxCombo,
+          railTitle
         });
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [gameStatus, score, timeLeft, moves, levelId, maxCombo, onWin, onLose, stopTimer, shop, rewardInfo]);
+  }, [gameStatus, score, timeLeft, moves, levelId, maxCombo, onWin, onLose, stopTimer, shop, rewardInfo, getRailTitle, railMaxCombo, railLevel]);
 
   const handleCardClick = (cardId) => {
     if (gameStatus === 'idle') {
@@ -161,7 +216,12 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     
     if (result.mistakeProtected) {
       setProtectCount(prev => Math.max(0, prev - 1));
-    } else if (!result.matched && flippedCards.length === 1) {
+    }
+    
+    if (flippedCards.length === 1 && !result.matched && !result.mistakeProtected) {
+      setTimeout(() => {
+        handleRailMistake();
+      }, 1000);
     }
   };
 
@@ -177,15 +237,21 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
 
   const handleRestart = () => {
     prevMatchedRef.current = 0;
+    prevRailLevelRef.current = null;
     effectsAppliedRef.current = false;
     resetGame();
     resetTimer(adjustedTimeLimit);
     resetScore();
+    resetRailChain();
     setShowPauseModal(false);
     setGameEffects({});
     setHintCount(0);
     setProtectCount(0);
     setRewardInfo(null);
+    setShowRailLevelUp(false);
+    setRailLevelUpInfo(null);
+    setShowStoryEventModal(false);
+    setStoryEventResult(null);
     if (shop) {
       shop.resetActiveEffects();
     }
@@ -273,6 +339,31 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
         </div>
       )}
 
+      {railLevel && (
+        <div 
+          className="star-rail-banner text-center py-2 px-4 rounded-lg mb-3 relative overflow-hidden"
+          style={{ backgroundColor: `${railLevel.color}20`, border: `1px solid ${railLevel.color}40` }}
+        >
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-xl">✨</span>
+            <span className="font-bold" style={{ color: railLevel.color }}>
+              {railLevel.name}
+            </span>
+            <span className="text-xs opacity-70" style={{ color: railLevel.color }}>
+              {railLevel.description}
+            </span>
+            <span className="multiplier-badge text-white text-xs font-bold px-2 py-0.5 rounded-full ml-2">
+              x{railMultiplier.toFixed(1)}
+            </span>
+          </div>
+          {getNextRailLevel() && (
+            <div className="text-xs text-white/50 mt-1">
+              距离下一阶段还需 {getNextRailLevel().comboRequired - railCombo} 次连击
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="flex justify-around items-center mb-4 rounded-xl p-3"
         style={{ 
           backgroundColor: `${skinTheme?.cardColor || '#2d1b69'}4d`,
@@ -298,6 +389,11 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
                 (+{Math.floor(gameEffects[ITEM_EFFECT_TYPES.SCORE_BOOST] * 100)}%)
               </span>
             )}
+            {railMultiplier > 1 && (
+              <span className="text-xs text-purple-400 ml-1">
+                [x{railMultiplier.toFixed(1)}]
+              </span>
+            )}
           </div>
         </div>
 
@@ -308,19 +404,20 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
           </div>
         </div>
 
-        {combo > 1 && (
-          <div className="text-center">
-            <div className="text-xs text-white/50">连击</div>
-            <div className="text-lg font-bold text-star-pink animate-pulse">
-              x{combo}
-              {gameEffects[ITEM_EFFECT_TYPES.COMBO_BOOST] > 1 && (
-                <span className="text-xs text-orange-400 ml-1">
-                  (x{gameEffects[ITEM_EFFECT_TYPES.COMBO_BOOST]})
-                </span>
-              )}
-            </div>
+        <div className="text-center">
+          <div className="text-xs text-white/50">连击</div>
+          <div 
+            className={`text-lg font-bold combo-number ${isChainActive ? 'animate-pulse' : ''}`}
+            style={{ color: railLevel?.color || '#ec4899' }}
+          >
+            x{Math.max(combo, railCombo)}
+            {gameEffects[ITEM_EFFECT_TYPES.COMBO_BOOST] > 1 && (
+              <span className="text-xs text-orange-400 ml-1">
+                (x{gameEffects[ITEM_EFFECT_TYPES.COMBO_BOOST]})
+              </span>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       <div className="flex justify-center gap-3 mb-4">
@@ -367,6 +464,7 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
                 onClick={handleCardClick}
                 disabled={isLocked || (gameStatus !== 'playing' && gameStatus !== 'idle')}
                 skinTheme={skinTheme}
+                starRailLevel={railLevel}
               />
             </div>
           ))}
@@ -398,6 +496,132 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
             </div>
           </div>
         </div>
+      )}
+
+      {showRailLevelUp && railLevelUpInfo && (
+        <div className="fixed top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50 rail-level-up">
+          <div 
+            className="text-center px-8 py-6 rounded-2xl"
+            style={{ 
+              backgroundColor: `${railLevelUpInfo.color}30`,
+              border: `2px solid ${railLevelUpInfo.color}`,
+              boxShadow: `0 0 30px ${railLevelUpInfo.color}60`
+            }}
+          >
+            <div className="text-4xl mb-2">✨</div>
+            <div 
+              className="text-2xl font-bold mb-1"
+              style={{ color: railLevelUpInfo.color }}
+            >
+              {railLevelUpInfo.name}
+            </div>
+            <div className="text-sm text-white/70">
+              {railLevelUpInfo.description}
+            </div>
+            <div 
+              className="mt-3 text-lg font-bold"
+              style={{ color: railLevelUpInfo.color }}
+            >
+              分数倍率 x{railLevelUpInfo.scoreMultiplier}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showStoryEvent && currentStoryEvent && (
+        <Modal
+          isOpen={true}
+          onClose={() => {}}
+          title={`🌟 ${currentStoryEvent.title}`}
+          showCloseButton={false}
+        >
+          <div className="max-w-sm">
+            <p className="text-white/80 text-center mb-6 leading-relaxed">
+              {currentStoryEvent.description}
+            </p>
+            <div className="space-y-3">
+              {currentStoryEvent.choices.map((choice, index) => (
+                <button
+                  key={choice.id}
+                  onClick={() => {
+                    const result = applyRailStoryChoice(choice);
+                    
+                    if (result.scoreBonus) {
+                      setScore(prev => prev + result.scoreBonus);
+                    }
+                    if (result.timeBonus) {
+                      addTime(result.timeBonus);
+                    }
+                    if (result.hints && shop) {
+                      setHintCount(prev => prev + result.hints);
+                    }
+                    
+                    setStoryEventResult({ choice, result });
+                    setShowStoryEventModal(true);
+                  }}
+                  className="w-full py-3 px-4 rounded-xl text-left transition-all
+                    border-2 border-star-gold/30 hover:border-star-gold/60 
+                    hover:bg-star-gold/10 active:scale-95"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <div className="font-bold text-star-gold">
+                    {choice.text}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {showStoryEventModal && storyEventResult && (
+        <Modal
+          isOpen={true}
+          onClose={() => {
+            setShowStoryEventModal(false);
+            setStoryEventResult(null);
+            closeRailStoryEvent();
+          }}
+          title="✨ 星轨回应"
+          showCloseButton={true}
+        >
+          <div className="max-w-sm text-center">
+            <div className="text-4xl mb-4">🌟</div>
+            <p className="text-white/80 mb-6 leading-relaxed">
+              {storyEventResult.choice.result}
+            </p>
+            {storyEventResult.result.scoreBonus && (
+              <div className="text-star-gold text-lg font-bold mb-2">
+                +{storyEventResult.result.scoreBonus} 分
+              </div>
+            )}
+            {storyEventResult.result.timeBonus && (
+              <div className="text-green-400 text-lg font-bold mb-2">
+                +{storyEventResult.result.timeBonus} 秒
+              </div>
+            )}
+            {storyEventResult.result.comboBoost && (
+              <div className="text-star-pink text-lg font-bold mb-2">
+                连击 +{storyEventResult.result.comboBoost}
+              </div>
+            )}
+            {storyEventResult.result.multiplierBoost && (
+              <div className="text-purple-400 text-lg font-bold mb-2">
+                倍率 +{storyEventResult.result.multiplierBoost}
+              </div>
+            )}
+            <button
+              onClick={() => {
+                setShowStoryEventModal(false);
+                setStoryEventResult(null);
+                closeRailStoryEvent();
+              }}
+              className="w-full btn-star mt-4"
+            >
+              继续游戏
+            </button>
+          </div>
+        </Modal>
       )}
 
       <Modal
