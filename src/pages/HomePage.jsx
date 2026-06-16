@@ -1,6 +1,6 @@
 import { LEVELS } from '../data/gameData';
 
-const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenDailyChallenge, unlockedLevel = 1, highScores = {} }) => {
+const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, onOpenDailyChallenge, unlockedLevel = 1, highScores = {}, collectedStars = 0 }) => {
   return (
     <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-8">
       <div className="text-center mb-12">
@@ -26,7 +26,7 @@ const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenDailyChalle
         </button>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 mb-10">
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <button
           onClick={onOpenDailyChallenge}
           className="px-8 py-4 rounded-full font-bold transition-all
@@ -44,6 +44,22 @@ const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenDailyChalle
             border-2 border-star-cyan/50 text-star-cyan hover:bg-star-cyan/10 hover:border-star-cyan hover:shadow-lg hover:shadow-star-cyan/30"
         >
           🏛️ 星塔档案馆
+        </button>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-4 mb-10">
+        <button
+          onClick={onOpenStarAlbum}
+          className="px-8 py-4 rounded-full font-bold transition-all
+            border-2 border-star-gold/50 text-star-gold hover:bg-star-gold/10 hover:border-star-gold hover:shadow-lg hover:shadow-star-gold/30
+            relative overflow-hidden group"
+        >
+          <span className="relative z-10">📖 星纹图鉴</span>
+          {collectedStars > 0 && (
+            <span className="absolute -top-1 -right-1 bg-star-gold text-star-dark text-xs px-2 py-0.5 rounded-full font-bold">
+              {collectedStars}/12
+            </span>
+          )}
         </button>
       </div>
 

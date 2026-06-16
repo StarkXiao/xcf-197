@@ -3,6 +3,7 @@ import HomePage from './pages/HomePage';
 import GamePage from './pages/GamePage';
 import ResultPage from './pages/ResultPage';
 import ArchivePage from './pages/ArchivePage';
+import StarAlbumPage from './pages/StarAlbumPage';
 import DailyChallengePage from './pages/DailyChallengePage';
 import DailyChallengeGamePage from './pages/DailyChallengeGamePage';
 import StarryBackground from './components/StarryBackground';
@@ -15,6 +16,7 @@ const PAGES = {
   GAME: 'game',
   RESULT: 'result',
   ARCHIVE: 'archive',
+  STAR_ALBUM: 'star-album',
   DAILY_CHALLENGE: 'daily-challenge',
   DAILY_CHALLENGE_GAME: 'daily-challenge-game'
 };
@@ -119,6 +121,14 @@ function App() {
     setCurrentPage(PAGES.HOME);
   };
 
+  const handleOpenStarAlbum = () => {
+    setCurrentPage(PAGES.STAR_ALBUM);
+  };
+
+  const handleBackFromStarAlbum = () => {
+    setCurrentPage(PAGES.HOME);
+  };
+
   const handleLose = (result) => {
     setIsWin(false);
     setGameResult(result);
@@ -173,9 +183,11 @@ function App() {
           onStartGame={handleStartGame}
           onSelectLevel={handleSelectLevel}
           onOpenArchive={handleOpenArchive}
+          onOpenStarAlbum={handleOpenStarAlbum}
           onOpenDailyChallenge={handleOpenDailyChallenge}
           unlockedLevel={unlockedLevel}
           highScores={highScores}
+          collectedStars={archive.collectedFragments.length}
         />
       )}
 
@@ -204,6 +216,13 @@ function App() {
         <ArchivePage
           archive={archive}
           onBack={handleBackFromArchive}
+        />
+      )}
+
+      {currentPage === PAGES.STAR_ALBUM && (
+        <StarAlbumPage
+          archive={archive}
+          onBack={handleBackFromStarAlbum}
         />
       )}
 

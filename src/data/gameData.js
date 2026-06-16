@@ -4,84 +4,156 @@ export const STAR_PATTERNS = [
     name: '北极星',
     symbol: '⭐',
     color: '#ffd700',
-    description: '永恒指引的北极之星'
+    description: '永恒指引的北极之星',
+    rarity: 'common',
+    story: '北极星是夜空中最稳定的存在，千年万载始终守护着迷途的旅人。传说中，只要对着北极星许下真挚的愿望，星光就会指引你找到心中所爱。',
+    unlockCondition: '通关第1关 · 星之序章',
+    element: '光',
+    guardian: '守护者',
+    meaning: '永恒与指引'
   },
   {
     id: 'star-2',
     name: '猎户座',
     symbol: '🌟',
     color: '#00d4ff',
-    description: '勇敢猎人的星座'
+    description: '勇敢猎人的星座',
+    rarity: 'common',
+    story: '猎户座的传说讲述了一位勇敢的猎人，他为了保护心爱的人，化身为星座永远守夜。腰间的三颗明星，是他永不放下的誓言。',
+    unlockCondition: '通关第2关 · 月光私语',
+    element: '风',
+    guardian: '猎人',
+    meaning: '勇气与守护'
   },
   {
     id: 'star-3',
     name: '北斗七星',
     symbol: '✨',
     color: '#ff6b9d',
-    description: '指向幸福的七星'
+    description: '指向幸福的七星',
+    rarity: 'rare',
+    story: '北斗七星是天界的指南针，七颗星组成一把神奇的勺子。据说沿着勺口的方向寻找，就能找到通往幸福的道路。每一颗星都代表一种祝福。',
+    unlockCondition: '通关第2关 · 月光私语',
+    element: '水',
+    guardian: '七贤者',
+    meaning: '智慧与方向'
   },
   {
     id: 'star-4',
     name: '织女星',
     symbol: '💫',
     color: '#c084fc',
-    description: '传说中的织女星'
+    description: '传说中的织女星',
+    rarity: 'rare',
+    story: '织女是天帝的女儿，她编织的云霞美丽绝伦。为了爱情，她甘愿放弃仙籍，与牛郎相隔银河两岸。每年七夕，鹊桥相会，泪洒星空。',
+    unlockCondition: '通关第3关 · 银河情书',
+    element: '木',
+    guardian: '织女',
+    meaning: '痴情与等待'
   },
   {
     id: 'star-5',
     name: '天狼星',
     symbol: '🔆',
     color: '#60a5fa',
-    description: '最亮的恒星'
+    description: '最亮的恒星',
+    rarity: 'rare',
+    story: '天狼星是夜空中最亮的恒星，它的光芒能穿透最深的黑暗。古代的航海者靠它辨别方向，战士们视它为胜利的象征。它是黎明前最耀眼的希望。',
+    unlockCondition: '通关第3关 · 银河情书',
+    element: '火',
+    guardian: '狼神',
+    meaning: '光明与力量'
   },
   {
     id: 'star-6',
     name: '仙女座',
     symbol: '💠',
     color: '#f472b6',
-    description: '美丽的仙女星座'
+    description: '美丽的仙女星座',
+    rarity: 'epic',
+    story: '仙女座的公主被海怪困在礁石上，等待着英雄的拯救。她的美丽让整片星空都为之失色。最终，珀尔修斯骑着飞马而来，上演了一场浪漫的救援。',
+    unlockCondition: '通关第4关 · 星座誓言',
+    element: '水',
+    guardian: '仙女',
+    meaning: '美丽与坚韧'
   },
   {
     id: 'star-7',
     name: '天琴座',
     symbol: '🎇',
     color: '#34d399',
-    description: '音乐之神的竖琴'
+    description: '音乐之神的竖琴',
+    rarity: 'epic',
+    story: '俄耳甫斯的琴声能使顽石点头、猛兽俯首。为了救回死去的爱人，他带着竖琴勇闯冥界。虽然最终功亏一篑，但他的琴音永远回荡在星空之中。',
+    unlockCondition: '通关第4关 · 星座誓言',
+    element: '风',
+    guardian: '乐神',
+    meaning: '音乐与深情'
   },
   {
     id: 'star-8',
     name: '天蝎座',
     symbol: '🦂',
     color: '#fb923c',
-    description: '神秘的天蝎星座'
+    description: '神秘的天蝎星座',
+    rarity: 'epic',
+    story: '天蝎是大地女神派来的猎手，它的毒刺能够制服最强大的对手。在完成使命后，它被升上天空成为星座。天蝎代表着神秘的力量和不可小觑的威胁。',
+    unlockCondition: '通关第5关 · 星塔终章',
+    element: '土',
+    guardian: '蝎王',
+    meaning: '神秘与力量'
   },
   {
     id: 'star-9',
     name: '狮子座',
     symbol: '🦁',
     color: '#fbbf24',
-    description: '王者之狮星座'
+    description: '王者之狮星座',
+    rarity: 'epic',
+    story: '尼米亚雄狮是赫拉克勒斯十二项功绩中的第一项。这头狮子刀枪不入，最终被英雄扼死。它的灵魂升上天空，成为狮子座，永远彰显着王者的威严。',
+    unlockCondition: '通关第5关 · 星塔终章',
+    element: '火',
+    guardian: '狮王',
+    meaning: '力量与威严'
   },
   {
     id: 'star-10',
     name: '双子座',
     symbol: '👯',
     color: '#a78bfa',
-    description: '双子星座的传说'
+    description: '双子星座的传说',
+    rarity: 'legendary',
+    story: '卡斯托尔和波吕克斯是一对孪生兄弟，一个凡人一个神。哥哥战死后，弟弟请求宙斯将自己的神格分给哥哥一半。宙斯被兄弟之情感动，将他们化为双子座。',
+    unlockCondition: '获得5次3星评价',
+    element: '风',
+    guardian: '双子神',
+    meaning: '羁绊与永恒'
   },
   {
     id: 'star-11',
     name: '双鱼座',
     symbol: '🐟',
     color: '#38bdf8',
-    description: '浪漫的双鱼星座'
+    description: '浪漫的双鱼星座',
+    rarity: 'legendary',
+    story: '爱神阿芙洛狄忒和儿子厄洛斯为了躲避怪兽，化身为两条鱼跳入河中。他们用丝带将尾巴系在一起，永不分离。双鱼座象征着永恒的爱与羁绊。',
+    unlockCondition: '累计游戏时长超过1小时',
+    element: '水',
+    guardian: '爱神',
+    meaning: '爱情与羁绊'
   },
   {
     id: 'star-12',
     name: '处女座',
     symbol: '👰',
     color: '#f0abfc',
-    description: '纯洁的处女星座'
+    description: '纯洁的处女星座',
+    rarity: 'legendary',
+    story: '处女座代表着正义女神阿斯特莱亚，她是最后一位离开人间的神祗。当人类世界变得堕落时，她带着天平升上天空，等待着人间恢复纯洁与公正的那一天。',
+    unlockCondition: '解锁所有隐藏结局',
+    element: '土',
+    guardian: '正义女神',
+    meaning: '纯洁与正义'
   }
 ];
 
@@ -540,4 +612,64 @@ export const getDifficultyColor = (difficulty) => {
     legendary: '#ec4899'
   };
   return colors[difficulty] || colors.easy;
+};
+
+export const RARITY_INFO = {
+  common: {
+    name: '普通',
+    color: '#9ca3af',
+    bgColor: 'rgba(156, 163, 175, 0.1)',
+    borderColor: 'rgba(156, 163, 175, 0.3)',
+    icon: '⚪'
+  },
+  rare: {
+    name: '稀有',
+    color: '#3b82f6',
+    bgColor: 'rgba(59, 130, 246, 0.1)',
+    borderColor: 'rgba(59, 130, 246, 0.3)',
+    icon: '🔵'
+  },
+  epic: {
+    name: '史诗',
+    color: '#a855f7',
+    bgColor: 'rgba(168, 85, 247, 0.1)',
+    borderColor: 'rgba(168, 85, 247, 0.3)',
+    icon: '🟣'
+  },
+  legendary: {
+    name: '传说',
+    color: '#f59e0b',
+    bgColor: 'rgba(245, 158, 11, 0.1)',
+    borderColor: 'rgba(245, 158, 11, 0.3)',
+    icon: '🌟'
+  }
+};
+
+export const getRarityInfo = (rarity) => {
+  return RARITY_INFO[rarity] || RARITY_INFO.common;
+};
+
+export const getStarsByRarity = (rarity) => {
+  return STAR_PATTERNS.filter(star => star.rarity === rarity);
+};
+
+export const getStarAlbumStats = (collectedFragments = []) => {
+  const total = STAR_PATTERNS.length;
+  const collected = collectedFragments.length;
+  const byRarity = {};
+  
+  Object.keys(RARITY_INFO).forEach(rarity => {
+    const stars = getStarsByRarity(rarity);
+    byRarity[rarity] = {
+      total: stars.length,
+      collected: stars.filter(star => collectedFragments.includes(star.id)).length
+    };
+  });
+  
+  return {
+    total,
+    collected,
+    percentage: Math.round((collected / total) * 100),
+    byRarity
+  };
 };
