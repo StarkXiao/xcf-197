@@ -2561,3 +2561,598 @@ export const POSTER_THEMES = [
 export const getWorkshopLetterById = (id) => WORKSHOP_LETTERS.find(l => l.id === id);
 export const getSpecialSentenceById = (id) => SPECIAL_SENTENCES.find(s => s.id === id);
 export const getPosterThemeById = (id) => POSTER_THEMES.find(t => t.id === id);
+
+export const VISITOR_CHARACTERS = [
+  {
+    id: 'visitor-1',
+    name: '露娜',
+    title: '月光诗人',
+    avatar: '🌙',
+    color: '#a5b4fc',
+    bgColor: '#312e81',
+    personality: '温柔浪漫，喜欢在月光下写诗',
+    backstory: '来自星河彼岸的游吟诗人，为了寻找传说中的星之诗篇而踏上旅途。她相信，每一颗星星背后都藏着一个动人的故事。',
+    firstMeetCondition: { type: 'unlockedLevel', value: 1 },
+    rarity: 'common',
+    element: '月',
+    likes: ['星空', '诗歌', '百合花', '音乐盒'],
+    dislikes: ['喧闹', '谎言', '阴霾']
+  },
+  {
+    id: 'visitor-2',
+    name: '凯恩',
+    title: '星焰剑士',
+    avatar: '⚔️',
+    color: '#fb923c',
+    bgColor: '#7c2d12',
+    personality: '正直勇敢，外表冷峻内心温暖',
+    backstory: '守护星塔的年轻剑士，家族世代肩负守护星光的使命。虽然看起来难以接近，但他对需要帮助的人从不吝啬伸出援手。',
+    firstMeetCondition: { type: 'unlockedLevel', value: 2 },
+    rarity: 'common',
+    element: '火',
+    likes: ['剑术', '荣誉', '红茶', '星空夜景'],
+    dislikes: ['不公', '背叛', '甜食']
+  },
+  {
+    id: 'visitor-3',
+    name: '赛琳娜',
+    title: '星辰炼金术士',
+    avatar: '⚗️',
+    color: '#34d399',
+    bgColor: '#064e3b',
+    personality: '聪慧好奇，对未知充满探索欲',
+    backstory: '来自远方学院的天才炼金术士，沉迷于研究星辰的奥秘。她相信星星中蕴含着能够改变世界的力量，为此不惜一切代价追寻真相。',
+    firstMeetCondition: { type: 'unlockedLevel', value: 3 },
+    rarity: 'rare',
+    element: '风',
+    likes: ['实验', '书籍', '水晶', '星空观测'],
+    dislikes: ['愚昧', '停滞不前', '浪费时间']
+  },
+  {
+    id: 'visitor-4',
+    name: '艾瑞斯',
+    title: '极光舞者',
+    avatar: '💃',
+    color: '#f472b6',
+    bgColor: '#831843',
+    personality: '活泼开朗，热爱自由和艺术',
+    backstory: '流浪的舞者，据说她的舞蹈能召唤极光。她走过无数国度，用舞蹈为人们带去欢笑和希望，却始终找不到属于自己的归宿。',
+    firstMeetCondition: { type: 'collectedFragments', value: 5 },
+    rarity: 'rare',
+    element: '光',
+    likes: ['舞蹈', '音乐', '旅行', '漂亮的裙子'],
+    dislikes: ['束缚', '孤独', '下雨天']
+  },
+  {
+    id: 'visitor-5',
+    name: '泰伦斯',
+    title: '时空占卜师',
+    avatar: '🔮',
+    color: '#a78bfa',
+    bgColor: '#4c1d95',
+    personality: '神秘莫测，说话总是意味深长',
+    backstory: '据说能看见时间长河的神秘占卜师，没有人知道他的真实年龄和来历。他的预言从未落空，但代价是看到了太多不该看到的结局。',
+    firstMeetCondition: { type: 'threeStarCount', value: 2 },
+    rarity: 'epic',
+    element: '时',
+    likes: ['塔罗牌', '星空', '古老传说', '宁静'],
+    dislikes: ['被追问', '喧嚣', '既定的命运']
+  },
+  {
+    id: 'visitor-6',
+    name: '诺艾尔',
+    title: '星海歌姬',
+    avatar: '🎤',
+    color: '#60a5fa',
+    bgColor: '#1e3a8a',
+    personality: '优雅高贵，拥有治愈人心的歌喉',
+    backstory: '传说中来自星海深处的歌姬，她的歌声能让星辰共鸣。为了找回失落的声音记忆，她来到星塔，希望在星光中重新找到自己的旋律。',
+    firstMeetCondition: { type: 'unlockedLevel', value: 4 },
+    rarity: 'epic',
+    element: '水',
+    likes: ['歌唱', '星星', '海洋', '温柔的人'],
+    dislikes: ['嘈杂', '悲伤的歌', '寂静']
+  },
+  {
+    id: 'visitor-7',
+    name: '伊卡洛斯',
+    title: '陨星铸造师',
+    avatar: '🔨',
+    color: '#fbbf24',
+    bgColor: '#78350f',
+    personality: '沉稳可靠，用双手创造奇迹',
+    backstory: '继承了陨星铸造术的匠人，能够用坠落的星星打造出神奇的器物。他话不多，但每一件作品都倾注了他全部的心血和祝福。',
+    firstMeetCondition: { type: 'playTime', value: 1800 },
+    rarity: 'epic',
+    element: '土',
+    likes: ['锻造', '陨石', '好酒', '诚实的人'],
+    dislikes: ['粗制滥造', '谎言', '浪费材料']
+  },
+  {
+    id: 'visitor-8',
+    name: '薇薇安娜',
+    title: '星梦守护者',
+    avatar: '🌸',
+    color: '#f0abfc',
+    bgColor: '#4a044e',
+    personality: '天真烂漫，能够进入他人的梦境',
+    backstory: '守护着孩子们梦境的神秘少女，她诞生于第一颗星星坠落时许下的愿望。她相信，只要还有人愿意相信梦想，星光就永远不会熄灭。',
+    firstMeetCondition: { type: 'allEndings', value: true },
+    rarity: 'legendary',
+    element: '梦',
+    likes: ['梦境', '棉花糖', '笑脸', '星光'],
+    dislikes: ['噩梦', '哭泣', '放弃梦想']
+  }
+];
+
+export const AFFECTION_LEVELS = [
+  { level: 0, name: '陌生人', minPoints: 0, icon: '👤', reward: '初次相遇' },
+  { level: 1, name: '认识', minPoints: 20, icon: '🤝', reward: '解锁基础对话' },
+  { level: 2, name: '熟人', minPoints: 60, icon: '😊', reward: '解锁个人背景故事' },
+  { level: 3, name: '朋友', minPoints: 120, icon: '👫', reward: '解锁专属表情包' },
+  { level: 4, name: '好友', minPoints: 200, icon: '💝', reward: '解锁特殊支线剧情' },
+  { level: 5, name: '挚友', minPoints: 320, icon: '💎', reward: '解锁专属纪念品' },
+  { level: 6, name: '羁绊', minPoints: 480, icon: '🌟', reward: '解锁隐藏结局CG' },
+  { level: 7, name: '命中注定', minPoints: 700, icon: '💫', reward: '解锁完美结局' }
+];
+
+export const VISITOR_COMMISSIONS = [
+  {
+    id: 'com-1-1',
+    visitorId: 'visitor-1',
+    title: '月光下的诗篇',
+    description: '露娜想要找到灵感，完成她的新诗。帮她配对带有月光气息的星纹吧！',
+    icon: '📜',
+    commissionStory: '「今夜的月色真美，但是...我好像找不到合适的词语来形容这份心情呢。占卜师，可以帮我寻找一下灵感吗？」',
+    pairs: 4,
+    timeLimit: 60,
+    requiredStars: ['star-1', 'star-2', 'star-4', 'star-11'],
+    bonusCondition: { type: 'timeLeft', value: 30 },
+    rewards: [
+      { type: 'affection', value: 15, condition: 'complete' },
+      { type: 'affection', value: 10, condition: 'bonus' },
+      { type: 'stardust', value: 100, condition: 'complete' },
+      { type: 'stardust', value: 50, condition: 'bonus' }
+    ],
+    unlockCondition: { type: 'affection', visitorId: 'visitor-1', value: 0 },
+    storyProgressUnlock: 1,
+    priority: 'normal'
+  },
+  {
+    id: 'com-1-2',
+    visitorId: 'visitor-1',
+    title: '星河组曲',
+    description: '露娜正在创作一首关于星河的长诗，需要更多的星光碎片作为参考。',
+    icon: '🎵',
+    commissionStory: '「我梦见自己漂浮在星河之中，无数的星星从我身边缓缓流过...那种感觉，我想用诗记录下来。」',
+    pairs: 6,
+    timeLimit: 90,
+    requiredStars: ['star-1', 'star-2', 'star-3', 'star-4', 'star-5', 'star-11'],
+    bonusCondition: { type: 'combo', value: 3 },
+    rewards: [
+      { type: 'affection', value: 20, condition: 'complete' },
+      { type: 'affection', value: 15, condition: 'bonus' },
+      { type: 'stardust', value: 200, condition: 'complete' },
+      { type: 'starShards', value: 3, condition: 'bonus' }
+    ],
+    unlockCondition: { type: 'affection', visitorId: 'visitor-1', value: 30 },
+    storyProgressUnlock: 2,
+    priority: 'normal'
+  },
+  {
+    id: 'com-1-3',
+    visitorId: 'visitor-1',
+    title: '北极星的指引',
+    description: '露娜想要写一首关于北极星的诗，传说中它能指引迷途的旅人。',
+    icon: '🧭',
+    commissionStory: '「有人说，北极星是每一个迷路之人的归宿...我想知道，对于我来说，归宿又在哪里呢？」',
+    pairs: 8,
+    timeLimit: 120,
+    requiredStars: ['star-1', 'star-2', 'star-3', 'star-4', 'star-5', 'star-6', 'star-7', 'star-11'],
+    bonusCondition: { type: 'stars', value: 3 },
+    rewards: [
+      { type: 'affection', value: 30, condition: 'complete' },
+      { type: 'affection', value: 20, condition: 'bonus' },
+      { type: 'stardust', value: 400, condition: 'complete' },
+      { type: 'starShards', value: 5, condition: 'bonus' }
+    ],
+    unlockCondition: { type: 'affection', visitorId: 'visitor-1', value: 80 },
+    storyProgressUnlock: 3,
+    priority: 'important'
+  },
+  {
+    id: 'com-2-1',
+    visitorId: 'visitor-2',
+    title: '剑术修行',
+    description: '凯恩想要提升自己的反应速度，用翻牌来训练是个不错的选择。',
+    icon: '🗡️',
+    commissionStory: '「剑士需要敏锐的洞察力，占卜师，让我看看你是否配得上星塔守护者的名号。」',
+    pairs: 4,
+    timeLimit: 50,
+    requiredStars: ['star-2', 'star-5', 'star-8', 'star-9'],
+    bonusCondition: { type: 'moves', value: 10 },
+    rewards: [
+      { type: 'affection', value: 15, condition: 'complete' },
+      { type: 'affection', value: 10, condition: 'bonus' },
+      { type: 'stardust', value: 120, condition: 'complete' },
+      { type: 'stardust', value: 60, condition: 'bonus' }
+    ],
+    unlockCondition: { type: 'affection', visitorId: 'visitor-2', value: 0 },
+    storyProgressUnlock: 1,
+    priority: 'normal'
+  },
+  {
+    id: 'com-2-2',
+    visitorId: 'visitor-2',
+    title: '誓言守护',
+    description: '凯恩正在守护一件重要的东西，他需要集中全部注意力。',
+    icon: '🛡️',
+    commissionStory: '「守护比进攻更难，因为你没有退路...但为了重要的人，我不会后退半步。」',
+    pairs: 6,
+    timeLimit: 80,
+    requiredStars: ['star-2', 'star-5', 'star-8', 'star-9', 'star-6', 'star-12'],
+    bonusCondition: { type: 'perfect', value: true },
+    rewards: [
+      { type: 'affection', value: 25, condition: 'complete' },
+      { type: 'affection', value: 15, condition: 'bonus' },
+      { type: 'stardust', value: 250, condition: 'complete' },
+      { type: 'starShards', value: 4, condition: 'bonus' }
+    ],
+    unlockCondition: { type: 'affection', visitorId: 'visitor-2', value: 40 },
+    storyProgressUnlock: 2,
+    priority: 'normal'
+  },
+  {
+    id: 'com-3-1',
+    visitorId: 'visitor-3',
+    title: '炼金实验',
+    description: '赛琳娜需要测试新材料的反应，快来帮她完成实验！',
+    icon: '🧪',
+    commissionStory: '「根据我的计算，这几颗星星的组合应该能产生奇妙的反应...来验证我的假设吧！」',
+    pairs: 5,
+    timeLimit: 70,
+    requiredStars: ['star-3', 'star-5', 'star-7', 'star-8', 'star-10'],
+    bonusCondition: { type: 'timeLeft', value: 35 },
+    rewards: [
+      { type: 'affection', value: 18, condition: 'complete' },
+      { type: 'affection', value: 12, condition: 'bonus' },
+      { type: 'stardust', value: 150, condition: 'complete' },
+      { type: 'starShards', value: 2, condition: 'bonus' }
+    ],
+    unlockCondition: { type: 'affection', visitorId: 'visitor-3', value: 0 },
+    storyProgressUnlock: 1,
+    priority: 'normal'
+  },
+  {
+    id: 'com-3-2',
+    visitorId: 'visitor-3',
+    title: '星辰提取',
+    description: '赛琳娜正在尝试从星辰中提取纯粹的星力，需要精准操作。',
+    icon: '💠',
+    commissionStory: '「星力是很敏感的东西，稍有不慎就会消散...占卜师，集中你的精神！」',
+    pairs: 7,
+    timeLimit: 100,
+    requiredStars: ['star-3', 'star-5', 'star-7', 'star-8', 'star-10', 'star-12', 'star-4'],
+    bonusCondition: { type: 'combo', value: 4 },
+    rewards: [
+      { type: 'affection', value: 28, condition: 'complete' },
+      { type: 'affection', value: 18, condition: 'bonus' },
+      { type: 'stardust', value: 300, condition: 'complete' },
+      { type: 'starShards', value: 5, condition: 'bonus' }
+    ],
+    unlockCondition: { type: 'affection', visitorId: 'visitor-3', value: 50 },
+    storyProgressUnlock: 2,
+    priority: 'important'
+  },
+  {
+    id: 'com-4-1',
+    visitorId: 'visitor-4',
+    title: '舞步编排',
+    description: '艾瑞斯想要编一支新的舞蹈，用星星来寻找舞步的灵感。',
+    icon: '🎭',
+    commissionStory: '「跳舞的时候，我感觉身体里有星星在闪烁~占卜师，你能跟上我的节奏吗？」',
+    pairs: 5,
+    timeLimit: 65,
+    requiredStars: ['star-6', 'star-7', 'star-10', 'star-11', 'star-4'],
+    bonusCondition: { type: 'combo', value: 5 },
+    rewards: [
+      { type: 'affection', value: 20, condition: 'complete' },
+      { type: 'affection', value: 15, condition: 'bonus' },
+      { type: 'stardust', value: 180, condition: 'complete' },
+      { type: 'stardust', value: 80, condition: 'bonus' }
+    ],
+    unlockCondition: { type: 'affection', visitorId: 'visitor-4', value: 0 },
+    storyProgressUnlock: 1,
+    priority: 'normal'
+  },
+  {
+    id: 'com-5-1',
+    visitorId: 'visitor-5',
+    title: '命运之轮',
+    description: '泰伦斯想要为你占卜一次命运，用翻牌来揭示真相吧。',
+    icon: '🎡',
+    commissionStory: '「命运之轮已经开始转动了...让我们看看，星星为你安排了怎样的道路。」',
+    pairs: 6,
+    timeLimit: 95,
+    requiredStars: ['star-3', 'star-5', 'star-8', 'star-10', 'star-12', 'star-2'],
+    bonusCondition: { type: 'stars', value: 3 },
+    rewards: [
+      { type: 'affection', value: 25, condition: 'complete' },
+      { type: 'affection', value: 20, condition: 'bonus' },
+      { type: 'stardust', value: 280, condition: 'complete' },
+      { type: 'starShards', value: 6, condition: 'bonus' }
+    ],
+    unlockCondition: { type: 'affection', visitorId: 'visitor-5', value: 0 },
+    storyProgressUnlock: 1,
+    priority: 'important'
+  },
+  {
+    id: 'com-6-1',
+    visitorId: 'visitor-6',
+    title: '寻找旋律',
+    description: '诺艾尔想要找回失落的歌声，在星光中寻找熟悉的旋律吧。',
+    icon: '🎼',
+    commissionStory: '「我...我记不起自己的歌了。但是，当星星闪烁的时候，我好像能听到一丝回响...」',
+    pairs: 6,
+    timeLimit: 100,
+    requiredStars: ['star-4', 'star-7', 'star-11', 'star-6', 'star-12', 'star-10'],
+    bonusCondition: { type: 'timeLeft', value: 50 },
+    rewards: [
+      { type: 'affection', value: 30, condition: 'complete' },
+      { type: 'affection', value: 20, condition: 'bonus' },
+      { type: 'stardust', value: 350, condition: 'complete' },
+      { type: 'starShards', value: 5, condition: 'bonus' }
+    ],
+    unlockCondition: { type: 'affection', visitorId: 'visitor-6', value: 0 },
+    storyProgressUnlock: 1,
+    priority: 'important'
+  },
+  {
+    id: 'com-7-1',
+    visitorId: 'visitor-7',
+    title: '陨星铸造',
+    description: '泰伦斯正在铸造一件新作品，需要用星辰来确定最佳的锻造时机。',
+    icon: '⚒️',
+    commissionStory: '「打铁要看火候，也要看星星的位置...来，帮我找准时机。」',
+    pairs: 7,
+    timeLimit: 110,
+    requiredStars: ['star-1', 'star-5', 'star-8', 'star-9', 'star-12', 'star-3', 'star-7'],
+    bonusCondition: { type: 'moves', value: 16 },
+    rewards: [
+      { type: 'affection', value: 25, condition: 'complete' },
+      { type: 'affection', value: 18, condition: 'bonus' },
+      { type: 'stardust', value: 320, condition: 'complete' },
+      { type: 'starShards', value: 6, condition: 'bonus' }
+    ],
+    unlockCondition: { type: 'affection', visitorId: 'visitor-7', value: 0 },
+    storyProgressUnlock: 1,
+    priority: 'normal'
+  },
+  {
+    id: 'com-8-1',
+    visitorId: 'visitor-8',
+    title: '梦境穿行',
+    description: '薇薇安娜邀请你进入梦境，在那里星星是连接梦与现实的桥梁。',
+    icon: '💭',
+    commissionStory: '「嘘~小声一点，我们悄悄进入梦境吧！那里有好多好多星星在等我们哦！」',
+    pairs: 8,
+    timeLimit: 130,
+    requiredStars: ['star-1', 'star-2', 'star-3', 'star-4', 'star-5', 'star-6', 'star-7', 'star-11'],
+    bonusCondition: { type: 'stars', value: 3 },
+    rewards: [
+      { type: 'affection', value: 40, condition: 'complete' },
+      { type: 'affection', value: 30, condition: 'bonus' },
+      { type: 'stardust', value: 500, condition: 'complete' },
+      { type: 'starShards', value: 10, condition: 'bonus' }
+    ],
+    unlockCondition: { type: 'affection', visitorId: 'visitor-8', value: 0 },
+    storyProgressUnlock: 1,
+    priority: 'legendary'
+  }
+];
+
+export const VISITOR_STORY_CHAPTERS = {
+  'visitor-1': [
+    {
+      chapter: 1,
+      title: '初遇诗人',
+      content: '月光如水的夜晚，你在星塔下遇到了一位正在写诗的少女。她抬头对你微微一笑，银色的长发在月光下闪烁着柔和的光芒。\n「你好，我是露娜，一位漫游的诗人。你...就是传说中的星塔占卜师吗？我能从你身上感受到星辰的气息呢。」',
+      unlockCondition: { type: 'commission', id: 'com-1-1' }
+    },
+    {
+      chapter: 2,
+      title: '星河的秘密',
+      content: '完成委托后，露娜邀请你和她一起坐在塔顶看星星。她向你展示了她的诗集，每一页都画着不同的星座图案。\n「我一直在寻找一颗特殊的星星...据说，当两颗心真正相通的时候，那颗星星就会出现在夜空中。」她望着你，眼中仿佛盛着整条银河。',
+      unlockCondition: { type: 'commission', id: 'com-1-2' }
+    },
+    {
+      chapter: 3,
+      title: '北极星的誓言',
+      content: '露娜在北极星下完成了她的新诗。她将诗集递给你，脸上带着淡淡的红晕。\n「这首诗...是写给你的。每一个字，都是我在星光下想你的心情。从今以后，你就是我的北极星，无论我走多远，只要抬头就能找到归途。」',
+      unlockCondition: { type: 'commission', id: 'com-1-3' }
+    }
+  ],
+  'visitor-2': [
+    {
+      chapter: 1,
+      title: '冷冽剑士',
+      content: '一位身披铠甲的年轻剑士挡在你面前，锐利的眼神审视着你。\n「我是凯恩，星塔的守护剑士。听说你能通过翻牌沟通星辰...让我看看你的实力。如果不合格，我是不会允许你靠近星塔核心的。」',
+      unlockCondition: { type: 'commission', id: 'com-2-1' }
+    },
+    {
+      chapter: 2,
+      title: '背后的温柔',
+      content: '训练结束后，你意外发现凯恩正在照顾一只受伤的小鸟。平时冷峻的面容此刻变得异常柔和。\n「...别误会，只是碰巧遇到而已。」他有些不自然地别过头，「守护...不仅仅是用剑。有时候，温柔也是一种力量。这句话，是我姐姐教我的。」',
+      unlockCondition: { type: 'commission', id: 'com-2-2' }
+    }
+  ],
+  'visitor-3': [
+    {
+      chapter: 1,
+      title: '炼金天才',
+      content: '实验室里摆满了各种奇异的仪器和水晶，一位少女正专注地观察着烧瓶中的反应。\n「哦？来了个有趣的人！我是赛琳娜，你身上的星力波动很有意思...要不要来当我的实验助手？放心，不会有危险的...大概。」',
+      unlockCondition: { type: 'commission', id: 'com-3-1' }
+    },
+    {
+      chapter: 2,
+      title: '真正的目的',
+      content: '实验成功后，赛琳娜难得地露出了安静的表情。她从怀中拿出一张泛黄的照片。\n「其实...我研究星力，是为了治好我老师的病。他将毕生所学都传授给了我，现在轮到我来救他了。谢谢你，占卜师。有你在，我感觉离目标又近了一步。」',
+      unlockCondition: { type: 'commission', id: 'com-3-2' }
+    }
+  ],
+  'visitor-4': [
+    {
+      chapter: 1,
+      title: '流浪舞者',
+      content: '广场中央，一位美丽的舞者正随着想象中的音乐翩翩起舞。她的每一个动作都仿佛与星光产生共鸣。\n「呀！有观众~」她开心地朝你跑来，「我是艾瑞斯！你觉得我刚才的舞蹈怎么样？这是我最新编排的《极光之舞》哦！」',
+      unlockCondition: { type: 'commission', id: 'com-4-1' }
+    }
+  ],
+  'visitor-5': [
+    {
+      chapter: 1,
+      title: '神秘预言',
+      content: '一位身披黑色斗篷的神秘男子出现在你面前，他手中的塔罗牌散发着淡淡的星光。\n「我等你很久了，占卜师。命运的丝线将你引到这里...想知道你未来的道路吗？不过，我要提醒你——知道太多真相，有时候是一种负担。」',
+      unlockCondition: { type: 'commission', id: 'com-5-1' }
+    }
+  ],
+  'visitor-6': [
+    {
+      chapter: 1,
+      title: '失落的歌声',
+      content: '海边，一位蓝发少女正望着星空沉默。当她注意到你时，勉强露出了一个微笑。\n「你好...我是诺艾尔。曾经，有人说我的歌声能让星辰都为之动容。但是现在...我已经记不起自己的歌了。你能帮我找回来吗？」',
+      unlockCondition: { type: 'commission', id: 'com-6-1' }
+    }
+  ],
+  'visitor-7': [
+    {
+      chapter: 1,
+      title: '沉默的匠人',
+      content: '锻造房中，一位肌肉结实的匠人正专注地锤打着一块散发着星光的金属。叮叮当当的敲击声仿佛在诉说着什么。\n「...来了。」他头也不抬地说，「我是伊卡洛斯。帮我看看这块陨星的纹路，我需要找到最合适的切入点。」',
+      unlockCondition: { type: 'commission', id: 'com-7-1' }
+    }
+  ],
+  'visitor-8': [
+    {
+      chapter: 1,
+      title: '梦与星之约',
+      content: '你做了一个奇怪的梦，梦中有无数漂浮的星星和一位穿着粉色衣裙的少女。\n「欢迎来到梦境~我是薇薇安娜！」她欢快地在星星之间穿梭，「你知道吗？每一颗星星都承载着一个人的梦想。你的梦想，又是什么样子的呢？」',
+      unlockCondition: { type: 'commission', id: 'com-8-1' }
+    }
+  ]
+};
+
+export const VISITOR_DIALOGUES = {
+  'visitor-1': {
+    greeting: ['「今晚的月色真美呢...正好适合写诗。」', '「占卜师，你来了！我正好需要一些灵感~」', '「你看那颗星星，是不是很像一首未完成的诗？」'],
+    afterCommission: ['「谢谢你的帮忙...这首诗里，有一半是你的功劳呢。」', '「和你在一起的时候，灵感总是源源不断...真是不可思议。」', '「下次，我想写一首关于我们的诗。」'],
+    affectionUp: ['「嗯？我的心跳好像变快了...是因为星星太亮了吗？」', '「和你相处越久，我越觉得...你是特别的人。」', '「我好像...有点喜欢上和你在一起的时光了。」'],
+    special: ['「在我遇见你之前，我从来不知道...原来等待也可以这么幸福。」']
+  },
+  'visitor-2': {
+    greeting: ['「...来了。今天也要训练吗？」', '「别废话，直接开始吧。时间宝贵。」', '「你最近进步很大...继续保持。」'],
+    afterCommission: ['「...不错，比上次强了。」', '「你的反应速度...比我预料的要快。」', '「...辛苦了。今晚的月色，我允许你休息一下。」'],
+    affectionUp: ['「啧...别误会，我只是觉得你变强了而已。」', '「...下次我会认真一点，你别输得太难看。」', '「...你要是遇到危险，可以来找我。这是我作为剑士的...承诺。」'],
+    special: ['「守护一个人，原来不需要理由。只是...希望你平安。」']
+  },
+  'visitor-3': {
+    greeting: ['「来得正好！我有一个新想法，快来帮我验证！」', '「今天实验的主题是——你猜？嘿嘿，先保密~」', '「快进来快进来！我发现了一个了不起的东西！」'],
+    afterCommission: ['「数据非常完美！你真是我的幸运星~」', '「果然，有你在实验总是特别顺利...我要把这篇论文的共同作者写上你的名字！」', '「下次我们挑战更难的实验吧！有你在，我什么都不怕~」'],
+    affectionUp: ['「咦？为什么看到你心跳会加速...难道是新的化学反应？」', '「我研究了那么多东西，发现...最有趣的还是你。」', '「从今以后，你就是我最重要的实验搭档...不，是最重要的人。」'],
+    special: ['「在我所有的实验中，遇见你，是最美的意外。」']
+  },
+  'visitor-4': {
+    greeting: ['「哦嗨哟~今天也要开心地跳舞吧！」', '「占卜师占卜师！看我新学的舞步~」', '「啦啦啦~今天心情超好，我们来跳舞吧！」'],
+    afterCommission: ['「太棒了！你的节奏感真好！下次我们跳双人舞好不好？」', '「和你配合的感觉...就像音乐找到了完美的节拍呢！」', '「我决定了！下一支舞蹈，就以你为灵感！」'],
+    affectionUp: ['「嘿嘿，一看到你我就想跳舞...这是什么魔法呀？」', '「我以前一直在流浪，但是现在...我好像找到想要停留的地方了。」', '「如果可以的话，我想...永远和你一起跳下去。」'],
+    special: ['「我的每一支舞，都是跳给你看的。从今往后，永远都是。」']
+  },
+  'visitor-5': {
+    greeting: ['「命运的齿轮...又转动了一格。」', '「我在等你。占卜师。」', '「今夜的星辰...预示着你的到来。」'],
+    afterCommission: ['「和命运有关的事情...总是需要特别的人来完成。而你，就是那个人。」', '「我看过很多人的命运，但你的...是最让我感兴趣的。」', '「星象显示...我们还会再见面很多次。」'],
+    affectionUp: ['「这很反常...我从未在别人的命运中，看到如此多自己的影子。」', '「预言无法显示的部分...也许才是最重要的。就像你和我。」', '「如果命运是一条河流，那么你...就是让我想要停留的彼岸。」'],
+    special: ['「我看透过无数人的命运，却唯独看不清自己的。直到遇见你，我才明白——原来命运，是可以一起书写的。」']
+  },
+  'visitor-6': {
+    greeting: ['「啊...是你。欢迎。」', '「今天的星星，好像在唱歌呢...你听到了吗？」', '「我...一直在等你。不知道为什么。」'],
+    afterCommission: ['「谢谢你...我好像，又想起了一点点旋律。」', '「和你在一起的时候，心里暖暖的...就像被歌声包围一样。」', '「总有一天，我要把找回来的歌，第一个唱给你听。」'],
+    affectionUp: ['「我...好像开始记得一些事情了。关于...温暖的感觉。」', '「如果我能再唱歌...第一首歌，想唱给你听。」', '「是你让我明白，就算失去了声音，也可以用另一种方式表达...心意。」'],
+    special: ['「我找回来了。我的歌声。它的第一个音符，是你的名字。」']
+  },
+  'visitor-7': {
+    greeting: ['「...进来吧。别碰那些还没完成的作品。」', '「今天要打什么？先说好，次品我不收。」', '「火候正好...你来得正是时候。」'],
+    afterCommission: ['「...不错。材料的纹路完全契合。」', '「你的眼光...很准。是个好匠人苗子。」', '「...下次，我教你真正的锻造术。」'],
+    affectionUp: ['「...这块护符，给你。别丢了。」', '「我不善言辞，但...我会用作品证明。」', '「从今以后，你身上的装备...都由我来锻造。一辈子。」'],
+    special: ['「这件作品，我倾注了所有的星力。它会替我...守护你到永远。」']
+  },
+  'visitor-8': {
+    greeting: ['「嘿嘿~你终于来梦境找我啦！」', '「今晚的梦是棉花糖味的哦！你要不要尝尝？」', '「快点快点，星星们都在等我们一起玩！」'],
+    afterCommission: ['「耶！任务完成~我们去云端吃棉花糖庆祝吧！」', '「你好厉害哦！比我梦境里的王子还要厉害！」', '「下次，我带你去一个只有我们两个人知道的梦境秘密基地！」'],
+    affectionUp: ['「我做了一个新的梦...梦里我们永远永远都在一起！」', '「以前的梦里只有我一个人，现在有你了...好开心。」', '「约定好了哦！你要永远陪薇薇安娜做甜甜的梦！」'],
+    special: ['「你知道吗？你是第一个让我想永远留在现实里的人。因为...有你的地方，就是最美的梦。」']
+  }
+};
+
+export const COMMISSION_EVALUATION_CRITERIA = {
+  stars: {
+    1: { minTimeRatio: 0, minMoveRatio: 0, label: '完成', icon: '⭐' },
+    2: { minTimeRatio: 0.3, minMoveRatio: 0.5, label: '优秀', icon: '⭐⭐' },
+    3: { minTimeRatio: 0.5, minMoveRatio: 0.8, label: '完美', icon: '⭐⭐⭐' }
+  },
+  bonusTypes: {
+    timeLeft: '剩余时间充足',
+    moves: '步数精准',
+    combo: '连击达成',
+    stars: '星级评价',
+    perfect: '零失误完成'
+  }
+};
+
+export const getVisitorById = (id) => VISITOR_CHARACTERS.find(v => v.id === id);
+export const getAffectionLevel = (points) => {
+  let currentLevel = AFFECTION_LEVELS[0];
+  for (const level of AFFECTION_LEVELS) {
+    if (points >= level.minPoints) {
+      currentLevel = level;
+    }
+  }
+  return currentLevel;
+};
+export const getNextAffectionLevel = (points) => {
+  for (const level of AFFECTION_LEVELS) {
+    if (points < level.minPoints) {
+      return level;
+    }
+  }
+  return null;
+};
+export const getCommissionsByVisitorId = (visitorId) => VISITOR_COMMISSIONS.filter(c => c.visitorId === visitorId);
+export const getCommissionById = (id) => VISITOR_COMMISSIONS.find(c => c.id === id);
+export const getVisitorStoryChapters = (visitorId) => VISITOR_STORY_CHAPTERS[visitorId] || [];
+export const getVisitorDialogues = (visitorId) => VISITOR_DIALOGUES[visitorId] || { greeting: [], afterCommission: [], affectionUp: [], special: [] };
+export const checkCommissionBonus = (commission, result) => {
+  const condition = commission.bonusCondition;
+  if (!condition) return false;
+  switch (condition.type) {
+    case 'timeLeft':
+      return result.timeLeft >= condition.value;
+    case 'moves':
+      return result.moves <= condition.value;
+    case 'combo':
+      return (result.maxCombo || 0) >= condition.value;
+    case 'stars':
+      return result.stars >= condition.value;
+    case 'perfect':
+      return result.perfect === true;
+    default:
+      return false;
+  }
+};
+export const calculateCommissionStars = (commission, timeLeft, moves) => {
+  const timeRatio = timeLeft / commission.timeLimit;
+  const moveRatio = (commission.pairs * 2) / moves;
+  const criteria = COMMISSION_EVALUATION_CRITERIA.stars;
+  if (timeRatio >= criteria[3].minTimeRatio && moveRatio >= criteria[3].minMoveRatio) return 3;
+  if (timeRatio >= criteria[2].minTimeRatio && moveRatio >= criteria[2].minMoveRatio) return 2;
+  return 1;
+};

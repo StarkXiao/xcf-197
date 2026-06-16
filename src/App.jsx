@@ -12,6 +12,7 @@ import StoryCorridorPage from './pages/StoryCorridorPage';
 import SeasonChallengePage from './pages/SeasonChallengePage';
 import SeasonSettlementPage from './pages/SeasonSettlementPage';
 import LetterWorkshopPage from './pages/LetterWorkshopPage';
+import VisitorCommissionPage from './pages/VisitorCommissionPage';
 import StarryBackground from './components/StarryBackground';
 import AchievementUnlockModal from './components/AchievementUnlockModal';
 import StoryChoiceModal from './components/StoryChoiceModal';
@@ -22,6 +23,7 @@ import { useAchievements } from './hooks/useAchievements';
 import { useShop } from './hooks/useShop';
 import { useSeasonChallenge } from './hooks/useSeasonChallenge';
 import { useLetterWorkshop } from './hooks/useLetterWorkshop';
+import { useVisitorCommission } from './hooks/useVisitorCommission';
 
 const PAGES = {
   HOME: 'home',
@@ -36,7 +38,8 @@ const PAGES = {
   STORY_CORRIDOR: 'story-corridor',
   SEASON_CHALLENGE: 'season-challenge',
   SEASON_SETTLEMENT: 'season-settlement',
-  LETTER_WORKSHOP: 'letter-workshop'
+  LETTER_WORKSHOP: 'letter-workshop',
+  VISITOR_COMMISSION: 'visitor-commission'
 };
 
 function App() {
@@ -54,6 +57,7 @@ function App() {
   const shop = useShop();
   const seasonChallenge = useSeasonChallenge(archive, achievements, shop);
   const letterWorkshop = useLetterWorkshop(archive);
+  const visitorCommission = useVisitorCommission(archive, shop);
 
   useEffect(() => {
     const savedProgress = localStorage.getItem('starTowerProgress');
@@ -288,6 +292,14 @@ function App() {
     setCurrentPage(PAGES.HOME);
   };
 
+  const handleOpenVisitorCommission = () => {
+    setCurrentPage(PAGES.VISITOR_COMMISSION);
+  };
+
+  const handleBackFromVisitorCommission = () => {
+    setCurrentPage(PAGES.HOME);
+  };
+
   const handleHomeFromResult = () => {
     achievements.clearNewAchievements();
     handleHome();
@@ -342,6 +354,7 @@ function App() {
           onOpenStoryCorridor={handleOpenStoryCorridor}
           onOpenSeasonChallenge={handleOpenSeasonChallenge}
           onOpenLetterWorkshop={handleOpenLetterWorkshop}
+          onOpenVisitorCommission={handleOpenVisitorCommission}
           unlockedLevel={unlockedLevel}
           highScores={highScores}
           collectedStars={archive.collectedFragments.length}
@@ -349,6 +362,7 @@ function App() {
           shop={shop}
           seasonChallenge={seasonChallenge}
           letterWorkshop={letterWorkshop}
+          visitorCommission={visitorCommission}
         />
       )}
 
@@ -453,6 +467,16 @@ function App() {
           workshop={letterWorkshop}
           archive={archive}
           onBack={handleBackFromLetterWorkshop}
+        />
+      )}
+
+      {currentPage === PAGES.VISITOR_COMMISSION && (
+        <VisitorCommissionPage
+          visitorCommission={visitorCommission}
+          archive={archive}
+          shop={shop}
+          onBack={handleBackFromVisitorCommission}
+          skinTheme={skinTheme}
         />
       )}
 

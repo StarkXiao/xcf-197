@@ -1,6 +1,6 @@
 import { LEVELS, getAchievementStats, CURRENCY_INFO, CURRENCY_TYPES, getCurrentSeason } from '../data/gameData';
 
-const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, onOpenDailyChallenge, onOpenAchievements, onOpenShop, onOpenStoryCorridor, onOpenSeasonChallenge, onOpenLetterWorkshop, unlockedLevel = 1, highScores = {}, collectedStars = 0, achievements, shop, seasonChallenge, letterWorkshop }) => {
+const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, onOpenDailyChallenge, onOpenAchievements, onOpenShop, onOpenStoryCorridor, onOpenSeasonChallenge, onOpenLetterWorkshop, onOpenVisitorCommission, unlockedLevel = 1, highScores = {}, collectedStars = 0, achievements, shop, seasonChallenge, letterWorkshop, visitorCommission }) => {
   const currentSeason = getCurrentSeason();
   const hasUnclaimedRewards = seasonChallenge?.unclaimedStageRewardsCount > 0 || 
                               seasonChallenge?.unclaimedTaskRewardsCount > 0;
@@ -159,6 +159,34 @@ const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, 
             )}
             {letterWorkshop.getWorkshopStats().completedLetters === 0 && (
               <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-xs px-2 py-0.5 rounded-full animate-bounce">
+                NEW
+              </span>
+            )}
+          </button>
+        </div>
+      )}
+
+      {onOpenVisitorCommission && visitorCommission && (
+        <div className="flex flex-col sm:flex-row gap-4 mb-4">
+          <button
+            onClick={onOpenVisitorCommission}
+            className="px-8 py-4 rounded-full font-bold transition-all
+              border-2 border-teal-400/50 text-teal-300 hover:bg-teal-500/10 hover:border-teal-400 hover:shadow-lg hover:shadow-teal-400/30
+              relative overflow-hidden group"
+          >
+            <span className="relative z-10">🏛️ 访客委托</span>
+            {visitorCommission.getOverallStats().metCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-teal-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                {visitorCommission.getOverallStats().metCount}人
+              </span>
+            )}
+            {(visitorCommission.newVisitorNotification || visitorCommission.getAvailableVisitorsCount() > 0) && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full animate-pulse font-bold">
+                NEW
+              </span>
+            )}
+            {visitorCommission.getOverallStats().metCount === 0 && !visitorCommission.newVisitorNotification && (
+              <span className="absolute -top-1 -right-1 bg-teal-500 text-white text-xs px-2 py-0.5 rounded-full animate-bounce">
                 NEW
               </span>
             )}
