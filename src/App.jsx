@@ -473,8 +473,6 @@ function App() {
       {currentPage === PAGES.VISITOR_COMMISSION && (
         <VisitorCommissionPage
           visitorCommission={visitorCommission}
-          archive={archive}
-          shop={shop}
           onBack={handleBackFromVisitorCommission}
           skinTheme={skinTheme}
         />

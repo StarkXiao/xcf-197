@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import CommissionGamePage from './visitorCommission/CommissionGamePage';
 import Modal from '../components/Modal';
-import { getRarityColor, getVisitorById, COMMISSION_EVALUATION_CRITERIA, CURRENCY_INFO, CURRENCY_TYPES, getAffectionLevel, getNextAffectionLevel } from '../data/gameData';
+import { getRarityColor, getVisitorById, COMMISSION_EVALUATION_CRITERIA, CURRENCY_INFO, CURRENCY_TYPES, getAffectionLevel } from '../data/gameData';
 
 const PAGE_VIEWS = {
   VISITOR_LIST: 'visitor-list',
@@ -16,7 +16,7 @@ const DETAIL_TABS = {
   INFO: 'info'
 };
 
-const VisitorCommissionPage = ({ visitorCommission, archive, shop, onBack, skinTheme }) => {
+const VisitorCommissionPage = ({ visitorCommission, onBack, skinTheme }) => {
   const [currentView, setCurrentView] = useState(PAGE_VIEWS.VISITOR_LIST);
   const [selectedVisitorId, setSelectedVisitorId] = useState(null);
   const [activeDetailTab, setActiveDetailTab] = useState(DETAIL_TABS.COMMISSIONS);
@@ -73,7 +73,7 @@ const VisitorCommissionPage = ({ visitorCommission, archive, shop, onBack, skinT
   };
 
   const handleCommissionComplete = (result) => {
-    const finalResult = visitorCommission.completeCommission(activeCommission.id, result);
+    visitorCommission.completeCommission(activeCommission.id, result);
     setActiveCommission(null);
     setActiveCommissionConfig(null);
   };
@@ -101,9 +101,14 @@ const VisitorCommissionPage = ({ visitorCommission, archive, shop, onBack, skinT
   };
 
   const handleCloseResultModal = () => {
+    const hasNewStory = lastCommissionResult?.unlockedStories?.length > 0;
     setShowResultModal(false);
     setLastCommissionResult(null);
     visitorCommission.clearActiveCommissionResult();
+    setActiveCommission(null);
+    setActiveCommissionConfig(null);
+    setCurrentView(PAGE_VIEWS.VISITOR_DETAIL);
+    setActiveDetailTab(hasNewStory ? DETAIL_TABS.STORY : DETAIL_TABS.INFO);
   };
 
   const handleCloseNewVisitorModal = () => {
