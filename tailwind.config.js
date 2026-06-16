@@ -13,6 +13,7 @@ export default {
         'star-gold': '#ffd700',
         'star-pink': '#ff6b9d',
         'star-cyan': '#00d4ff',
+        'star-orange': '#f97316',
       },
       fontFamily: {
         'fantasy': ['Georgia', 'serif'],

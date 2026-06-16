@@ -7,12 +7,14 @@ import StarAlbumPage from './pages/StarAlbumPage';
 import DailyChallengePage from './pages/DailyChallengePage';
 import DailyChallengeGamePage from './pages/DailyChallengeGamePage';
 import AchievementWallPage from './pages/AchievementWallPage';
+import DivinationShopPage from './pages/DivinationShopPage';
 import StarryBackground from './components/StarryBackground';
 import AchievementUnlockModal from './components/AchievementUnlockModal';
 import { LEVELS, getLevelById } from './data/gameData';
 import { useArchive } from './hooks/useArchive';
 import { useDailyChallenge } from './hooks/useDailyChallenge';
 import { useAchievements } from './hooks/useAchievements';
+import { useShop } from './hooks/useShop';
 
 const PAGES = {
   HOME: 'home',
@@ -22,7 +24,8 @@ const PAGES = {
   STAR_ALBUM: 'star-album',
   DAILY_CHALLENGE: 'daily-challenge',
   DAILY_CHALLENGE_GAME: 'daily-challenge-game',
-  ACHIEVEMENT: 'achievement'
+  ACHIEVEMENT: 'achievement',
+  SHOP: 'shop'
 };
 
 function App() {
@@ -35,6 +38,7 @@ function App() {
   const archive = useArchive();
   const dailyChallenge = useDailyChallenge();
   const achievements = useAchievements(archive);
+  const shop = useShop();
 
   useEffect(() => {
     const savedProgress = localStorage.getItem('starTowerProgress');
@@ -193,6 +197,18 @@ function App() {
     achievements.closeModal();
   };
 
+  const handleOpenShop = () => {
+    setCurrentPage(PAGES.SHOP);
+  };
+
+  const handleBackFromShop = () => {
+    setCurrentPage(PAGES.HOME);
+  };
+
+  const handleStartGameFromShop = () => {
+    setCurrentPage(PAGES.HOME);
+  };
+
   const handleHomeFromResult = () => {
     achievements.clearNewAchievements();
     handleHome();
@@ -222,10 +238,12 @@ function App() {
           onOpenStarAlbum={handleOpenStarAlbum}
           onOpenDailyChallenge={handleOpenDailyChallenge}
           onOpenAchievements={handleOpenAchievements}
+          onOpenShop={handleOpenShop}
           unlockedLevel={unlockedLevel}
           highScores={highScores}
           collectedStars={archive.collectedFragments.length}
           achievements={achievements}
+          shop={shop}
         />
       )}
 
@@ -236,6 +254,7 @@ function App() {
           onBack={handleBack}
           onWin={handleWin}
           onLose={handleLose}
+          shop={shop}
         />
       )}
 
@@ -287,6 +306,14 @@ function App() {
         <AchievementWallPage
           achievements={achievements}
           onBack={handleBackFromAchievements}
+        />
+      )}
+
+      {currentPage === PAGES.SHOP && (
+        <DivinationShopPage
+          shop={shop}
+          onBack={handleBackFromShop}
+          onStartGame={handleStartGameFromShop}
         />
       )}
 

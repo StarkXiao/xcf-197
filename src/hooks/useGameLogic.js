@@ -1,13 +1,17 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getStarById } from '../data/gameData';
 
-export const useGameLogic = (level) => {
+export const useGameLogic = (level, options = {}) => {
   const [cards, setCards] = useState([]);
   const [flippedCards, setFlippedCards] = useState([]);
   const [matchedPairs, setMatchedPairs] = useState([]);
   const [moves, setMoves] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [gameStatus, setGameStatus] = useState('idle');
+  const [hintCards, setHintCards] = useState([]);
+  const [mistakeProtected, setMistakeProtected] = useState(false);
+
+  const initializedRef = useRef(false);
 
   const initializeCards = useCallback(() => {
     if (!level) return;
@@ -15,19 +19,37 @@ export const useGameLogic = (level) => {
     const cardPairs = level.stars.map(starId => {
       const star = getStarById(starId);
       return [
-        { id: `${starId}-a`, starId, star, isFlipped: false, isMatched: false },
-        { id: `${starId}-b`, starId, star, isFlipped: false, isMatched: false }
+        { id: `${starId}-a`, starId, star, isFlipped: false, isMatched: false, isHinted: false },
+        { id: `${starId}-b`, starId, star, isFlipped: false, isMatched: false, isHinted: false }
       ];
     }).flat();
 
-    const shuffled = shuffleArray(cardPairs);
+    let shuffled = shuffleArray(cardPairs);
+    
+    if (options.perfectStart && !initializedRef.current) {
+      initializedRef.current = true;
+      const firstStarId = shuffled[0]?.starId;
+      if (firstStarId) {
+        shuffled = shuffled.map(card => ({
+          ...card,
+          isMatched: card.starId === firstStarId,
+          isFlipped: card.starId === firstStarId
+        }));
+        setMatchedPairs([firstStarId]);
+      }
+    }
+
     setCards(shuffled);
     setFlippedCards([]);
-    setMatchedPairs([]);
+    if (!options.perfectStart || initializedRef.current) {
+      setMatchedPairs([]);
+    }
     setMoves(0);
     setIsLocked(false);
     setGameStatus('idle');
-  }, [level]);
+    setHintCards([]);
+    setMistakeProtected(false);
+  }, [level, options.perfectStart]);
 
   useEffect(() => {
     if (level) {
@@ -44,16 +66,19 @@ export const useGameLogic = (level) => {
     return shuffled;
   };
 
-  const flipCard = useCallback((cardId) => {
-    if (isLocked) return;
-    if (gameStatus !== 'playing' && gameStatus !== 'idle') return;
+  const flipCard = useCallback((cardId, { useMistakeProtect = false } = {}) => {
+    if (isLocked) return { matched: false, mistakeProtected: false };
+    if (gameStatus !== 'playing' && gameStatus !== 'idle') return { matched: false, mistakeProtected: false };
 
     const card = cards.find(c => c.id === cardId);
-    if (!card || card.isFlipped || card.isMatched) return;
+    if (!card || card.isFlipped || card.isMatched) return { matched: false, mistakeProtected: false };
 
     if (gameStatus === 'idle') {
       setGameStatus('playing');
     }
+
+    setHintCards([]);
+    setCards(prev => prev.map(c => ({ ...c, isHinted: false })));
 
     const newFlipped = [...flippedCards, cardId];
     setFlippedCards(newFlipped);
@@ -79,17 +104,61 @@ export const useGameLogic = (level) => {
           setFlippedCards([]);
           setIsLocked(false);
         }, 500);
+        return { matched: true, mistakeProtected: false };
       } else {
-        setTimeout(() => {
-          setCards(prev => prev.map(c =>
-            newFlipped.includes(c.id) ? { ...c, isFlipped: false } : c
-          ));
-          setFlippedCards([]);
-          setIsLocked(false);
-        }, 1000);
+        const shouldProtect = useMistakeProtect && options.hasMistakeProtect;
+        
+        if (shouldProtect) {
+          setMistakeProtected(true);
+          setTimeout(() => {
+            setCards(prev => prev.map(c =>
+              newFlipped.includes(c.id) ? { ...c, isFlipped: false } : c
+            ));
+            setFlippedCards([]);
+            setIsLocked(false);
+            setMistakeProtected(false);
+          }, 1000);
+          return { matched: false, mistakeProtected: true };
+        } else {
+          setTimeout(() => {
+            setCards(prev => prev.map(c =>
+              newFlipped.includes(c.id) ? { ...c, isFlipped: false } : c
+            ));
+            setFlippedCards([]);
+            setIsLocked(false);
+          }, 1000);
+          return { matched: false, mistakeProtected: false };
+        }
       }
     }
-  }, [cards, flippedCards, isLocked, gameStatus]);
+    return { matched: false, mistakeProtected: false };
+  }, [cards, flippedCards, isLocked, gameStatus, options.hasMistakeProtect]);
+
+  const showHint = useCallback(() => {
+    const unmatchedCards = cards.filter(c => !c.isMatched && !c.isFlipped);
+    if (unmatchedCards.length < 2) return null;
+
+    const firstUnmatched = unmatchedCards[0];
+    const pairCard = unmatchedCards.find(c => 
+      c.starId === firstUnmatched.starId && c.id !== firstUnmatched.id
+    );
+
+    if (!pairCard) return null;
+
+    const hintPair = [firstUnmatched.id, pairCard.id];
+    setHintCards(hintPair);
+    setCards(prev => prev.map(c => ({
+      ...c,
+      isHinted: hintPair.includes(c.id)
+    })));
+
+    setTimeout(() => {
+      setHintCards([]);
+      setCards(prev => prev.map(c => ({ ...c, isHinted: false })));
+    }, 3000);
+
+    return hintPair;
+  }, [cards]);
 
   useEffect(() => {
     if (level && matchedPairs.length === level.pairs && gameStatus === 'playing') {
@@ -98,6 +167,7 @@ export const useGameLogic = (level) => {
   }, [matchedPairs, level, gameStatus]);
 
   const resetGame = useCallback(() => {
+    initializedRef.current = false;
     initializeCards();
   }, [initializeCards]);
 
@@ -110,6 +180,9 @@ export const useGameLogic = (level) => {
     isLocked,
     flipCard,
     resetGame,
-    setGameStatus
+    setGameStatus,
+    showHint,
+    hintCards,
+    mistakeProtected
   };
 };

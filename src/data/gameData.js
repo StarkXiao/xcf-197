@@ -1052,3 +1052,372 @@ export const getAchievementStats = (unlockedAchievements = []) => {
     totalPoints: getTotalAchievementPoints(unlockedAchievements)
   };
 };
+
+export const CURRENCY_TYPES = {
+  STARDUST: 'stardust',
+  STAR_SHARD: 'starShard'
+};
+
+export const CURRENCY_INFO = {
+  [CURRENCY_TYPES.STARDUST]: {
+    name: '星尘',
+    icon: '✨',
+    color: '#60a5fa',
+    description: '通过完成关卡和每日挑战获得的普通货币'
+  },
+  [CURRENCY_TYPES.STAR_SHARD]: {
+    name: '星光碎片',
+    icon: '💎',
+    color: '#a855f7',
+    description: '稀有的高级货币，可通过排行奖励和特殊成就获得'
+  }
+};
+
+export const ITEM_EFFECT_TYPES = {
+  TIME_EXTEND: 'timeExtend',
+  HINT: 'hint',
+  SCORE_BOOST: 'scoreBoost',
+  MISTAKE_PROTECT: 'mistakeProtect',
+  COMBO_BOOST: 'comboBoost',
+  PERFECT_START: 'perfectStart',
+  DOUBLE_REWARD: 'doubleReward'
+};
+
+export const ITEM_EFFECT_INFO = {
+  [ITEM_EFFECT_TYPES.TIME_EXTEND]: {
+    name: '时间延长',
+    icon: '⏱️',
+    description: '增加关卡时间限制',
+    color: '#10b981'
+  },
+  [ITEM_EFFECT_TYPES.HINT]: {
+    name: '占卜提示',
+    icon: '💡',
+    description: '显示一对匹配的卡牌位置',
+    color: '#fbbf24'
+  },
+  [ITEM_EFFECT_TYPES.SCORE_BOOST]: {
+    name: '分数加成',
+    icon: '📈',
+    description: '基础分数获得百分比加成',
+    color: '#ec4899'
+  },
+  [ITEM_EFFECT_TYPES.MISTAKE_PROTECT]: {
+    name: '防错护符',
+    icon: '🛡️',
+    description: '抵消一次配对错误，不中断连击',
+    color: '#8b5cf6'
+  },
+  [ITEM_EFFECT_TYPES.COMBO_BOOST]: {
+    name: '连击加成',
+    icon: '⚡',
+    description: '连击分数倍率提升',
+    color: '#f97316'
+  },
+  [ITEM_EFFECT_TYPES.PERFECT_START]: {
+    name: '完美开局',
+    icon: '🌟',
+    description: '游戏开始时自动配对一对卡牌',
+    color: '#06b6d4'
+  },
+  [ITEM_EFFECT_TYPES.DOUBLE_REWARD]: {
+    name: '双倍奖励',
+    icon: '🎁',
+    description: '通关后获得双倍星尘奖励',
+    color: '#14b8a6'
+  }
+};
+
+export const SHOP_ITEMS = [
+  {
+    id: 'item-time-30',
+    name: '时间沙漏·小',
+    icon: '⏳',
+    description: '使用后增加30秒关卡时间',
+    effectType: ITEM_EFFECT_TYPES.TIME_EXTEND,
+    effectValue: 30,
+    rarity: 'common',
+    currency: CURRENCY_TYPES.STARDUST,
+    price: 200,
+    category: 'consumable',
+    isLimited: false,
+    dailyLimit: null,
+    stackable: true,
+    maxStack: 99
+  },
+  {
+    id: 'item-time-60',
+    name: '时间沙漏·大',
+    icon: '⌛',
+    description: '使用后增加60秒关卡时间',
+    effectType: ITEM_EFFECT_TYPES.TIME_EXTEND,
+    effectValue: 60,
+    rarity: 'rare',
+    currency: CURRENCY_TYPES.STARDUST,
+    price: 500,
+    category: 'consumable',
+    isLimited: false,
+    dailyLimit: null,
+    stackable: true,
+    maxStack: 99
+  },
+  {
+    id: 'item-hint-1',
+    name: '占卜提示',
+    icon: '💡',
+    description: '显示一对匹配的卡牌位置，每局限用3次',
+    effectType: ITEM_EFFECT_TYPES.HINT,
+    effectValue: 1,
+    rarity: 'common',
+    currency: CURRENCY_TYPES.STARDUST,
+    price: 150,
+    category: 'consumable',
+    isLimited: false,
+    dailyLimit: null,
+    stackable: true,
+    maxStack: 99
+  },
+  {
+    id: 'item-hint-5',
+    name: '提示礼包',
+    icon: '🎐',
+    description: '包含5个占卜提示',
+    effectType: ITEM_EFFECT_TYPES.HINT,
+    effectValue: 5,
+    rarity: 'rare',
+    currency: CURRENCY_TYPES.STARDUST,
+    price: 600,
+    category: 'consumable',
+    isLimited: false,
+    dailyLimit: null,
+    stackable: true,
+    maxStack: 99
+  },
+  {
+    id: 'item-score-20',
+    name: '星光护符',
+    icon: '⭐',
+    description: '本局所有分数增加20%',
+    effectType: ITEM_EFFECT_TYPES.SCORE_BOOST,
+    effectValue: 0.2,
+    rarity: 'rare',
+    currency: CURRENCY_TYPES.STARDUST,
+    price: 300,
+    category: 'consumable',
+    isLimited: false,
+    dailyLimit: null,
+    stackable: true,
+    maxStack: 99
+  },
+  {
+    id: 'item-score-50',
+    name: '星辉护符',
+    icon: '🌟',
+    description: '本局所有分数增加50%',
+    effectType: ITEM_EFFECT_TYPES.SCORE_BOOST,
+    effectValue: 0.5,
+    rarity: 'epic',
+    currency: CURRENCY_TYPES.STAR_SHARD,
+    price: 5,
+    category: 'consumable',
+    isLimited: true,
+    dailyLimit: 3,
+    stackable: true,
+    maxStack: 99
+  },
+  {
+    id: 'item-protect-1',
+    name: '防错护符',
+    icon: '🛡️',
+    description: '抵消一次配对错误，不中断连击计数',
+    effectType: ITEM_EFFECT_TYPES.MISTAKE_PROTECT,
+    effectValue: 1,
+    rarity: 'rare',
+    currency: CURRENCY_TYPES.STARDUST,
+    price: 400,
+    category: 'consumable',
+    isLimited: false,
+    dailyLimit: null,
+    stackable: true,
+    maxStack: 99
+  },
+  {
+    id: 'item-protect-3',
+    name: '守护礼包',
+    icon: '🔰',
+    description: '包含3个防错护符',
+    effectType: ITEM_EFFECT_TYPES.MISTAKE_PROTECT,
+    effectValue: 3,
+    rarity: 'epic',
+    currency: CURRENCY_TYPES.STARDUST,
+    price: 1000,
+    category: 'consumable',
+    isLimited: false,
+    dailyLimit: null,
+    stackable: true,
+    maxStack: 99
+  },
+  {
+    id: 'item-combo-2',
+    name: '连击符文',
+    icon: '⚡',
+    description: '连击分数倍率提升2倍',
+    effectType: ITEM_EFFECT_TYPES.COMBO_BOOST,
+    effectValue: 2,
+    rarity: 'epic',
+    currency: CURRENCY_TYPES.STAR_SHARD,
+    price: 8,
+    category: 'consumable',
+    isLimited: true,
+    dailyLimit: 5,
+    stackable: true,
+    maxStack: 99
+  },
+  {
+    id: 'item-combo-3',
+    name: '雷霆符文',
+    icon: '🔥',
+    description: '连击分数倍率提升3倍',
+    effectType: ITEM_EFFECT_TYPES.COMBO_BOOST,
+    effectValue: 3,
+    rarity: 'legendary',
+    currency: CURRENCY_TYPES.STAR_SHARD,
+    price: 15,
+    category: 'consumable',
+    isLimited: true,
+    dailyLimit: 2,
+    stackable: true,
+    maxStack: 99
+  },
+  {
+    id: 'item-perfect-start',
+    name: '完美开局',
+    icon: '🎯',
+    description: '游戏开始时自动配对一对卡牌',
+    effectType: ITEM_EFFECT_TYPES.PERFECT_START,
+    effectValue: 1,
+    rarity: 'epic',
+    currency: CURRENCY_TYPES.STAR_SHARD,
+    price: 10,
+    category: 'consumable',
+    isLimited: true,
+    dailyLimit: 3,
+    stackable: true,
+    maxStack: 99
+  },
+  {
+    id: 'item-double-reward',
+    name: '双倍星尘',
+    icon: '🎁',
+    description: '通关后获得的星尘奖励翻倍',
+    effectType: ITEM_EFFECT_TYPES.DOUBLE_REWARD,
+    effectValue: 2,
+    rarity: 'epic',
+    currency: CURRENCY_TYPES.STAR_SHARD,
+    price: 12,
+    category: 'consumable',
+    isLimited: true,
+    dailyLimit: 2,
+    stackable: true,
+    maxStack: 99
+  }
+];
+
+export const DAILY_ROTATION_ITEMS = [
+  'item-score-50',
+  'item-combo-2',
+  'item-combo-3',
+  'item-perfect-start',
+  'item-double-reward'
+];
+
+export const SHOP_CATEGORIES = [
+  {
+    id: 'all',
+    name: '全部',
+    icon: '🏪',
+    description: '查看所有商品'
+  },
+  {
+    id: 'consumable',
+    name: '消耗品',
+    icon: '🎒',
+    description: '对局中使用的道具'
+  },
+  {
+    id: 'limited',
+    name: '限时',
+    icon: '⏰',
+    description: '每日刷新的稀有商品'
+  }
+];
+
+export const SHOP_TIPS = [
+  '💡 道具可以在对局开始前选择使用',
+  '⏰ 限时商品每日0点刷新，不要错过哦',
+  '🎁 每日挑战可以获得大量星尘',
+  '💎 星光碎片可以通过排行榜和特殊成就获取',
+  '⚡ 合理使用道具可以大幅提升通关效率'
+];
+
+export const STARDUST_REWARDS = {
+  levelComplete: {
+    1: 50,
+    2: 80,
+    3: 120,
+    4: 180,
+    5: 250
+  },
+  starBonus: {
+    1: 0,
+    2: 20,
+    3: 50
+  },
+  dailyChallenge: 200
+};
+
+export const getShopItemById = (id) => {
+  return SHOP_ITEMS.find(item => item.id === id);
+};
+
+export const getShopItemsByCategory = (category) => {
+  if (category === 'all') return SHOP_ITEMS;
+  if (category === 'limited') return SHOP_ITEMS.filter(item => item.isLimited);
+  return SHOP_ITEMS.filter(item => item.category === category);
+};
+
+export const getCurrencyInfo = (type) => {
+  return CURRENCY_INFO[type] || null;
+};
+
+export const getItemEffectInfo = (type) => {
+  return ITEM_EFFECT_INFO[type] || null;
+};
+
+export const getStardustReward = (levelId, stars) => {
+  const baseReward = STARDUST_REWARDS.levelComplete[levelId] || 50;
+  const starBonus = STARDUST_REWARDS.starBonus[stars] || 0;
+  return baseReward + starBonus;
+};
+
+export const generateDailyShopItems = (dateStr) => {
+  const seed = dateStr.split('-').reduce((acc, val) => acc + parseInt(val), 0);
+  const seededRandom = (s) => {
+    const x = Math.sin(s) * 10000;
+    return x - Math.floor(x);
+  };
+  
+  const limitedItems = SHOP_ITEMS.filter(item => item.isLimited);
+  const shuffled = [...limitedItems];
+  
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(seededRandom(seed + i) * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  
+  return shuffled.slice(0, 3).map(item => ({
+    ...item,
+    discount: seededRandom(seed + item.id.length) > 0.5 ? 0.2 : 0,
+    flashSale: seededRandom(seed + item.id.length * 2) > 0.7
+  }));
+};

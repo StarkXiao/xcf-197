@@ -1,9 +1,30 @@
-import { LEVELS, getAchievementStats } from '../data/gameData';
+import { LEVELS, getAchievementStats, CURRENCY_INFO, CURRENCY_TYPES } from '../data/gameData';
 
-const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, onOpenDailyChallenge, onOpenAchievements, unlockedLevel = 1, highScores = {}, collectedStars = 0, achievements }) => {
+const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, onOpenDailyChallenge, onOpenAchievements, onOpenShop, unlockedLevel = 1, highScores = {}, collectedStars = 0, achievements, shop }) => {
   const achievementStats = achievements ? getAchievementStats(achievements.unlockedAchievements) : null;
   return (
     <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-8">
+      {shop && (
+        <div className="absolute top-4 right-4 flex gap-3">
+          <div className="flex items-center gap-1 px-3 py-1.5 bg-blue-500/20 rounded-full border border-blue-500/30">
+            <span style={{ color: CURRENCY_INFO[CURRENCY_TYPES.STARDUST]?.color }}>
+              {CURRENCY_INFO[CURRENCY_TYPES.STARDUST]?.icon}
+            </span>
+            <span className="text-sm font-bold text-blue-400">
+              {shop.stardust.toLocaleString()}
+            </span>
+          </div>
+          <div className="flex items-center gap-1 px-3 py-1.5 bg-purple-500/20 rounded-full border border-purple-500/30">
+            <span style={{ color: CURRENCY_INFO[CURRENCY_TYPES.STAR_SHARD]?.color }}>
+              {CURRENCY_INFO[CURRENCY_TYPES.STAR_SHARD]?.icon}
+            </span>
+            <span className="text-sm font-bold text-purple-400">
+              {shop.starShards.toLocaleString()}
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="text-center mb-12">
         <div className="text-6xl mb-4 animate-float">🌟</div>
         <h1 className="text-4xl md:text-5xl font-bold text-star-gold mb-4 glow-text">
@@ -48,7 +69,7 @@ const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, 
         </button>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 mb-10">
+      <div className="flex flex-col sm:flex-row gap-4 mb-4">
         <button
           onClick={onOpenStarAlbum}
           className="px-8 py-4 rounded-full font-bold transition-all
@@ -63,6 +84,22 @@ const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, 
           )}
         </button>
       </div>
+
+      {onOpenShop && (
+        <div className="flex flex-col sm:flex-row gap-4 mb-10">
+          <button
+            onClick={onOpenShop}
+            className="px-8 py-4 rounded-full font-bold transition-all
+              border-2 border-star-orange/50 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 hover:shadow-lg hover:shadow-orange-500/30
+              relative overflow-hidden group"
+          >
+            <span className="relative z-10">🏪 占卜商店</span>
+            <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full animate-bounce">
+              NEW
+            </span>
+          </button>
+        </div>
+      )}
 
       {onOpenAchievements && (
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
