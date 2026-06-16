@@ -1,6 +1,6 @@
 import { LEVELS, getAchievementStats, CURRENCY_INFO, CURRENCY_TYPES } from '../data/gameData';
 
-const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, onOpenDailyChallenge, onOpenAchievements, onOpenShop, unlockedLevel = 1, highScores = {}, collectedStars = 0, achievements, shop }) => {
+const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, onOpenDailyChallenge, onOpenAchievements, onOpenShop, onOpenStoryCorridor, unlockedLevel = 1, highScores = {}, collectedStars = 0, achievements, shop }) => {
   const achievementStats = achievements ? getAchievementStats(achievements.unlockedAchievements) : null;
   return (
     <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-8">
@@ -102,7 +102,7 @@ const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, 
       )}
 
       {onOpenAchievements && (
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row gap-4 mb-4">
           <button
             onClick={onOpenAchievements}
             className="px-8 py-4 rounded-full font-bold transition-all
@@ -120,6 +120,22 @@ const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, 
                 NEW
               </span>
             )}
+          </button>
+        </div>
+      )}
+
+      {onOpenStoryCorridor && (
+        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+          <button
+            onClick={onOpenStoryCorridor}
+            className="px-8 py-4 rounded-full font-bold transition-all
+              border-2 border-amber-400/50 text-amber-300 hover:bg-amber-500/10 hover:border-amber-400 hover:shadow-lg hover:shadow-amber-400/30
+              relative overflow-hidden group"
+          >
+            <span className="relative z-10">🎭 剧情回廊</span>
+            <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full animate-bounce">
+              NEW
+            </span>
           </button>
         </div>
       )}

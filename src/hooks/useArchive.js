@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { STAR_PATTERNS, LEVELS, HIDDEN_ENDINGS, REWARDS } from '../data/gameData';
+import { STAR_PATTERNS, LEVELS, HIDDEN_ENDINGS, REWARDS, STORY_BRANCHES, CHARACTER_RELATIONS, getPlayerType, getCharacterByStarId, getRelationLevel } from '../data/gameData';
 
 const getThreeStarCount = (chapterStars) => {
   return Object.values(chapterStars).filter(stars => stars >= 3).length;
@@ -16,6 +16,10 @@ export const useArchive = () => {
   const [maxCombo, setMaxCombo] = useState(0);
   const [letterProgress, setLetterProgress] = useState(0);
   const [fastLevelCount, setFastLevelCount] = useState(0);
+  const [storyChoices, setStoryChoices] = useState({});
+  const [characterAffection, setCharacterAffection] = useState({});
+  const [unlockedStoryBranches, setUnlockedStoryBranches] = useState([]);
+  const [unlockedCharacterStories, setUnlockedCharacterStories] = useState([]);
 
   const stateRef = useRef({});
 
@@ -34,6 +38,10 @@ export const useArchive = () => {
         setMaxCombo(data.maxCombo || 0);
         setLetterProgress(data.letterProgress || 0);
         setFastLevelCount(data.fastLevelCount || 0);
+        setStoryChoices(data.storyChoices || {});
+        setCharacterAffection(data.characterAffection || {});
+        setUnlockedStoryBranches(data.unlockedStoryBranches || []);
+        setUnlockedCharacterStories(data.unlockedCharacterStories || []);
       } catch (e) {
         console.error('Failed to load archive:', e);
       }
@@ -51,7 +59,11 @@ export const useArchive = () => {
       totalPlayTime,
       maxCombo,
       letterProgress,
-      fastLevelCount
+      fastLevelCount,
+      storyChoices,
+      characterAffection,
+      unlockedStoryBranches,
+      unlockedCharacterStories
     };
   });
 
@@ -67,7 +79,11 @@ export const useArchive = () => {
       totalPlayTime: data.totalPlayTime !== undefined ? data.totalPlayTime : s.totalPlayTime,
       maxCombo: data.maxCombo !== undefined ? data.maxCombo : s.maxCombo,
       letterProgress: data.letterProgress !== undefined ? data.letterProgress : s.letterProgress,
-      fastLevelCount: data.fastLevelCount !== undefined ? data.fastLevelCount : s.fastLevelCount
+      fastLevelCount: data.fastLevelCount !== undefined ? data.fastLevelCount : s.fastLevelCount,
+      storyChoices: data.storyChoices !== undefined ? data.storyChoices : s.storyChoices,
+      characterAffection: data.characterAffection !== undefined ? data.characterAffection : s.characterAffection,
+      unlockedStoryBranches: data.unlockedStoryBranches !== undefined ? data.unlockedStoryBranches : s.unlockedStoryBranches,
+      unlockedCharacterStories: data.unlockedCharacterStories !== undefined ? data.unlockedCharacterStories : s.unlockedCharacterStories
     };
     localStorage.setItem('starTowerArchive', JSON.stringify(archiveData));
   }, []);
@@ -347,7 +363,114 @@ export const useArchive = () => {
     setMaxCombo(0);
     setLetterProgress(0);
     setFastLevelCount(0);
+    setStoryChoices({});
+    setCharacterAffection({});
+    setUnlockedStoryBranches([]);
+    setUnlockedCharacterStories([]);
     localStorage.removeItem('starTowerArchive');
+  };
+
+  const makeStoryChoice = useCallback((choicePointId, optionId) => {
+    const newChoices = { ...storyChoices, [choicePointId]: optionId };
+    setStoryChoices(newChoices);
+    saveArchive({ storyChoices: newChoices });
+
+    let branch = null;
+    STORY_BRANCHES.forEach(b => {
+      if (b.choicePoint.id === choicePointId) {
+        branch = b;
+      }
+    });
+
+    if (branch) {
+      const option = branch.choicePoint.options.find(o => o.id === optionId);
+      if (option) {
+        const newAffection = { ...characterAffection };
+        Object.entries(option.affectionChanges).forEach(([starId, value]) => {
+          newAffection[starId] = (newAffection[starId] || 0) + value;
+        });
+        setCharacterAffection(newAffection);
+        saveArchive({ characterAffection: newAffection });
+
+        const newUnlockedBranches = [...unlockedStoryBranches];
+        if (!newUnlockedBranches.includes(optionId)) {
+          newUnlockedBranches.push(optionId);
+          setUnlockedStoryBranches(newUnlockedBranches);
+          saveArchive({ unlockedStoryBranches: newUnlockedBranches });
+        }
+
+        const newCharStories = [...unlockedCharacterStories];
+        Object.keys(option.affectionChanges).forEach(starId => {
+          const char = getCharacterByStarId(starId);
+          if (char) {
+            const affection = newAffection[starId] || 0;
+            char.stories.forEach(story => {
+              const storyKey = `${starId}-${story.affection}`;
+              if (affection >= story.affection && !newCharStories.includes(storyKey)) {
+                newCharStories.push(storyKey);
+              }
+            });
+          }
+        });
+        setUnlockedCharacterStories(newCharStories);
+        saveArchive({ unlockedCharacterStories: newCharStories });
+      }
+    }
+
+    return newChoices;
+  }, [storyChoices, characterAffection, unlockedStoryBranches, unlockedCharacterStories, saveArchive]);
+
+  const getStoryChoicesList = () => {
+    return STORY_BRANCHES.map(branch => {
+      const chosenOptionId = storyChoices[branch.choicePoint.id] || null;
+      const chosenOption = branch.choicePoint.options.find(o => o.id === chosenOptionId) || null;
+      const unchosenOption = branch.choicePoint.options.find(o => o.id !== chosenOptionId) || null;
+      return {
+        ...branch,
+        chosenOptionId,
+        chosenOption,
+        unchosenOption,
+        isChosen: !!chosenOptionId,
+        branchContent: chosenOptionId ? branch.branches[chosenOptionId] : null
+      };
+    });
+  };
+
+  const getCharacterRelationsWithStatus = () => {
+    return CHARACTER_RELATIONS.map(char => {
+      const affection = characterAffection[char.starId] || 0;
+      const relationLevel = getRelationLevel(affection);
+      const unlockedStories = char.stories
+        .filter(story => {
+          const key = `${char.starId}-${story.affection}`;
+          return unlockedCharacterStories.includes(key);
+        })
+        .map(story => ({
+          ...story,
+          unlocked: affection >= story.affection
+        }));
+
+      return {
+        ...char,
+        affection,
+        relationLevel,
+        unlockedStories,
+        nextStoryAffection: char.stories.find(s => s.affection > affection)?.affection || null
+      };
+    });
+  };
+
+  const getPlayerTypeInfo = () => {
+    const choiceIds = Object.values(storyChoices);
+    return getPlayerType(choiceIds);
+  };
+
+  const getChoiceCount = () => {
+    return Object.keys(storyChoices).length;
+  };
+
+  const isStoryCorridorUnlocked = () => {
+    return unlockedChapters.length >= 1;
   };
 
   const initializedRef = useRef(false);
@@ -372,6 +495,10 @@ export const useArchive = () => {
     maxCombo,
     letterProgress,
     fastLevelCount,
+    storyChoices,
+    characterAffection,
+    unlockedStoryBranches,
+    unlockedCharacterStories,
     checkStarUnlockConditions,
     collectFragmentsFromLevel,
     unlockChapter,
@@ -388,6 +515,12 @@ export const useArchive = () => {
     getLetterProgressPercent,
     checkEndingConditions,
     checkRewardConditions,
+    makeStoryChoice,
+    getStoryChoicesList,
+    getCharacterRelationsWithStatus,
+    getPlayerTypeInfo,
+    getChoiceCount,
+    isStoryCorridorUnlocked,
     resetArchive
   };
 };

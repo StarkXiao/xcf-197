@@ -1421,3 +1421,514 @@ export const generateDailyShopItems = (dateStr) => {
     flashSale: seededRandom(seed + item.id.length * 2) > 0.7
   }));
 };
+
+export const RELATION_LEVELS = [
+  { level: 0, name: '初识', minAffection: 0, color: '#9ca3af', icon: '⚪' },
+  { level: 1, name: '熟悉', minAffection: 5, color: '#3b82f6', icon: '🔵' },
+  { level: 2, name: '信任', minAffection: 15, color: '#a855f7', icon: '🟣' },
+  { level: 3, name: '羁绊', minAffection: 30, color: '#f97316', icon: '🟠' },
+  { level: 4, name: '永恒', minAffection: 50, color: '#fbbf24', icon: '🌟' }
+];
+
+export const CHARACTER_RELATIONS = [
+  {
+    starId: 'star-1',
+    name: '北极星守护者',
+    title: '永恒引路人',
+    personality: '沉稳温柔',
+    backstory: '北极星守护者是星塔最古老的守护灵，千年来默默指引迷途者找到归途。她的光芒从不炽烈，却永远坚定。',
+    stories: [
+      { affection: 0, title: '星光初现', content: '你在星塔底层感受到了一道温柔的目光。北极星守护者从星光中显现，微微点头："你终于来了。"' },
+      { affection: 5, title: '夜路同行', content: '北极星守护者在你身边亮起微光。"不必害怕黑暗，我永远在这里。"她的声音如同深夜的低语，温暖而坚定。' },
+      { affection: 15, title: '星辰誓言', content: '"我曾立下誓言，守护每一个追寻星光的人。"她将一缕星光放在你的掌心，"而你，是最特别的那一个。"' },
+      { affection: 30, title: '永恒守望', content: '北极星守护者握住你的手，星光照亮了整座星塔。"无论你走多远，我的光芒都会为你指引方向。这是永恒的承诺。"' },
+      { affection: 50, title: '命运交汇', content: '星光汇聚成一条闪耀的河流，将你与她紧紧相连。"千年等待，只为与你相遇。从此以后，我们便是彼此的永恒。"' }
+    ]
+  },
+  {
+    starId: 'star-2',
+    name: '猎户座守护者',
+    title: '勇敢猎手',
+    personality: '豪爽正义',
+    backstory: '猎户座守护者曾是星界最勇猛的猎手，为保护心爱之人化为星座。他的腰间三星永远闪烁，象征不变的誓言。',
+    stories: [
+      { affection: 0, title: '猎手现身', content: '一个魁梧的身影从星光中走出，肩扛弓箭，腰悬三星。"旅人，星塔可不是闲逛的地方。"' },
+      { affection: 5, title: '并肩作战', content: '猎户座守护者挡在你身前，拉弓射出一道星光。"别怕，有我在，什么暗影都伤不了你。"' },
+      { affection: 15, title: '守护之心', content: '"我化为星座，不是为了战斗，是为了守护。"他放下弓箭，认真地看着你，"现在，我也想守护你。"' },
+      { affection: 30, title: '三星誓言', content: '他将腰间的三颗明星取下一颗递给你。"这是我的誓言，比任何言语都沉重。从今以后，我为你而战。"' },
+      { affection: 50, title: '猎手归处', content: '"我追逐了一辈子的猎物，没想到最终的归宿是守护一个人。"他微笑着将你护在身后，"这就是命运的安排吧。"' }
+    ]
+  },
+  {
+    starId: 'star-3',
+    name: '北斗七星守护者',
+    title: '七贤之首',
+    personality: '睿智深邃',
+    backstory: '北斗七星守护者是七位贤者的合灵，代表着至高的智慧。它以七星为勺，舀起命运的甘露，指引迷津。',
+    stories: [
+      { affection: 0, title: '贤者低语', content: '七个声音同时响起，却又如一人般和谐。"求知者，你来寻找什么？"' },
+      { affection: 5, title: '智慧之光', content: '"真正的力量不在于战斗，而在于理解。"北斗守护者展开星图，"让我教你读懂星语。"' },
+      { affection: 15, title: '命运之勺', content: '"我们能看见命运的走向，但无法替你做选择。"七贤之声渐轻，"不过，我们会一直陪着你。"' },
+      { affection: 30, title: '七星共鸣', content: '七星同时闪烁，在你的意识中响起七个音符合一的旋律。"你已获得我们的认可，从此智慧与你同行。"' },
+      { affection: 50, title: '天命之约', content: '"千年以来，我们从未与凡人建立如此深的联系。"北斗守护者的声音柔和下来，"你是我们的例外，也是我们的归途。"' }
+    ]
+  },
+  {
+    starId: 'star-4',
+    name: '织女星守护者',
+    title: '痴情织女',
+    personality: '温柔多情',
+    backstory: '织女星守护者继承了织女的痴情，她编织的云霞里藏着无尽的思念。每年七夕，她的泪滴化为银河中最美的星光。',
+    stories: [
+      { affection: 0, title: '织云初见', content: '一阵轻柔的丝弦声中，织女星守护者从云霞中显现。她的眼角似乎带着泪痕。"你...也是来跨越银河的吗？"' },
+      { affection: 5, title: '思念之线', content: '"我编织的每一缕云霞，都是对远方之人的思念。"她递给你一缕金线，"这是织情线，能将两颗心连在一起。"' },
+      { affection: 15, title: '银河泪光', content: '她的指尖轻触星河，泪珠化为一颗颗闪亮的星辰。"等待并不可怕，可怕的是再也无法相见。"' },
+      { affection: 30, title: '鹊桥相会', content: '"你知道吗？鹊桥的意义不是连接两岸，而是证明——只要有爱，就没有什么能阻隔。"她微笑着看向你。' },
+      { affection: 50, title: '织情永恒', content: '她将整片云霞铺展开来，上面织满了你们共同的故事。"这一次，我不再等待了。因为那个人，就在我身边。"' }
+    ]
+  },
+  {
+    starId: 'star-5',
+    name: '天狼星守护者',
+    title: '破晓之光',
+    personality: '刚毅热血',
+    backstory: '天狼星守护者是最耀眼的存在，他的光芒能穿透最深的黑暗。传说中他是黎明前最后的守护者，永不熄灭的希望之火。',
+    stories: [
+      { affection: 0, title: '光之降临', content: '一道刺目的光芒划破黑暗，天狼星守护者从光芒中走出。"黑暗退散！"他的声音如雷鸣般响彻。' },
+      { affection: 5, title: '黎明守望', content: '"在最深的黑暗中，你唯一需要做的就是相信——光终会来。"他举起光之剑，为你照亮前路。' },
+      { affection: 15, title: '不灭之火', content: '"别人说我的光芒太耀眼，"他收起光剑，"但我只是想让每个人都能看到希望。"他的目光温柔了几分。' },
+      { affection: 30, title: '光与影', content: '"即使是光，也需要有人来守护。"他将一缕天狼星光融入你的掌心，"从现在起，你就是我的光。"' },
+      { affection: 50, title: '永恒黎明', content: '"我曾以为自己的使命是照亮世界，"他拥抱住你，星光照耀四方，"直到遇见你，我才明白——我的使命是照亮你的世界。"' }
+    ]
+  },
+  {
+    starId: 'star-6',
+    name: '仙女座守护者',
+    title: '星尘公主',
+    personality: '优雅坚韧',
+    backstory: '仙女座守护者是星界的公主，曾被囚禁在暗礁之上。她用美丽与坚韧赢得了自由，将痛苦化为最璀璨的星光。',
+    stories: [
+      { affection: 0, title: '公主降临', content: '一个优雅的身影从星尘中浮现，带着不可侵犯的尊严。"我是仙女座守护者，你——是来拯救我的，还是来寻求拯救的？"' },
+      { affection: 5, title: '美丽与坚韧', content: '"被困在暗礁上的那些年，我学会了一件事——真正的美丽来自不屈的灵魂。"她的眼中闪烁着坚定的光芒。' },
+      { affection: 15, title: '破茧之翼', content: '"每个人心中都有一片暗礁，"她展开星尘之翼，"但只要有勇气，就能化茧成蝶。"' },
+      { affection: 30, title: '星空共舞', content: '她向你伸出手，星尘在她周围旋转如舞。"与我共舞吧，在这无尽的星空下。让我们忘记所有伤痛。"' },
+      { affection: 50, title: '永恒之星', content: '"我曾经以为自由就是逃离囚笼，"她依偎在你身旁，"但现在我知道——真正的自由，是找到了值得守护的人。"' }
+    ]
+  },
+  {
+    starId: 'star-7',
+    name: '天琴座守护者',
+    title: '琴音诗人',
+    personality: '浪漫感性',
+    backstory: '天琴座守护者的琴声能感动万物。他曾为爱勇闯冥界，虽未能挽回挚爱，但他的琴音永远回荡在星空之中。',
+    stories: [
+      { affection: 0, title: '琴音初闻', content: '一阵悠扬的琴声从远处传来，天琴座守护者怀抱竖琴现身。"你听到了吗？这是命运的旋律。"' },
+      { affection: 5, title: '灵魂之曲', content: '"音乐是灵魂的语言，"他拨动琴弦，一段旋律如流水般淌出，"这首曲子，是为你而作。"' },
+      { affection: 15, title: '冥界归来', content: '"我曾为爱去过最深的深渊，"他的琴音变得低沉，"虽然最终功亏一篑，但那段旋律永远铭刻在了星空中。"' },
+      { affection: 30, title: '知音之约', content: '"千年来，没有人能真正听懂我的琴音，"他抬起头看着你，眼中含着泪光，"直到你出现。"' },
+      { affection: 50, title: '永恒回响', content: '他将竖琴放在你手中，双手覆上你的手指。"让我们一起弹奏，这首属于我们的永恒之歌。从此，琴音不再孤独。"' }
+    ]
+  },
+  {
+    starId: 'star-8',
+    name: '天蝎座守护者',
+    title: '暗夜蝎王',
+    personality: '神秘冷傲',
+    backstory: '天蝎座守护者是大地女神的猎手，他潜伏在暗处，守护着星塔最深的秘密。他的毒刺虽危险，却从不伤害无辜。',
+    stories: [
+      { affection: 0, title: '暗影现身', content: '黑暗中一双幽深的眼睛注视着你。天蝎座守护者从阴影中走出，"你不该来这里的——不过既然来了，就别想轻易离开。"' },
+      { affection: 5, title: '毒与护', content: '"我的毒刺能杀死最强者，但也能保护最珍视之人。"他收起毒刺，"你——值得保护。"' },
+      { affection: 15, title: '暗夜之心', content: '"别人都害怕黑暗中的存在，"他的声音低沉，"可他们不知道，黑暗中最深沉的，其实是守护之心。"' },
+      { affection: 30, title: '蝎王之诺', content: '"我不善言辞，只会用行动证明。"他将蝎甲化为护盾环绕你身，"从今以后，暗影是你的屏障，毒刺是你的利刃。"' },
+      { affection: 50, title: '永恒暗影', content: '"我曾以为自己只属于黑暗，"他终于露出微笑，"直到遇见你——你是我黑暗中唯一的光。我愿永远做你的影子。"' }
+    ]
+  },
+  {
+    starId: 'star-9',
+    name: '狮子座守护者',
+    title: '星域狮王',
+    personality: '威严霸气',
+    backstory: '狮子座守护者是星域的王者，他的咆哮能震碎星辰。他崇尚力量，但也深知真正的强大来自守护而非征服。',
+    stories: [
+      { affection: 0, title: '王者降临', content: '一声震撼星域的咆哮过后，狮子座守护者昂首走来。"在吾的领地，唯有强者方能前行！"' },
+      { affection: 5, title: '王者之试', content: '"力量不是用来欺压的，"他的目光如火炬般灼热，"而是用来守护的。让我看看你的决心。"' },
+      { affection: 15, title: '狮心无悔', content: '"真正的王者不是没有恐惧，"他收起威压，"而是在恐惧面前依然选择守护。你——有这样的勇气。"' },
+      { affection: 30, title: '王者之誓', content: '他低下高傲的头颅，将狮鬃的星辉披在你肩上。"这是王者之誓——我将用我的力量，守护你的每一寸征途。"' },
+      { affection: 50, title: '永恒之王', content: '"征服万千星辰，不如守护一人。"他立于星域之巅，声音传遍整座星塔，"你是我唯一臣服的存在，也是我永恒守护的王。"' }
+    ]
+  },
+  {
+    starId: 'star-10',
+    name: '双子座守护者',
+    title: '双子神使',
+    personality: '活泼善变',
+    backstory: '双子座守护者是一对孪生神使，一体双魂。他们代表着永恒的羁绊——即使一半是凡人一半是神，爱也能跨越一切。',
+    stories: [
+      { affection: 0, title: '双子降临', content: '两个一模一样的身影同时出现，一个微笑一个严肃。"我们是一体的，"他们异口同声，"也是两个人的故事。"' },
+      { affection: 5, title: '双子游戏', content: '"猜猜看，现在和你说话的是谁？"他们调皮地交换位置，"不过没关系，无论哪一个，都是你的朋友。"' },
+      { affection: 15, title: '永恒羁绊', content: '"我们曾为了在一起而放弃了一半的神格，"他们的声音变得柔和，"这就是羁绊的力量——比任何法则都强大。"' },
+      { affection: 30, title: '心之约定', content: '"我们能共享一切感受，"他们同时握住你的手，"现在，我们也想和你分享——双倍的快乐和温暖。"' },
+      { affection: 50, title: '三魂归一', content: '"一加二等于三，"他们微笑着拥抱你，星光将三人环绕，"你是让我们真正完整的第三个灵魂。从此，三魂永不离散。"' }
+    ]
+  },
+  {
+    starId: 'star-11',
+    name: '双鱼座守护者',
+    title: '爱之灵鱼',
+    personality: '浪漫纯真',
+    backstory: '双鱼座守护者是爱神的化身，两条鱼以丝带相连永不分离。她相信世间万物都能被爱感动，是最温柔的守护灵。',
+    stories: [
+      { affection: 0, title: '鱼跃星河', content: '两条闪着光芒的小鱼跃出星河，化为一个温柔的少女。"你感受到爱了吗？星河中到处都是爱的涟漪。"' },
+      { affection: 5, title: '丝带之约', content: '"这条丝带将两条鱼系在一起，永不分离，"她将一条星河丝带系在你手腕上，"现在，你也被爱牵绊了哦。"' },
+      { affection: 15, title: '爱的回响', content: '"每一颗星星都是爱的回响，"她的鱼尾划过星河，泛起阵阵涟漪，"而你，是我听到最动听的那一声。"' },
+      { affection: 30, title: '双鱼守护', content: '"两条鱼守护着彼此的尾巴，"她变成双鱼环绕你身边，"我们也想这样守护你——用爱编织最安全的港湾。"' },
+      { affection: 50, title: '永恒之爱', content: '星河中泛起最美的涟漪，两条鱼合为一体化为漫天星光。"爱不需要理由，只需要——永远在一起。这是双鱼的永恒之誓。"' }
+    ]
+  },
+  {
+    starId: 'star-12',
+    name: '处女座守护者',
+    title: '正义女神',
+    personality: '清冷公正',
+    backstory: '处女座守护者是最后一位离开人间的神祗，她带着天平升上天空，等待人间恢复公正。她的目光清澈如水，看穿一切虚伪。',
+    stories: [
+      { affection: 0, title: '女神审判', content: '一个冰冷而庄严的声音从虚空中传来。处女座守护者手持天平俯视着你。"在你的心中，正义几何？"' },
+      { affection: 5, title: '公正之秤', content: '"我的天平能衡量一切善恶，"她的目光柔和了几分，"而你——你的心比想象中更纯粹。"' },
+      { affection: 15, title: '离开人间', content: '"我离开人间，是因为那里失去了公正，"她低下头，"但也许，正是因为有像你这样的人存在，公正永远不会消失。"' },
+      { affection: 30, title: '天平之择', content: '她将天平的一端放在你手中。"正义不是冰冷的规则，而是温暖的选择。你教会了我这一点。"' },
+      { affection: 50, title: '永恒正义', content: '"我等待了千年，只为找到配得上这份信任的人，"她放下天平，握住你的手，"你就是我等待的答案。从此，我不再孤独地守护公正。"' }
+    ]
+  }
+];
+
+export const getCharacterByStarId = (starId) => {
+  return CHARACTER_RELATIONS.find(c => c.starId === starId);
+};
+
+export const getRelationLevel = (affection) => {
+  for (let i = RELATION_LEVELS.length - 1; i >= 0; i--) {
+    if (affection >= RELATION_LEVELS[i].minAffection) {
+      return RELATION_LEVELS[i];
+    }
+  }
+  return RELATION_LEVELS[0];
+};
+
+export const STORY_BRANCHES = [
+  {
+    id: 'branch-1',
+    chapterId: 1,
+    title: '命运的选择',
+    subtitle: '星塔之门前的抉择',
+    description: '你站在星塔入口，感受着两种截然不同的力量在召唤你...',
+    choicePoint: {
+      id: 'choice-1',
+      question: '星塔之门前的你，听到了两种声音——一种来自光明，一种来自暗影。你选择...',
+      options: [
+        {
+          id: 'choice-1-a',
+          text: '追随光明的指引',
+          mood: '勇敢',
+          result: '你选择走向光明，北极星和天狼星的光芒照亮了你的道路。星塔的守护者们对你的勇气表示认可。',
+          affectionChanges: { 'star-1': 3, 'star-5': 3, 'star-9': 2 }
+        },
+        {
+          id: 'choice-1-b',
+          text: '倾听暗影的低语',
+          mood: '智慧',
+          result: '你选择倾听暗影，天蝎座和北斗七星的智慧引导你发现了隐藏的通道。暗处并非只有危险，还有被遗忘的真相。',
+          affectionChanges: { 'star-3': 3, 'star-8': 3, 'star-12': 2 }
+        }
+      ]
+    },
+    branches: {
+      'choice-1-a': {
+        title: '光明之路',
+        content: '你追随光明踏入星塔，金色的光芒环绕四周。北极星守护者出现在你面前，微笑着说："勇敢的旅人，你选择了最艰难却最光荣的道路。"天狼星守护者也在远处向你点头致意。他们的光芒为你驱散了迷雾，你清晰地看到了通往星塔深处的阶梯。'
+      },
+      'choice-1-b': {
+        title: '暗影之道',
+        content: '你闭目倾听暗影中的低语，声音逐渐清晰。北斗七星守护者的七个音符合一，在你耳畔低诉着星塔的秘密。天蝎座守护者从暗处现身，"聪明的旅人，你选择了更有洞察力的道路。"在他们的引导下，你找到了一条隐藏的螺旋楼梯，通往星塔的核心。'
+      }
+    }
+  },
+  {
+    id: 'branch-2',
+    chapterId: 2,
+    title: '月下的约定',
+    subtitle: '月光下的两难抉择',
+    description: '皎洁的月光下，你遇到了一位需要帮助的灵魂，但帮助ta意味着放弃眼前的珍贵宝物...',
+    choicePoint: {
+      id: 'choice-2',
+      question: '月光下，一个虚弱的星灵向你求助。帮助它会消耗你辛苦收集的星光，但星光是你修复情书的关键。你选择...',
+      options: [
+        {
+          id: 'choice-2-a',
+          text: '无私帮助星灵',
+          mood: '温柔',
+          result: '你将星光分享给虚弱的星灵，它化为了织女星守护者的信使。你的善良打动了星塔中所有温柔的守护者。',
+          affectionChanges: { 'star-4': 4, 'star-11': 3, 'star-6': 2 }
+        },
+        {
+          id: 'choice-2-b',
+          text: '保留星光继续前行',
+          mood: '坚定',
+          result: '你忍痛告别星灵，继续追寻修复情书的使命。猎户座守护者理解你的抉择——有时坚持比善良更需要勇气。',
+          affectionChanges: { 'star-2': 4, 'star-5': 2, 'star-12': 3 }
+        }
+      ]
+    },
+    branches: {
+      'choice-2-a': {
+        title: '温柔之心',
+        content: '星灵在你手中缓缓恢复，化作一只银色的萤火虫。它绕着你飞了三圈，然后向织女星守护者的方向飞去。远处，织女星守护者含泪微笑："你的善良，是这星塔最珍贵的光芒。"她弹出一缕金线，为你织出一件星光外衣。虽然失去了部分星光，但你收获了更珍贵的羁绊。'
+      },
+      'choice-2-b': {
+        title: '铁石心肠',
+        content: '你攥紧手中的星光，转身离开。身后星灵的声音渐渐远去，你咬着牙继续攀登。猎户座守护者挡在前路，"你没有做错。"他拍了拍你的肩膀，"坚持使命需要更大的勇气。"处女座守护者也在高处俯视着你，第一次露出了认可的微笑。星光依旧完整，但你的心多了一道伤痕。'
+      }
+    }
+  },
+  {
+    id: 'branch-3',
+    chapterId: 3,
+    title: '银河的分岔',
+    subtitle: '情与理的抉择',
+    description: '银河横亘眼前，一条路通往真相，一条路通往爱人...',
+    choicePoint: {
+      id: 'choice-3',
+      question: '银河将道路一分为二。一条通向星塔隐藏的真相——关于情书被撕碎的真正原因；一条通向情书碎片聚集之地，可以更快修复情书。你选择...',
+      options: [
+        {
+          id: 'choice-3-a',
+          text: '追寻真相',
+          mood: '求真',
+          result: '你选择了真相，发现了情书被撕碎背后的故事——那是关于一段跨越时空的牺牲。天琴座守护者的琴音为你揭示了这段隐秘。',
+          affectionChanges: { 'star-7': 4, 'star-3': 3, 'star-12': 2 }
+        },
+        {
+          id: 'choice-3-b',
+          text: '修复情书',
+          mood: '重情',
+          result: '你选择了情书，让心中的爱引领方向。双子座守护者为你指引了碎片的位置，双鱼座守护者用爱的丝带帮你将碎片聚拢。',
+          affectionChanges: { 'star-10': 3, 'star-11': 4, 'star-4': 2 }
+        }
+      ]
+    },
+    branches: {
+      'choice-3-a': {
+        title: '真相之路',
+        content: '你踏入银河的支流，星辰的记忆如潮水般涌来。天琴座守护者的琴音引导你看到了过去——情书并非被星光撕碎，而是书写者自愿将其化为星尘，为了让爱人的愿望得以实现。北斗七星守护者在一旁默默记录着这一切。"真相有时比谎言更令人心碎，"他低语道，"但你值得知道。"你含泪继续前行，心中多了一份沉甸甸的使命感。'
+      },
+      'choice-3-b': {
+        title: '情书之路',
+        content: '你沿着爱的方向前行，情书碎片如萤火虫般在银河中闪烁。双子座守护者一边与你嬉闹，一边帮你辨认碎片的真伪。双鱼座守护者在银河中畅游，用爱的丝带将碎片一根根系在一起。"修复情书不只是拼凑文字，"她温柔地说，"更是拼凑两颗心。"碎片在你的手中渐渐聚合，情书的轮廓越来越清晰。'
+      }
+    }
+  },
+  {
+    id: 'branch-4',
+    chapterId: 4,
+    title: '星座的考验',
+    subtitle: '信任与怀疑的抉择',
+    description: '十二星座要求你做出最后的考验——选择你真正信任的守护者...',
+    choicePoint: {
+      id: 'choice-4',
+      question: '十二星座的试炼中，你需要选择一位守护者与你一同面对最后的考验。你的选择将决定终章的走向...',
+      options: [
+        {
+          id: 'choice-4-a',
+          text: '选择力量型守护者（狮子座/猎户座）',
+          mood: '力量',
+          result: '你选择了以力量面对终章，狮子座和猎户座的守护者与你并肩而立。他们将用绝对的实力为你扫清障碍。',
+          affectionChanges: { 'star-9': 5, 'star-2': 4, 'star-5': 3 }
+        },
+        {
+          id: 'choice-4-b',
+          text: '选择智慧型守护者（北斗七星/处女座）',
+          mood: '智慧',
+          result: '你选择了以智慧面对终章，北斗七星和处女座的守护者与你同行。他们将用深邃的洞察为你照亮迷局。',
+          affectionChanges: { 'star-3': 5, 'star-12': 4, 'star-7': 3 }
+        }
+      ]
+    },
+    branches: {
+      'choice-4-a': {
+        title: '力量之光',
+        content: '狮子座守护者的咆哮震碎了前方的星壁，猎户座守护者的箭矢精准地击碎了每一个陷阱。天狼星守护者在远处为你照亮方向。"以力量破局，"狮子座守护者傲然道，"这就是我们的方式。"你们一路冲锋，势不可挡，星塔的层层障碍在力量面前如同薄纸。最终，你们来到了星塔之巅。'
+      },
+      'choice-4-b': {
+        title: '智慧之径',
+        content: '北斗七星守护者的七重智慧为你破解了每一道星纹谜题，处女座守护者的公正天平帮你辨明了真假。天琴座守护者在一旁弹奏着安抚心灵的旋律。"以智慧化解，"北斗守护者轻声道，"这就是我们的方式。"你们步步为营，以巧破局，星塔的机关在智慧面前自动退让。最终，你们从容地登上了星塔之巅。'
+      }
+    }
+  },
+  {
+    id: 'branch-5',
+    chapterId: 5,
+    title: '终章·星光回响',
+    subtitle: '最后的抉择',
+    description: '在星塔之巅，情书即将复原，但你需要做出最终的选择——这将决定一切的结局...',
+    choicePoint: {
+      id: 'choice-5',
+      question: '情书即将修复完成，你发现自己可以选择——让情书恢复原样，让过去的爱恋完整；或者将情书化为新的星光，为星塔注入永恒的生命。你选择...',
+      options: [
+        {
+          id: 'choice-5-a',
+          text: '修复情书，让爱完整',
+          mood: '深情',
+          result: '你选择了让爱完整。情书在你手中缓缓复原，每一个字都闪烁着温暖的光。所有守护者为你感动，这是对爱最纯粹的守护。',
+          affectionChanges: { 'star-4': 5, 'star-11': 5, 'star-1': 3, 'star-6': 3 }
+        },
+        {
+          id: 'choice-5-b',
+          text: '化为星光，守护未来',
+          mood: '大义',
+          result: '你选择将情书化为永恒的星光。文字化为星尘，注入星塔，整个星域焕发新生。牺牲小爱成就大爱，守护者们对你肃然起敬。',
+          affectionChanges: { 'star-9': 5, 'star-12': 5, 'star-5': 3, 'star-3': 3 }
+        }
+      ]
+    },
+    branches: {
+      'choice-5-a': {
+        title: '爱之终章',
+        content: '情书的最后一个碎片归位，整封信绽放出最温暖的光芒。织女星守护者泪流满面，双鱼座守护者编织着爱的丝带将情书环绕。北极星守护者的光芒变得格外柔和，"你选择了让爱完整——这是最温柔的结局。"情书中的文字活了过来，化为一对恋人的身影，在星光中永恒相拥。你知道，有些爱，值得跨越一切去守护。'
+      },
+      'choice-5-b': {
+        title: '光之终章',
+        content: '你将情书高高举起，星尘从文字中飘散而出。狮子座守护者和处女座守护者同时出手，将星尘注入星塔的核心。整座星塔爆发出前所未有的光芒，星河为之震动。北斗七星守护者庄严宣告："你选择了牺牲与守护——这是最伟大的结局。"情书虽已不在，但它化为的星光将永远照亮星塔。你知道，有些爱，是以放手的方式永恒存在的。'
+      }
+    }
+  }
+];
+
+export const getStoryBranchByChapter = (chapterId) => {
+  return STORY_BRANCHES.find(b => b.chapterId === chapterId);
+};
+
+export const PLAYER_TYPES = [
+  {
+    id: 'warrior',
+    name: '星辰勇者',
+    description: '你选择了勇敢与力量，用行动证明一切',
+    icon: '⚔️',
+    color: '#f97316',
+    moods: ['勇敢', '力量']
+  },
+  {
+    id: 'sage',
+    name: '星象贤者',
+    description: '你选择了智慧与真相，用洞察照亮前路',
+    icon: '🔮',
+    color: '#a855f7',
+    moods: ['智慧', '求真']
+  },
+  {
+    id: 'lover',
+    name: '星尘恋人',
+    description: '你选择了温柔与深情，用爱守护一切',
+    icon: '💕',
+    color: '#ec4899',
+    moods: ['温柔', '深情']
+  },
+  {
+    id: 'guardian',
+    name: '星域守护',
+    description: '你选择了坚定与大义，用牺牲成就未来',
+    icon: '🛡️',
+    color: '#3b82f6',
+    moods: ['坚定', '大义']
+  }
+];
+
+export const getPlayerType = (choiceIds = []) => {
+  const moodCount = {};
+  choiceIds.forEach(id => {
+    STORY_BRANCHES.forEach(branch => {
+      branch.choicePoint.options.forEach(opt => {
+        if (opt.id === id) {
+          moodCount[opt.mood] = (moodCount[opt.mood] || 0) + 1;
+        }
+      });
+    });
+  });
+
+  let bestType = PLAYER_TYPES[0];
+  let bestScore = 0;
+
+  PLAYER_TYPES.forEach(pt => {
+    const score = pt.moods.reduce((sum, m) => sum + (moodCount[m] || 0), 0);
+    if (score > bestScore) {
+      bestScore = score;
+      bestType = pt;
+    }
+  });
+
+  return bestType;
+};
+
+export const FINALE_TEMPLATES = {
+  'warrior-love': {
+    title: '勇者之爱',
+    icon: '⚔️💕',
+    content: '你用勇敢的心追寻爱，用力量守护你珍视的一切。在星塔之巅，你证明了——最强大的力量，来自于想要守护的心。星光因你而闪耀，爱因你而永恒。',
+    rarity: 'epic'
+  },
+  'warrior-duty': {
+    title: '勇者之光',
+    icon: '⚔️🛡️',
+    content: '你用勇敢的心面对一切考验，最终选择将个人之情化为永恒的星光。你的名字将被铭刻在星塔之上——那位以力量和大义守护众生的勇者。',
+    rarity: 'legendary'
+  },
+  'sage-love': {
+    title: '贤者之情',
+    icon: '🔮💕',
+    content: '你用智慧洞察了爱的真相，用温柔守护了情的完整。在最深的银河中，你找到了真理与爱的交汇点——那便是人心最纯粹的模样。',
+    rarity: 'epic'
+  },
+  'sage-duty': {
+    title: '贤者之道',
+    icon: '🔮🛡️',
+    content: '你用智慧看透了一切，用洞见做出了最艰难的选择。你明白——真正的智慧不仅是看清真相，更是愿意为更大的善而牺牲。星塔因你而永生。',
+    rarity: 'legendary'
+  },
+  'lover-love': {
+    title: '恋人之歌',
+    icon: '💕💕',
+    content: '你始终追随心中的爱，用温柔和深情走完了每一步。最终，你让那封被撕碎的情书重新完整——这是对爱最纯粹的告白，也是最温暖的结局。',
+    rarity: 'legendary'
+  },
+  'lover-duty': {
+    title: '恋人之心',
+    icon: '💕🛡️',
+    content: '你的心中有最柔软的爱，也有最坚韧的意志。你选择将爱化为永恒的星光，让它在星塔中永不熄灭。有些爱不是占有，而是放手后的永恒。',
+    rarity: 'epic'
+  },
+  'guardian-love': {
+    title: '守护之誓',
+    icon: '🛡️💕',
+    content: '你以坚定守护所爱，以温柔面对考验。在最终的抉择中，你证明了——守护不仅是责任，更是发自心底的深情。你是星塔最忠诚的守护者。',
+    rarity: 'epic'
+  },
+  'guardian-duty': {
+    title: '守护之巅',
+    icon: '🛡️🛡️',
+    content: '你始终选择最艰难的道路，用坚定和大义走完了全程。你将一切化为永恒的星光，让星塔焕发新生。你是星域最伟大的守护者——万星之王。',
+    rarity: 'legendary'
+  }
+};
+
+export const getFinaleTemplate = (playerType, lastChoice) => {
+  const isLove = lastChoice === 'choice-5-a';
+  const key = `${playerType.id}-${isLove ? 'love' : 'duty'}`;
+  return FINALE_TEMPLATES[key] || FINALE_TEMPLATES['warrior-love'];
+};
+
+export const getCharacterAffectionSummary = (affectionMap = {}) => {
+  const total = Object.values(affectionMap).reduce((s, v) => s + v, 0);
+  const maxAffection = Math.max(...Object.values(affectionMap), 0);
+  const maxCharId = Object.entries(affectionMap).find(([_, v]) => v === maxAffection)?.[0] || null;
+  const unlockedCount = Object.values(affectionMap).filter(v => v > 0).length;
+
+  return { total, maxAffection, maxCharId, unlockedCount };
+};

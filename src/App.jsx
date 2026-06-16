@@ -8,6 +8,7 @@ import DailyChallengePage from './pages/DailyChallengePage';
 import DailyChallengeGamePage from './pages/DailyChallengeGamePage';
 import AchievementWallPage from './pages/AchievementWallPage';
 import DivinationShopPage from './pages/DivinationShopPage';
+import StoryCorridorPage from './pages/StoryCorridorPage';
 import StarryBackground from './components/StarryBackground';
 import AchievementUnlockModal from './components/AchievementUnlockModal';
 import { LEVELS, getLevelById } from './data/gameData';
@@ -25,7 +26,8 @@ const PAGES = {
   DAILY_CHALLENGE: 'daily-challenge',
   DAILY_CHALLENGE_GAME: 'daily-challenge-game',
   ACHIEVEMENT: 'achievement',
-  SHOP: 'shop'
+  SHOP: 'shop',
+  STORY_CORRIDOR: 'story-corridor'
 };
 
 function App() {
@@ -205,6 +207,14 @@ function App() {
     setCurrentPage(PAGES.HOME);
   };
 
+  const handleOpenStoryCorridor = () => {
+    setCurrentPage(PAGES.STORY_CORRIDOR);
+  };
+
+  const handleBackFromStoryCorridor = () => {
+    setCurrentPage(PAGES.HOME);
+  };
+
   const handleStartGameFromShop = (levelId) => {
     if (levelId) {
       setCurrentLevel(levelId);
@@ -244,6 +254,7 @@ function App() {
           onOpenDailyChallenge={handleOpenDailyChallenge}
           onOpenAchievements={handleOpenAchievements}
           onOpenShop={handleOpenShop}
+          onOpenStoryCorridor={handleOpenStoryCorridor}
           unlockedLevel={unlockedLevel}
           highScores={highScores}
           collectedStars={archive.collectedFragments.length}
@@ -320,6 +331,13 @@ function App() {
           onBack={handleBackFromShop}
           onStartGame={handleStartGameFromShop}
           unlockedLevel={unlockedLevel}
+        />
+      )}
+
+      {currentPage === PAGES.STORY_CORRIDOR && (
+        <StoryCorridorPage
+          archive={archive}
+          onBack={handleBackFromStoryCorridor}
         />
       )}
 
