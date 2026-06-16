@@ -23,6 +23,8 @@ export const useDailyChallenge = () => {
   const [lastResetDate, setLastResetDate] = useState(null);
   const [reminderShown, setReminderShown] = useState(false);
   const [timeUntilReset, setTimeUntilReset] = useState(0);
+  const [rankRewardClaimed, setRankRewardClaimed] = useState(false);
+  const [starShards, setStarShards] = useState(0);
 
   const stateRef = useRef({});
 
@@ -117,7 +119,9 @@ export const useDailyChallenge = () => {
       todayBestScore: data.todayBestScore !== undefined ? data.todayBestScore : s.todayBestScore,
       totalBonusPoints: data.totalBonusPoints !== undefined ? data.totalBonusPoints : s.totalBonusPoints,
       lastResetDate: data.lastResetDate !== undefined ? data.lastResetDate : s.lastResetDate,
-      reminderShown: data.reminderShown !== undefined ? data.reminderShown : s.reminderShown
+      reminderShown: data.reminderShown !== undefined ? data.reminderShown : s.reminderShown,
+      rankRewardClaimed: data.rankRewardClaimed !== undefined ? data.rankRewardClaimed : s.rankRewardClaimed,
+      starShards: data.starShards !== undefined ? data.starShards : s.starShards
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
   }, []);
@@ -138,6 +142,7 @@ export const useDailyChallenge = () => {
     setLastResetDate(todayStr);
     setReminderShown(false);
     setLeaderboard(generateMockLeaderboard(todayStr, 0));
+    setRankRewardClaimed(false);
     
     saveDailyChallenge({
       currentTheme: newTheme,
@@ -147,7 +152,8 @@ export const useDailyChallenge = () => {
       challengeRecords: [],
       todayBestScore: 0,
       lastResetDate: todayStr,
-      reminderShown: false
+      reminderShown: false,
+      rankRewardClaimed: false
     });
   }, [generateDailyChallenge, generateMockLeaderboard, saveDailyChallenge]);
 
@@ -174,6 +180,8 @@ export const useDailyChallenge = () => {
         setTotalBonusPoints(data.totalBonusPoints || 0);
         setLastResetDate(data.lastResetDate);
         setReminderShown(data.reminderShown || false);
+        setRankRewardClaimed(data.rankRewardClaimed || false);
+        setStarShards(data.starShards || 0);
       } catch (e) {
         console.error('Failed to load daily challenge:', e);
       }
@@ -190,7 +198,9 @@ export const useDailyChallenge = () => {
       todayBestScore,
       totalBonusPoints,
       lastResetDate,
-      reminderShown
+      reminderShown,
+      rankRewardClaimed,
+      starShards
     };
   });
 
@@ -372,6 +382,54 @@ export const useDailyChallenge = () => {
     return getDailyRewardByRank(rank);
   }, [getCurrentRank]);
 
+  const getShardRewardAmount = (rank) => {
+    if (rank === 1) return 20;
+    if (rank === 2) return 10;
+    if (rank === 3) return 5;
+    if (rank <= 10) return 3;
+    return 1;
+  };
+
+  const claimRankReward = useCallback(() => {
+    if (rankRewardClaimed) {
+      return { success: false, message: '今日排行奖励已领取' };
+    }
+    
+    const rank = getCurrentRank();
+    if (!rank) {
+      return { success: false, message: '暂无排名，完成一次挑战后领取' };
+    }
+    
+    const reward = getRankReward();
+    if (!reward) {
+      return { success: false, message: '无法获取奖励信息' };
+    }
+    
+    const shardAmount = getShardRewardAmount(rank);
+    
+    setRankRewardClaimed(true);
+    const newShards = starShards + shardAmount;
+    setStarShards(newShards);
+    
+    const newPoints = totalBonusPoints + reward.bonusPoints;
+    setTotalBonusPoints(newPoints);
+    
+    saveDailyChallenge({
+      rankRewardClaimed: true,
+      starShards: newShards,
+      totalBonusPoints: newPoints
+    });
+    
+    return {
+      success: true,
+      message: `领取成功！`,
+      rank,
+      reward,
+      points: reward.bonusPoints,
+      shards: shardAmount
+    };
+  }, [rankRewardClaimed, getCurrentRank, getRankReward, starShards, totalBonusPoints, saveDailyChallenge]);
+
   const getTasksWithStatus = useCallback(() => {
     return dailyTasks.map(taskId => {
       const task = DAILY_CHALLENGE_TASKS.find(t => t.id === taskId);
@@ -406,11 +464,14 @@ export const useDailyChallenge = () => {
     lastResetDate,
     timeUntilReset,
     reminderShown,
+    rankRewardClaimed,
+    starShards,
     getChallengeConfig,
     calculateChallengeScore,
     recordChallengeResult,
     checkTaskCompletion,
     claimTaskReward,
+    claimRankReward,
     getCurrentRank,
     getRankReward,
     getTasksWithStatus,
