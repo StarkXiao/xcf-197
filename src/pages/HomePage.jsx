@@ -1,6 +1,6 @@
 import { LEVELS, getAchievementStats, CURRENCY_INFO, CURRENCY_TYPES, getCurrentSeason } from '../data/gameData';
 
-const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, onOpenDailyChallenge, onOpenAchievements, onOpenShop, onOpenStoryCorridor, onOpenSeasonChallenge, onOpenLetterWorkshop, onOpenVisitorCommission, unlockedLevel = 1, highScores = {}, collectedStars = 0, achievements, shop, seasonChallenge, letterWorkshop, visitorCommission }) => {
+const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, onOpenDailyChallenge, onOpenAchievements, onOpenShop, onOpenStoryCorridor, onOpenSeasonChallenge, onOpenLetterWorkshop, onOpenVisitorCommission, onOpenRepairRoom, unlockedLevel = 1, highScores = {}, collectedStars = 0, achievements, shop, seasonChallenge, letterWorkshop, visitorCommission, repairRoom }) => {
   const currentSeason = getCurrentSeason();
   const hasUnclaimedRewards = seasonChallenge?.unclaimedStageRewardsCount > 0 || 
                               seasonChallenge?.unclaimedTaskRewardsCount > 0;
@@ -188,6 +188,34 @@ const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, 
             {visitorCommission.getOverallStats().metCount === 0 && !visitorCommission.newVisitorNotification && (
               <span className="absolute -top-1 -right-1 bg-teal-500 text-white text-xs px-2 py-0.5 rounded-full animate-bounce">
                 NEW
+              </span>
+            )}
+          </button>
+        </div>
+      )}
+
+      {onOpenRepairRoom && repairRoom && (
+        <div className="flex flex-col sm:flex-row gap-4 mb-4">
+          <button
+            onClick={onOpenRepairRoom}
+            className="px-8 py-4 rounded-full font-bold transition-all
+              border-2 border-amber-400/50 text-amber-300 hover:bg-amber-500/10 hover:border-amber-400 hover:shadow-lg hover:shadow-amber-400/30
+              relative overflow-hidden group"
+          >
+            <span className="relative z-10">🏛️ 情书修复室</span>
+            {repairRoom.getStats().repairedFragments > 0 && (
+              <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                {repairRoom.getStats().overallProgress}%
+              </span>
+            )}
+            {repairRoom.getStats().repairedFragments === 0 && (
+              <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full animate-bounce">
+                NEW
+              </span>
+            )}
+            {repairRoom.newlyUnlockedSentences?.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full animate-pulse font-bold">
+                {repairRoom.newlyUnlockedSentences.length}
               </span>
             )}
           </button>

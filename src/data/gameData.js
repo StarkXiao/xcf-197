@@ -3364,3 +3364,231 @@ export const getStarRailTitle = (maxCombo) => {
 export const getStarRailStoryEvent = (combo) => {
   return STAR_RAIL_STORY_EVENTS.find(event => event.triggerCombo === combo);
 };
+
+export const REPAIR_ROOM_CHAPTERS = [
+  {
+    id: 'rc-1',
+    name: '星之序章',
+    description: '修复情书的第一页，开启星之旅程',
+    icon: '🌅',
+    chapter: 1,
+    rarity: 'common',
+    fragments: [
+      { id: 'rcf-1-1', text: '亲爱的，当你读到这封信的时候，', position: 1, requiredStars: ['star-1'], hint: '北极星的光芒' },
+      { id: 'rcf-1-2', text: '我已经在星塔之巅等你很久了。', position: 2, requiredStars: ['star-2'], hint: '猎户座的守望' }
+    ],
+    hiddenSentenceId: 'rhs-1',
+    reward: { type: 'stardust', value: 200 },
+    background: 'from-amber-900/30 to-orange-900/30'
+  },
+  {
+    id: 'rc-2',
+    name: '月光私语',
+    description: '在月光下修复第二页情书',
+    icon: '🌙',
+    chapter: 2,
+    rarity: 'rare',
+    fragments: [
+      { id: 'rcf-2-1', text: '我一直在星空中寻找你的身影，', position: 1, requiredStars: ['star-3'], hint: '北斗七星的指引' },
+      { id: 'rcf-2-2', text: '每一颗星星都是我对你的思念。', position: 2, requiredStars: ['star-4'], hint: '织女星的等待' },
+      { id: 'rcf-2-3', text: '从北极星到猎户座，', position: 3, requiredStars: ['star-5'], hint: '天狼星的光芒' }
+    ],
+    hiddenSentenceId: 'rhs-2',
+    reward: { type: 'stardust', value: 300 },
+    background: 'from-indigo-900/30 to-purple-900/30'
+  },
+  {
+    id: 'rc-3',
+    name: '银河情书',
+    description: '跨越银河，修复第三页',
+    icon: '🌌',
+    chapter: 3,
+    rarity: 'rare',
+    fragments: [
+      { id: 'rcf-3-1', text: '从北斗七星到织女星，', position: 1, requiredStars: ['star-6'], hint: '仙女座的优雅' },
+      { id: 'rcf-3-2', text: '所有的星光都指引着我走向你。', position: 2, requiredStars: ['star-7'], hint: '天琴座的旋律' },
+      { id: 'rcf-3-3', text: '愿我们的爱情如星辰般永恒闪耀，', position: 3, requiredStars: ['star-8'], hint: '天蝎座的神秘' }
+    ],
+    hiddenSentenceId: 'rhs-3',
+    reward: { type: 'stardust', value: 400 },
+    background: 'from-purple-900/30 to-blue-900/30'
+  },
+  {
+    id: 'rc-4',
+    name: '星座誓言',
+    description: '十二星座见证的誓言',
+    icon: '⭐',
+    chapter: 4,
+    rarity: 'epic',
+    fragments: [
+      { id: 'rcf-4-1', text: '跨越银河，穿越时空，', position: 1, requiredStars: ['star-9'], hint: '狮子座的威严' },
+      { id: 'rcf-4-2', text: '在每一个有星星的夜晚，', position: 2, requiredStars: ['star-10'], hint: '双子座的羁绊' },
+      { id: 'rcf-4-3', text: '你都能感受到我的存在。', position: 3, requiredStars: ['star-11'], hint: '双鱼座的浪漫' },
+      { id: 'rcf-4-4', text: '我爱你，穿越时空，至死不渝。', position: 4, requiredStars: ['star-12'], hint: '处女座的纯洁' }
+    ],
+    hiddenSentenceId: 'rhs-4',
+    reward: { type: 'starShard', value: 5 },
+    background: 'from-rose-900/30 to-pink-900/30'
+  },
+  {
+    id: 'rc-5',
+    name: '星塔终章',
+    description: '修复完整的情书，揭开最终秘密',
+    icon: '🏰',
+    chapter: 5,
+    rarity: 'legendary',
+    fragments: [
+      { id: 'rcf-5-1', text: '—— 星塔占卜师', position: 1, requiredStars: ['star-1', 'star-2'], hint: '最初的两颗星' },
+      { id: 'rcf-5-2', text: 'PS：如果你读到了这封信，', position: 2, requiredStars: ['star-3', 'star-4'], hint: '七星与织女' },
+      { id: 'rcf-5-3', text: '请来星塔之巅找我。', position: 3, requiredStars: ['star-5', 'star-6'], hint: '天狼与仙女' },
+      { id: 'rcf-5-4', text: '我有一个埋藏了千年的秘密，', position: 4, requiredStars: ['star-7', 'star-8'], hint: '天琴与天蝎' },
+      { id: 'rcf-5-5', text: '只想亲口告诉你。', position: 5, requiredStars: ['star-9', 'star-10', 'star-11', 'star-12'], hint: '最后的四星座' }
+    ],
+    hiddenSentenceId: 'rhs-5',
+    reward: { type: 'title', value: 'title-repair-master' },
+    background: 'from-yellow-900/30 to-amber-900/30'
+  }
+];
+
+export const REPAIR_HIDDEN_SENTENCES = [
+  {
+    id: 'rhs-1',
+    text: '星塔之下，初见之时，我便知道，你是我等待千年的人。',
+    author: '星塔占卜师',
+    rarity: 'common',
+    icon: '💫',
+    unlockHint: '修复「星之序章」全部碎片后解锁'
+  },
+  {
+    id: 'rhs-2',
+    text: '月光下我曾许下誓言，无论轮回多少次，我都会找到你。',
+    author: '星塔占卜师',
+    rarity: 'rare',
+    icon: '🌙',
+    unlockHint: '修复「月光私语」全部碎片后解锁'
+  },
+  {
+    id: 'rhs-3',
+    text: '银河有多长，我的思念就有多深。每一颗星星都是我爱你的证明。',
+    author: '星塔占卜师',
+    rarity: 'rare',
+    icon: '🌌',
+    unlockHint: '修复「银河情书」全部碎片后解锁'
+  },
+  {
+    id: 'rhs-4',
+    text: '十二星座为证，山河岁月为鉴，我对你的爱，永不褪色。',
+    author: '星塔占卜师',
+    rarity: 'epic',
+    icon: '✨',
+    unlockHint: '修复「星座誓言」全部碎片后解锁'
+  },
+  {
+    id: 'rhs-5',
+    text: '千年等待，只为与你相遇。这一次，换我来守护你。',
+    author: '星塔占卜师',
+    rarity: 'legendary',
+    icon: '💝',
+    unlockHint: '修复「星塔终章」全部碎片后解锁'
+  },
+  {
+    id: 'rhs-6',
+    text: '时光流转，星辰变迁，唯有爱你，是我永恒不变的选择。',
+    author: '星塔占卜师',
+    rarity: 'legendary',
+    icon: '⏳',
+    unlockHint: '集齐全部隐藏句后解锁'
+  }
+];
+
+export const REPAIR_ACHIEVEMENTS = [
+  {
+    id: 'repair-1',
+    name: '初入修复室',
+    description: '完成第一次碎片修复',
+    icon: '🔧',
+    rarity: 'common',
+    condition: { type: 'repairedFragments', value: 1 },
+    reward: { type: 'points', value: 10 }
+  },
+  {
+    id: 'repair-2',
+    name: '修复学徒',
+    description: '累计修复10个碎片',
+    icon: '📚',
+    rarity: 'common',
+    condition: { type: 'repairedFragments', value: 10 },
+    reward: { type: 'points', value: 20 }
+  },
+  {
+    id: 'repair-3',
+    name: '情书匠人',
+    description: '完成第一章情书修复',
+    icon: '💌',
+    rarity: 'rare',
+    condition: { type: 'completedChapters', value: 1 },
+    reward: { type: 'points', value: 30 }
+  },
+  {
+    id: 'repair-4',
+    name: '星光修复师',
+    description: '完成全部5章情书修复',
+    icon: '⭐',
+    rarity: 'epic',
+    condition: { type: 'completedChapters', value: 5 },
+    reward: { type: 'points', value: 80 }
+  },
+  {
+    id: 'repair-5',
+    name: '隐秘心语',
+    description: '解锁3句隐藏情话',
+    icon: '🔮',
+    rarity: 'rare',
+    condition: { type: 'unlockedSentences', value: 3 },
+    reward: { type: 'points', value: 40 }
+  },
+  {
+    id: 'repair-6',
+    name: '情话收藏家',
+    description: '解锁全部隐藏情话',
+    icon: '💎',
+    rarity: 'legendary',
+    condition: { type: 'unlockedSentences', value: 6 },
+    reward: { type: 'points', value: 100 }
+  }
+];
+
+export const REPAIR_TITLES = [
+  {
+    id: 'title-repair-master',
+    name: '修复大师',
+    icon: '🛠️',
+    rarity: 'epic',
+    description: '精通情书修复的匠人',
+    unlocked: false
+  }
+];
+
+export const getRepairChapterById = (id) => REPAIR_ROOM_CHAPTERS.find(ch => ch.id === id);
+export const getRepairHiddenSentenceById = (id) => REPAIR_HIDDEN_SENTENCES.find(s => s.id === id);
+export const getRepairAchievementById = (id) => REPAIR_ACHIEVEMENTS.find(a => a.id === id);
+export const getRepairTitleById = (id) => REPAIR_TITLES.find(t => t.id === id);
+
+export const getRepairRoomStats = (repairedFragments = [], completedChapters = [], unlockedSentences = []) => {
+  const totalFragments = REPAIR_ROOM_CHAPTERS.reduce((sum, ch) => sum + ch.fragments.length, 0);
+  const totalChapters = REPAIR_ROOM_CHAPTERS.length;
+  const totalSentences = REPAIR_HIDDEN_SENTENCES.length;
+
+  return {
+    totalFragments,
+    repairedFragments: repairedFragments.length,
+    fragmentProgress: Math.round((repairedFragments.length / totalFragments) * 100),
+    totalChapters,
+    completedChapters: completedChapters.length,
+    chapterProgress: Math.round((completedChapters.length / totalChapters) * 100),
+    totalSentences,
+    unlockedSentences: unlockedSentences.length,
+    sentenceProgress: Math.round((unlockedSentences.length / totalSentences) * 100),
+    overallProgress: Math.round(((repairedFragments.length / totalFragments) + (completedChapters.length / totalChapters) + (unlockedSentences.length / totalSentences)) / 3 * 100)
+  };
+};
