@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { RARITY_INFO } from '../../data/gameData';
+import { RARITY_INFO, getStarById } from '../../data/gameData';
 import Modal from '../../components/Modal';
 
 const FragmentAssembly = ({ workshop, archive }) => {
@@ -178,12 +178,20 @@ const FragmentAssembly = ({ workshop, archive }) => {
                       </div>
                       <div className="flex-1">
                         {fragment.isAssembled || fragment.isUnlocked ? (
-                          <p className={`text-sm italic ${fragment.isAssembled ? 'text-green-300' : 'text-white/80'}`}>
-                            "{fragment.text}"
-                          </p>
+                          <>
+                            <p className={`text-sm italic ${fragment.isAssembled ? 'text-green-300' : 'text-white/80'}`}>
+                              "{fragment.text}"
+                            </p>
+                            {!fragment.isAssembled && (
+                              <p className="text-xs text-white/40 mt-1">
+                              <span className="mr-1">🔗</span>
+                              来自「{getStarById(fragment.starId)?.name || '未知星座'}」碎片
+                            </p>
+                            )}
+                          </>
                         ) : (
                           <p className="text-sm text-gray-500 italic">
-                            通关第{fragment.levelRequired}关解锁此碎片...
+                            收集「{getStarById(fragment.starId)?.name || '未知星座'}」碎片解锁...
                           </p>
                         )}
                       </div>

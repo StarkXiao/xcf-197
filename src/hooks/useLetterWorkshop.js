@@ -113,7 +113,7 @@ export const useLetterWorkshop = (archive) => {
     const fragment = letter.fragments.find(f => f.id === fragmentId);
     if (!fragment) return;
 
-    if (!archive?.unlockedChapters?.includes(fragment.levelRequired)) return;
+    if (!archive?.collectedFragments?.includes(fragment.starId)) return;
 
     const current = stateRef.current.assembledFragments[letterId] || [];
     if (current.includes(fragmentId)) return;
@@ -140,7 +140,7 @@ export const useLetterWorkshop = (archive) => {
     const assembled = assembledFragments[letterId] || [];
     const fragments = letter.fragments.map(f => ({
       ...f,
-      isUnlocked: archive?.unlockedChapters?.includes(f.levelRequired) || false,
+      isUnlocked: archive?.collectedFragments?.includes(f.starId) || false,
       isAssembled: assembled.includes(f.id)
     }));
 
@@ -163,8 +163,8 @@ export const useLetterWorkshop = (archive) => {
 
   const isLetterAvailable = useCallback((letter) => {
     if (!archive) return false;
-    const firstFragmentLevel = letter.fragments[0]?.levelRequired;
-    return archive.unlockedChapters?.includes(firstFragmentLevel) || false;
+    const hasAnyFragment = letter.fragments.some(f => archive.collectedFragments?.includes(f.starId));
+    return hasAnyFragment;
   }, [archive]);
 
   const toggleFavoriteLetter = useCallback((letterId) => {

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { POSTER_THEMES, RARITY_INFO, SPECIAL_SENTENCES, WORKSHOP_LETTERS } from '../../data/gameData';
 import Modal from '../../components/Modal';
 
@@ -7,9 +7,244 @@ const SharePoster = ({ workshop }) => {
   const [selectedTheme, setSelectedTheme] = useState(workshop.selectedPosterTheme);
   const [showThemePicker, setShowThemePicker] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const posterRef = useRef(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedImageUrl, setGeneratedImageUrl] = useState(null);
+  const canvasRef = useRef(null);
 
   const theme = POSTER_THEMES.find(t => t.id === selectedTheme) || POSTER_THEMES[0];
+
+  const parseGradient = (gradientStr) => {
+    const match = gradientStr.match(/linear-gradient\((\d+)deg,\s*([^)]+)\)/);
+    if (!match) return { angle: 135, colors: [] };
+    const angle = parseInt(match[1]);
+    const colorParts = match[2].split(',').map(s => s.trim());
+    const colors = colorParts.map(part => {
+      const parts = part.split(/\s+/);
+      return { color: parts[0], position: parts[1] ? parseFloat(parts[1]) / 100 : undefined };
+    });
+    return { angle, colors };
+  };
+
+  const drawRoundedRect = (ctx, x, y, width, height, radius) => {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+  };
+
+  const drawStar = (ctx, cx, cy, spikes, outerRadius, innerRadius) => {
+    let rot = Math.PI / 2 * 3;
+    let x = cx;
+    let y = cy;
+    const step = Math.PI / spikes;
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - outerRadius);
+    for (let i = 0; i < spikes; i++) {
+      x = cx + Math.cos(rot) * outerRadius;
+      y = cy + Math.sin(rot) * outerRadius;
+      ctx.lineTo(x, y);
+      rot += step;
+
+      x = cx + Math.cos(rot) * innerRadius;
+      y = cy + Math.sin(rot) * innerRadius;
+      ctx.lineTo(x, y);
+      rot += step;
+    }
+    ctx.lineTo(cx, cy - outerRadius);
+    ctx.closePath();
+  };
+
+  const generatePosterImage = useCallback(async () => {
+    if (!posterContent || !canvasRef.current) return null;
+
+    setIsGenerating(true);
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const width = 750;
+    const height = 1334;
+
+    canvas.width = width;
+    canvas.height = height;
+
+    const gradientInfo = parseGradient(theme.bgColor);
+    const angleRad = (gradientInfo.angle - 90) * Math.PI / 180;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const length = Math.sqrt(width * width + height * height) / 2;
+    const x1 = centerX - Math.cos(angleRad) * length;
+    const y1 = centerY - Math.sin(angleRad) * length;
+    const x2 = centerX + Math.cos(angleRad) * length;
+    const y2 = centerY + Math.sin(angleRad) * length;
+
+    const bgGradient = ctx.createLinearGradient(x1, y1, x2, y2);
+    gradientInfo.colors.forEach(c => {
+      if (c.position !== undefined) {
+        bgGradient.addColorStop(c.position, c.color);
+      } else {
+        bgGradient.addColorStop(0, c.color);
+      }
+    });
+
+    ctx.fillStyle = bgGradient;
+    ctx.fillRect(0, 0, width, height);
+
+    const starCount = 40;
+    for (let i = 0; i < starCount; i++) {
+      const x = Math.random() * width;
+      const y = Math.random() * height;
+      const size = Math.random() * 2 + 0.5;
+      const opacity = Math.random() * 0.6 + 0.2;
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+      ctx.fill();
+    }
+
+    for (let i = 0; i < 5; i++) {
+      const x = Math.random() * width;
+      const y = Math.random() * height * 0.7;
+      const size = Math.random() * 15 + 10;
+      const opacity = Math.random() * 0.3 + 0.1;
+      drawStar(ctx, x, y, 5, size, size * 0.4);
+      ctx.fillStyle = `${theme.accentColor}${Math.floor(opacity * 255).toString(16).padStart(2, '0')}`;
+      ctx.fill();
+    }
+
+    const contentX = 60;
+    const contentY = 120;
+    const contentWidth = width - contentX * 2;
+    const contentHeight = height - contentY * 2 - 100;
+
+    ctx.save();
+    ctx.globalAlpha = 0.15;
+    ctx.fillStyle = theme.accentColor;
+    drawRoundedRect(ctx, contentX - 30, contentY - 30, contentWidth + 60, contentHeight + 60, 40);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.font = '80px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(posterContent.icon, width / 2, contentY + 80);
+
+    ctx.font = 'bold 24px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.fillStyle = theme.accentColor;
+    ctx.globalAlpha = 0.8;
+    const headerText = posterContent.type === 'letter'
+      ? `✦ 信笺工坊 · ${posterContent.name} ✦`
+      : `✦ 信笺工坊 · 守护者之声 ✦`;
+    ctx.fillText(headerText, width / 2, contentY + 180);
+    ctx.globalAlpha = 1;
+
+    const textY = contentY + 280;
+    const maxTextWidth = contentWidth - 60;
+    const lineHeight = 42;
+
+    ctx.font = 'italic 30px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.fillStyle = theme.textColor;
+    ctx.textAlign = 'center';
+
+    const fullText = `"${posterContent.text}"`;
+    const words = fullText.split('');
+    const lines = [];
+    let currentLine = '';
+
+    for (let i = 0; i < words.length; i++) {
+      const testLine = currentLine + words[i];
+      const metrics = ctx.measureText(testLine);
+      if (metrics.width > maxTextWidth && currentLine) {
+        lines.push(currentLine);
+        currentLine = words[i];
+      } else {
+        currentLine = testLine;
+      }
+    }
+    if (currentLine) lines.push(currentLine);
+
+    const totalTextHeight = lines.length * lineHeight;
+    let currentY = textY + (contentHeight - 400) / 2 - totalTextHeight / 2;
+
+    lines.forEach(line => {
+      ctx.fillText(line, width / 2, currentY);
+      currentY += lineHeight;
+    });
+
+    currentY += 40;
+    ctx.font = '22px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.fillStyle = theme.textColor;
+    ctx.globalAlpha = 0.6;
+    const authorText = posterContent.type === 'letter'
+      ? '—— 星塔占卜师'
+      : `—— ${posterContent.author}`;
+    ctx.fillText(authorText, width / 2, currentY);
+    ctx.globalAlpha = 1;
+
+    const dividerY = height - 200;
+    ctx.beginPath();
+    ctx.moveTo(contentX + 50, dividerY);
+    ctx.lineTo(width - contentX - 50, dividerY);
+    ctx.strokeStyle = theme.textColor;
+    ctx.globalAlpha = 0.2;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    ctx.font = '20px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.fillStyle = theme.textColor;
+    ctx.globalAlpha = 0.4;
+    ctx.fillText('🌟 星塔占卜 · 信笺工坊', width / 2, dividerY + 40);
+
+    const date = new Date();
+    const dateStr = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+    ctx.font = '16px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.fillText(dateStr, width / 2, dividerY + 75);
+    ctx.globalAlpha = 1;
+
+    const qrSize = 80;
+    const qrX = width - contentX - qrSize;
+    const qrY = dividerY + 20;
+
+    ctx.fillStyle = '#ffffff';
+    drawRoundedRect(ctx, qrX, qrY, qrSize, qrSize, 10);
+    ctx.fill();
+
+    ctx.fillStyle = '#000000';
+    const cellSize = 4;
+    const gridSize = Math.floor((qrSize - 16) / cellSize);
+    for (let i = 0; i < gridSize; i++) {
+      for (let j = 0; j < gridSize; j++) {
+        const isCorner = (i < 6 && j < 6) || (i < 6 && j >= gridSize - 6) || (i >= gridSize - 6 && j < 6);
+        const isCenter = i >= gridSize / 2 - 2 && i <= gridSize / 2 + 1 && j >= gridSize / 2 - 2 && j <= gridSize / 2 + 1;
+        const isRandom = Math.random() > 0.5;
+        if (isCorner || isCenter || isRandom) {
+          ctx.fillRect(qrX + 8 + j * cellSize, qrY + 8 + i * cellSize, cellSize - 0.5, cellSize - 0.5);
+        }
+      }
+    }
+
+    const imageUrl = canvas.toDataURL('image/png', 1.0);
+    setGeneratedImageUrl(imageUrl);
+    setIsGenerating(false);
+
+    return imageUrl;
+  }, [posterContent, theme]);
+
+  useEffect(() => {
+    if (posterContent) {
+      generatePosterImage();
+    } else {
+      setGeneratedImageUrl(null);
+    }
+  }, [posterContent, selectedTheme, generatePosterImage]);
 
   const createLetterPoster = (letterId) => {
     const letter = WORKSHOP_LETTERS.find(l => l.id === letterId);
@@ -37,8 +272,62 @@ const SharePoster = ({ workshop }) => {
     });
   };
 
-  const handleShare = useCallback(() => {
-    if (!posterContent) return;
+  const downloadImage = useCallback(() => {
+    if (!generatedImageUrl) return;
+
+    const link = document.createElement('a');
+    link.download = `星塔信笺_${posterContent.type === 'letter' ? posterContent.name : posterContent.author}_${Date.now()}.png`;
+    link.href = generatedImageUrl;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, [generatedImageUrl, posterContent]);
+
+  const shareImage = useCallback(async () => {
+    if (!generatedImageUrl) return;
+
+    try {
+      const response = await fetch(generatedImageUrl);
+      const blob = await response.blob();
+      const file = new File([blob], 'star_tower_letter.png', { type: 'image/png' });
+
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: '星塔占卜 · 信笺工坊',
+          text: `"${posterContent.text}"\n\n—— ${posterContent.type === 'letter' ? '星塔占卜师' : posterContent.author}`,
+          files: [file]
+        });
+        workshop.createPoster({
+          contentId: posterContent.id,
+          contentType: posterContent.type,
+          themeId: selectedTheme,
+          text: posterContent.text
+        });
+        workshop.setPosterTheme(selectedTheme);
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 2000);
+        return;
+      }
+    } catch (e) {
+      console.log('Share not available, falling back to clipboard');
+    }
+
+    downloadImage();
+
+    if (navigator.clipboard) {
+      try {
+        const response = await fetch(generatedImageUrl);
+        const blob = await response.blob();
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ]);
+      } catch (e) {
+        console.log('Image copy failed, copying text');
+        navigator.clipboard.writeText(
+          `✨ 星塔占卜 · 信笺工坊 ✨\n\n"${posterContent.text}"\n\n${posterContent.type === 'letter' ? `—— ${posterContent.name}` : `—— ${posterContent.author}`}\n\n🌟 来自星塔占卜`
+        ).catch(() => {});
+      }
+    }
 
     workshop.createPoster({
       contentId: posterContent.id,
@@ -46,31 +335,26 @@ const SharePoster = ({ workshop }) => {
       themeId: selectedTheme,
       text: posterContent.text
     });
-
     workshop.setPosterTheme(selectedTheme);
-
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(
-        `✨ 星塔占卜 · 信笺工坊 ✨\n\n"${posterContent.text}"\n\n${posterContent.type === 'letter' ? `—— ${posterContent.name}` : `—— ${posterContent.author}`}\n\n🌟 来自星塔占卜`
-      ).catch(() => {});
-    }
 
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 2000);
-  }, [posterContent, selectedTheme, workshop]);
+  }, [generatedImageUrl, posterContent, selectedTheme, workshop, downloadImage]);
 
   const completedLetters = WORKSHOP_LETTERS.filter(l => workshop.completedLetters.includes(l.id));
   const unlockedSentenceList = SPECIAL_SENTENCES.filter(s => workshop.unlockedSentences.includes(s.id));
 
   return (
     <div className="max-w-4xl mx-auto">
+      <canvas ref={canvasRef} style={{ display: 'none' }} />
+
       <div className="text-center mb-8">
         <div className="text-5xl mb-4 animate-float">🎨</div>
         <h2 className="text-2xl font-bold text-star-gold mb-2 glow-text">
           分享海报
         </h2>
         <p className="text-white/60 text-sm">
-          选择内容生成精美分享海报，将星光传递给更多人
+          选择内容生成精美分享海报，可保存图片分享到社交媒体
         </p>
       </div>
 
@@ -184,86 +468,120 @@ const SharePoster = ({ workshop }) => {
             </button>
           </div>
 
-          <div
-            ref={posterRef}
-            className="relative max-w-sm mx-auto rounded-2xl overflow-hidden shadow-2xl"
-            style={{ background: theme.bgColor }}
-          >
-            <div className="p-8 text-center">
-              <div className="text-4xl mb-4 opacity-80">{posterContent.icon}</div>
-
-              {posterContent.type === 'letter' ? (
-                <>
-                  <div
-                    className="text-xs tracking-widest mb-3 opacity-60"
-                    style={{ color: theme.accentColor }}
-                  >
-                    ✨ 信笺工坊 · {posterContent.name} ✨
+          <div className="flex flex-col md:flex-row gap-6 items-start justify-center">
+            <div
+              className="relative max-w-sm w-full mx-auto rounded-2xl overflow-hidden shadow-2xl"
+              style={{ background: theme.bgColor }}
+            >
+              {isGenerating && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
+                  <div className="text-center">
+                    <div className="w-12 h-12 border-4 border-star-gold border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                    <p className="text-white/80 text-sm">生成中...</p>
                   </div>
-                  <p
-                    className="text-base italic leading-relaxed mb-6"
-                    style={{ color: theme.textColor }}
-                  >
-                    "{posterContent.text}"
-                  </p>
-                  <div
-                    className="text-xs opacity-50"
-                    style={{ color: theme.textColor }}
-                  >
-                    —— 星塔占卜师
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div
-                    className="text-xs tracking-widest mb-3 opacity-60"
-                    style={{ color: theme.accentColor }}
-                  >
-                    ✨ 信笺工坊 · 守护者之声 ✨
-                  </div>
-                  <p
-                    className="text-base italic leading-loose mb-6"
-                    style={{ color: theme.textColor }}
-                  >
-                    "{posterContent.text}"
-                  </p>
-                  <div
-                    className="text-xs opacity-50"
-                    style={{ color: theme.textColor }}
-                  >
-                    —— {posterContent.author}
-                  </div>
-                </>
+                </div>
               )}
+              <div className="p-8 text-center">
+                <div className="text-4xl mb-4 opacity-80">{posterContent.icon}</div>
 
-              <div className="mt-6 pt-4 border-t border-white/10">
-                <div
-                  className="text-xs opacity-40"
-                  style={{ color: theme.textColor }}
-                >
-                  🌟 星塔占卜 · 信笺工坊
+                {posterContent.type === 'letter' ? (
+                  <>
+                    <div
+                      className="text-xs tracking-widest mb-3 opacity-60"
+                      style={{ color: theme.accentColor }}
+                    >
+                      ✨ 信笺工坊 · {posterContent.name} ✨
+                    </div>
+                    <p
+                      className="text-base italic leading-relaxed mb-6"
+                      style={{ color: theme.textColor }}
+                    >
+                      "{posterContent.text}"
+                    </p>
+                    <div
+                      className="text-xs opacity-50"
+                      style={{ color: theme.textColor }}
+                    >
+                      —— 星塔占卜师
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div
+                      className="text-xs tracking-widest mb-3 opacity-60"
+                      style={{ color: theme.accentColor }}
+                    >
+                      ✨ 信笺工坊 · 守护者之声 ✨
+                    </div>
+                    <p
+                      className="text-base italic leading-loose mb-6"
+                      style={{ color: theme.textColor }}
+                    >
+                      "{posterContent.text}"
+                    </p>
+                    <div
+                      className="text-xs opacity-50"
+                      style={{ color: theme.textColor }}
+                    >
+                      —— {posterContent.author}
+                    </div>
+                  </>
+                )}
+
+                <div className="mt-6 pt-4 border-t border-white/10">
+                  <div
+                    className="text-xs opacity-40"
+                    style={{ color: theme.textColor }}
+                  >
+                    🌟 星塔占卜 · 信笺工坊
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex items-center justify-center gap-4 mt-6">
-            <button
-              onClick={handleShare}
-              className="btn-star px-8 py-3 flex items-center gap-2"
-            >
-              <span>📤</span>
-              <span>分享海报</span>
-            </button>
-          </div>
+            {generatedImageUrl && (
+              <div className="w-full md:w-auto">
+                <div className="bg-star-purple/20 rounded-xl p-4 border border-star-gold/20">
+                  <h4 className="text-white/80 font-bold mb-3 text-sm">📱 操作</h4>
+                  <div className="space-y-2">
+                    <button
+                      onClick={downloadImage}
+                      className="w-full btn-star px-6 py-2.5 flex items-center justify-center gap-2 text-sm"
+                    >
+                      <span>💾</span>
+                      <span>保存图片</span>
+                    </button>
+                    <button
+                      onClick={shareImage}
+                      className="w-full px-6 py-2.5 rounded-full flex items-center justify-center gap-2 text-sm font-medium
+                        bg-gradient-to-r from-purple-600 to-pink-600 text-white
+                        hover:from-purple-500 hover:to-pink-500 transition-all"
+                    >
+                      <span>📤</span>
+                      <span>分享海报</span>
+                    </button>
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-white/10">
+                    <p className="text-white/40 text-xs">
+                      💡 长按海报图片可直接保存到相册
+                    </p>
+                  </div>
+                </div>
 
-          {showSuccess && (
-            <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-green-600 text-white px-8 py-4 rounded-2xl shadow-2xl text-center animate-slide-in">
-              <div className="text-2xl mb-2">✅</div>
-              <div className="font-bold">分享成功！</div>
-              <div className="text-sm opacity-80">内容已复制到剪贴板</div>
-            </div>
-          )}
+                {generatedImageUrl && (
+                  <div className="mt-4">
+                    <h4 className="text-white/60 text-xs mb-2 text-center">长按保存</h4>
+                    <img
+                      src={generatedImageUrl}
+                      alt="海报预览"
+                      className="w-32 mx-auto rounded-lg shadow-lg"
+                      style={{ imageRendering: 'auto' }}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -272,8 +590,9 @@ const SharePoster = ({ workshop }) => {
         <ul className="text-sm text-white/60 space-y-1">
           <li>• 完成情书拼接或解锁特殊句段后可生成分享海报</li>
           <li>• 选择不同主题让海报呈现独特的星空风格</li>
-          <li>• 分享后内容将自动复制到剪贴板，可粘贴发送</li>
-          <li>• 最多保存最近20张海报记录</li>
+          <li>• 点击「保存图片」可下载高清海报到本地</li>
+          <li>• 点击「分享海报」可直接分享到社交媒体或复制</li>
+          <li>• 手机端长按生成的海报图片可保存到相册</li>
         </ul>
       </div>
 
@@ -308,6 +627,14 @@ const SharePoster = ({ workshop }) => {
           ))}
         </div>
       </Modal>
+
+      {showSuccess && (
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-green-600 text-white px-8 py-4 rounded-2xl shadow-2xl text-center animate-slide-in">
+          <div className="text-2xl mb-2">✅</div>
+          <div className="font-bold">分享成功！</div>
+          <div className="text-sm opacity-80">海报已保存到相册</div>
+        </div>
+      )}
     </div>
   );
 };

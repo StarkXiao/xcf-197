@@ -2362,14 +2362,14 @@ export const WORKSHOP_LETTERS = [
     icon: '💌',
     rarity: 'common',
     fragments: [
-      { id: 'wf-1-1', text: '当第一缕星光穿透夜幕', levelRequired: 1 },
-      { id: 'wf-1-2', text: '我便在银河的尽头等你的身影', levelRequired: 2 },
-      { id: 'wf-1-3', text: '每一次心跳都是星辰的低语', levelRequired: 3 },
-      { id: 'wf-1-4', text: '愿这份爱如北极星般永恒', levelRequired: 4 },
-      { id: 'wf-1-5', text: '穿越时空，只为与你相遇', levelRequired: 5 }
+      { id: 'wf-1-1', text: '当第一缕星光穿透夜幕', levelRequired: 1, starId: 'star-1' },
+      { id: 'wf-1-2', text: '我便在银河的尽头等你的身影', levelRequired: 2, starId: 'star-2' },
+      { id: 'wf-1-3', text: '每一次心跳都是星辰的低语', levelRequired: 3, starId: 'star-3' },
+      { id: 'wf-1-4', text: '愿这份爱如北极星般永恒', levelRequired: 4, starId: 'star-4' },
+      { id: 'wf-1-5', text: '穿越时空，只为与你相遇', levelRequired: 5, starId: 'star-5' }
     ],
     completeText: '当第一缕星光穿透夜幕，我便在银河的尽头等你的身影。每一次心跳都是星辰的低语，愿这份爱如北极星般永恒，穿越时空，只为与你相遇。',
-    unlockCondition: '通关第1关即可开始拼接'
+    unlockCondition: '收集北极星、猎户座、北斗七星、织女星、天狼星碎片'
   },
   {
     id: 'wl-2',
@@ -2378,14 +2378,14 @@ export const WORKSHOP_LETTERS = [
     icon: '🌙',
     rarity: 'rare',
     fragments: [
-      { id: 'wf-2-1', text: '月光洒落你的发梢', levelRequired: 1 },
-      { id: 'wf-2-2', text: '银色的丝线将两颗心悄悄相连', levelRequired: 2 },
-      { id: 'wf-2-3', text: '我听见织女在云端轻叹', levelRequired: 3 },
-      { id: 'wf-2-4', text: '那是千年未变的深情守望', levelRequired: 4 },
-      { id: 'wf-2-5', text: '愿化月光入你怀，此生不相离', levelRequired: 5 }
+      { id: 'wf-2-1', text: '月光洒落你的发梢', levelRequired: 1, starId: 'star-6' },
+      { id: 'wf-2-2', text: '银色的丝线将两颗心悄悄相连', levelRequired: 2, starId: 'star-7' },
+      { id: 'wf-2-3', text: '我听见织女在云端轻叹', levelRequired: 3, starId: 'star-8' },
+      { id: 'wf-2-4', text: '那是千年未变的深情守望', levelRequired: 4, starId: 'star-9' },
+      { id: 'wf-2-5', text: '愿化月光入你怀，此生不相离', levelRequired: 5, starId: 'star-10' }
     ],
     completeText: '月光洒落你的发梢，银色的丝线将两颗心悄悄相连。我听见织女在云端轻叹，那是千年未变的深情守望。愿化月光入你怀，此生不相离。',
-    unlockCondition: '收集5个星座碎片'
+    unlockCondition: '收集仙女座、天琴座、天蝎座、狮子座、双子座碎片'
   },
   {
     id: 'wl-3',
@@ -2394,14 +2394,14 @@ export const WORKSHOP_LETTERS = [
     icon: '🌌',
     rarity: 'epic',
     fragments: [
-      { id: 'wf-3-1', text: '银河为证，星辰为誓', levelRequired: 2 },
-      { id: 'wf-3-2', text: '我愿渡过千万光年的距离', levelRequired: 3 },
-      { id: 'wf-3-3', text: '只为在你身旁停留一刻', levelRequired: 4 },
-      { id: 'wf-3-4', text: '即使宇宙终将冷却', levelRequired: 5 },
-      { id: 'wf-3-5', text: '我对你的爱也将如恒星般燃烧', levelRequired: 5 }
+      { id: 'wf-3-1', text: '银河为证，星辰为誓', levelRequired: 2, starId: 'star-11' },
+      { id: 'wf-3-2', text: '我愿渡过千万光年的距离', levelRequired: 3, starId: 'star-12' },
+      { id: 'wf-3-3', text: '只为在你身旁停留一刻', levelRequired: 4, starId: 'star-1' },
+      { id: 'wf-3-4', text: '即使宇宙终将冷却', levelRequired: 5, starId: 'star-2' },
+      { id: 'wf-3-5', text: '我对你的爱也将如恒星般燃烧', levelRequired: 5, starId: 'star-3' }
     ],
     completeText: '银河为证，星辰为誓，我愿渡过千万光年的距离，只为在你身旁停留一刻。即使宇宙终将冷却，我对你的爱也将如恒星般燃烧。',
-    unlockCondition: '通关第3关'
+    unlockCondition: '收集双鱼座、处女座、北极星、猎户座、北斗七星碎片'
   },
   {
     id: 'wl-4',
@@ -2410,14 +2410,14 @@ export const WORKSHOP_LETTERS = [
     icon: '🎶',
     rarity: 'epic',
     fragments: [
-      { id: 'wf-4-1', text: '琴弦震动，音符化作漫天流萤', levelRequired: 3 },
-      { id: 'wf-4-2', text: '每一只萤火虫都载着我未说出口的话', levelRequired: 3 },
-      { id: 'wf-4-3', text: '它们飞过星河，穿越银河', levelRequired: 4 },
-      { id: 'wf-4-4', text: '在你的窗前化作一道温柔的光', levelRequired: 5 },
-      { id: 'wf-4-5', text: '那是我——用一生演奏的安眠曲', levelRequired: 5 }
+      { id: 'wf-4-1', text: '琴弦震动，音符化作漫天流萤', levelRequired: 3, starId: 'star-7' },
+      { id: 'wf-4-2', text: '每一只萤火虫都载着我未说出口的话', levelRequired: 3, starId: 'star-4' },
+      { id: 'wf-4-3', text: '它们飞过星河，穿越银河', levelRequired: 4, starId: 'star-5' },
+      { id: 'wf-4-4', text: '在你的窗前化作一道温柔的光', levelRequired: 5, starId: 'star-6' },
+      { id: 'wf-4-5', text: '那是我——用一生演奏的安眠曲', levelRequired: 5, starId: 'star-8' }
     ],
     completeText: '琴弦震动，音符化作漫天流萤，每一只萤火虫都载着我未说出口的话。它们飞过星河，穿越银河，在你的窗前化作一道温柔的光。那是我——用一生演奏的安眠曲。',
-    unlockCondition: '解锁天琴座守护者故事'
+    unlockCondition: '收集天琴座、织女星、天狼星、仙女座、天蝎座碎片'
   },
   {
     id: 'wl-5',
@@ -2426,14 +2426,14 @@ export const WORKSHOP_LETTERS = [
     icon: '💞',
     rarity: 'legendary',
     fragments: [
-      { id: 'wf-5-1', text: '两条鱼在星河中相遇', levelRequired: 4 },
-      { id: 'wf-5-2', text: '丝带将它们的尾巴系在一起', levelRequired: 4 },
-      { id: 'wf-5-3', text: '从此，一尾向东，一尾向西', levelRequired: 5 },
-      { id: 'wf-5-4', text: '却永远被爱的羁绊牵引着', levelRequired: 5 },
-      { id: 'wf-5-5', text: '这就是永恒——不在于相守，而在于不弃', levelRequired: 5 }
+      { id: 'wf-5-1', text: '两条鱼在星河中相遇', levelRequired: 4, starId: 'star-11' },
+      { id: 'wf-5-2', text: '丝带将它们的尾巴系在一起', levelRequired: 4, starId: 'star-10' },
+      { id: 'wf-5-3', text: '从此，一尾向东，一尾向西', levelRequired: 5, starId: 'star-9' },
+      { id: 'wf-5-4', text: '却永远被爱的羁绊牵引着', levelRequired: 5, starId: 'star-12' },
+      { id: 'wf-5-5', text: '这就是永恒——不在于相守，而在于不弃', levelRequired: 5, starId: 'star-1' }
     ],
     completeText: '两条鱼在星河中相遇，丝带将它们的尾巴系在一起。从此，一尾向东，一尾向西，却永远被爱的羁绊牵引着。这就是永恒——不在于相守，而在于不弃。',
-    unlockCondition: '收集全部12个星座碎片'
+    unlockCondition: '收集双鱼座、双子座、狮子座、处女座、北极星碎片'
   }
 ];
 
