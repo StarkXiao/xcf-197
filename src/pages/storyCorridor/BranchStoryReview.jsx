@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LEVELS } from '../../data/gameData';
+import { LEVELS, CHARACTER_RELATIONS } from '../../data/gameData';
 import Modal from '../../components/Modal';
 
 const BranchStoryReview = ({ archive }) => {

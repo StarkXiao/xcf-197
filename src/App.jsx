@@ -11,7 +11,8 @@ import DivinationShopPage from './pages/DivinationShopPage';
 import StoryCorridorPage from './pages/StoryCorridorPage';
 import StarryBackground from './components/StarryBackground';
 import AchievementUnlockModal from './components/AchievementUnlockModal';
-import { LEVELS, getLevelById } from './data/gameData';
+import StoryChoiceModal from './components/StoryChoiceModal';
+import { LEVELS, getLevelById, getStoryBranchByChapter } from './data/gameData';
 import { useArchive } from './hooks/useArchive';
 import { useDailyChallenge } from './hooks/useDailyChallenge';
 import { useAchievements } from './hooks/useAchievements';
@@ -37,6 +38,8 @@ function App() {
   const [isWin, setIsWin] = useState(false);
   const [unlockedLevel, setUnlockedLevel] = useState(1);
   const [highScores, setHighScores] = useState({});
+  const [showStoryChoiceModal, setShowStoryChoiceModal] = useState(false);
+  const [pendingStoryChapterId, setPendingStoryChapterId] = useState(null);
   const archive = useArchive();
   const dailyChallenge = useDailyChallenge();
   const achievements = useAchievements(archive);
@@ -99,7 +102,6 @@ function App() {
   const handleWin = (result) => {
     setIsWin(true);
     setGameResult(result);
-    setCurrentPage(PAGES.RESULT);
     saveProgress(result.levelId, result.score);
 
     const level = getLevelById(result.levelId);
@@ -122,6 +124,16 @@ function App() {
         archive.incrementFastLevel();
       }
     }
+
+    const branch = getStoryBranchByChapter(result.levelId);
+    if (branch && !archive.storyChoices[branch.choicePoint.id]) {
+      setPendingStoryChapterId(result.levelId);
+      setTimeout(() => {
+        setShowStoryChoiceModal(true);
+      }, 500);
+    }
+
+    setCurrentPage(PAGES.RESULT);
   };
 
   const handleOpenArchive = () => {
@@ -344,6 +356,13 @@ function App() {
       <AchievementUnlockModal
         achievements={achievements}
         onClose={handleCloseAchievementModal}
+      />
+
+      <StoryChoiceModal
+        isOpen={showStoryChoiceModal}
+        onClose={() => setShowStoryChoiceModal(false)}
+        chapterId={pendingStoryChapterId}
+        archive={archive}
       />
     </div>
   );
