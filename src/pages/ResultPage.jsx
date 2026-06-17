@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { getLevelById, FULL_LETTER, getRarityInfo, getAchievementById, getTitleById, getStarRailTitle, getChapterById, getNodeById, getChapterStats, LOVE_LETTER_CONFIG } from '../data/gameData';
+import { getLevelById, FULL_LETTER, getRarityInfo, getAchievementById, getTitleById, getStarRailTitle, getChapterById, getNodeById, getChapterStats, LOVE_LETTER_CONFIG, STAR_PATTERNS, getStarAlbumStats } from '../data/gameData';
 
-const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLevel, achievements, onOpenAchievements, isChapterMode = false, currentChapter, currentNodeId, onContinue, onBackToStarMap, chapterProgress = {} }) => {
+const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLevel, achievements, onOpenAchievements, archive, onOpenStarAlbum, isChapterMode = false, currentChapter, currentNodeId, onContinue, onBackToStarMap, chapterProgress = {} }) => {
   const level = getLevelById(result?.levelId || 1);
   const chapter = currentChapter ? getChapterById(currentChapter) : null;
   const currentNode = currentChapter && currentNodeId ? getNodeById(currentChapter, currentNodeId) : null;
@@ -11,6 +11,7 @@ const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLeve
   ).find(s => s.chapterId === currentChapter) : null;
   
   const [showAchievementSection, setShowAchievementSection] = useState(false);
+  const [showStarCollection, setShowStarCollection] = useState(false);
   const [showChapterProgress, setShowChapterProgress] = useState(false);
   const [showLoveLetterEnding, setShowLoveLetterEnding] = useState(false);
   const [endingStage, setEndingStage] = useState(0);
@@ -52,6 +53,15 @@ const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLeve
       return () => clearTimeout(timer);
     }
   }, [achievements?.newAchievements?.length]);
+
+  useEffect(() => {
+    if (isWin && archive && level) {
+      const timer = setTimeout(() => {
+        setShowStarCollection(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isWin, archive, level]);
 
   useEffect(() => {
     if (isChapterMode && isWin) {
@@ -442,6 +452,105 @@ const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLeve
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {isWin && archive && showStarCollection && level && (
+          <div className="bg-gradient-to-br from-star-gold/10 to-star-purple/20 rounded-2xl p-5 mb-6 border border-star-gold/30 animate-slide-in">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">📖</span>
+                <span className="font-bold text-star-gold">星纹图鉴</span>
+                <span className="text-xs bg-star-gold/20 text-star-gold px-2 py-0.5 rounded-full">
+                  收集进度
+                </span>
+              </div>
+              {onOpenStarAlbum && (
+                <button
+                  onClick={onOpenStarAlbum}
+                  className="text-xs text-star-cyan hover:text-star-cyan/80 transition-colors"
+                >
+                  查看图鉴 →
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-white/70 text-sm">
+                本关收录星座
+              </div>
+              <div className="text-star-gold font-bold">
+                {level.stars?.length || 0} 颗
+              </div>
+            </div>
+
+            <div className="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
+              {level.stars?.map((starId, index) => {
+                const star = STAR_PATTERNS.find(s => s.id === starId);
+                if (!star) return null;
+                const isCollected = archive.collectedFragments?.includes(starId);
+                const rarityInfo = getRarityInfo(star.rarity);
+                
+                return (
+                  <div
+                    key={starId}
+                    className={`flex-shrink-0 w-16 p-2 rounded-xl border-2 text-center
+                      ${isCollected ? `rarity-${star.rarity}` : 'border-white/10 bg-white/5 opacity-60'}
+                    `}
+                    style={{
+                      animationDelay: `${index * 0.1}s`,
+                      backgroundColor: isCollected ? rarityInfo.bgColor : undefined
+                    }}
+                  >
+                    <div
+                      className={`text-2xl mb-1 ${isCollected ? '' : 'grayscale'}`}
+                      style={{ filter: isCollected ? `drop-shadow(0 0 4px ${star.color})` : 'none' }}
+                    >
+                      {star.symbol}
+                    </div>
+                    <div className="text-[10px] font-medium truncate">
+                      {star.name}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <div className="flex justify-between text-xs text-white/60 mb-1">
+                  <span>图鉴完成度</span>
+                  <span>{getStarAlbumStats(archive.collectedFragments).percentage}%</span>
+                </div>
+                <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-star-gold to-star-pink rounded-full progress-glow transition-all duration-1000"
+                    style={{ width: `${getStarAlbumStats(archive.collectedFragments).percentage}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="bg-white/5 rounded-lg p-2">
+                  <div className="text-star-cyan font-bold text-sm">
+                    {archive.getCollectionStats().unlockedChapters}/5
+                  </div>
+                  <div className="text-[10px] text-white/50">章节解锁</div>
+                </div>
+                <div className="bg-white/5 rounded-lg p-2">
+                  <div className="text-star-pink font-bold text-sm">
+                    {archive.getCollectionStats().threeStarCount}
+                  </div>
+                  <div className="text-[10px] text-white/50">三星关卡</div>
+                </div>
+                <div className="bg-white/5 rounded-lg p-2">
+                  <div className="text-star-gold font-bold text-sm">
+                    {archive.getCollectionStats().unlockedEndings}/3
+                  </div>
+                  <div className="text-[10px] text-white/50">隐藏结局</div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

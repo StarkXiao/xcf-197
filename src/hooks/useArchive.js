@@ -20,6 +20,10 @@ export const useArchive = () => {
   const [characterAffection, setCharacterAffection] = useState({});
   const [unlockedStoryBranches, setUnlockedStoryBranches] = useState([]);
   const [unlockedCharacterStories, setUnlockedCharacterStories] = useState([]);
+  const [levelBestScores, setLevelBestScores] = useState({});
+  const [levelBestMoves, setLevelBestMoves] = useState({});
+  const [levelBestTime, setLevelBestTime] = useState({});
+  const [unlockedConstellationStories, setUnlockedConstellationStories] = useState([]);
 
   const stateRef = useRef({});
 
@@ -42,6 +46,10 @@ export const useArchive = () => {
         setCharacterAffection(data.characterAffection || {});
         setUnlockedStoryBranches(data.unlockedStoryBranches || []);
         setUnlockedCharacterStories(data.unlockedCharacterStories || []);
+        setLevelBestScores(data.levelBestScores || {});
+        setLevelBestMoves(data.levelBestMoves || {});
+        setLevelBestTime(data.levelBestTime || {});
+        setUnlockedConstellationStories(data.unlockedConstellationStories || []);
       } catch (e) {
         console.error('Failed to load archive:', e);
       }
@@ -63,7 +71,11 @@ export const useArchive = () => {
       storyChoices,
       characterAffection,
       unlockedStoryBranches,
-      unlockedCharacterStories
+      unlockedCharacterStories,
+      levelBestScores,
+      levelBestMoves,
+      levelBestTime,
+      unlockedConstellationStories
     };
   });
 
@@ -83,7 +95,11 @@ export const useArchive = () => {
       storyChoices: data.storyChoices !== undefined ? data.storyChoices : s.storyChoices,
       characterAffection: data.characterAffection !== undefined ? data.characterAffection : s.characterAffection,
       unlockedStoryBranches: data.unlockedStoryBranches !== undefined ? data.unlockedStoryBranches : s.unlockedStoryBranches,
-      unlockedCharacterStories: data.unlockedCharacterStories !== undefined ? data.unlockedCharacterStories : s.unlockedCharacterStories
+      unlockedCharacterStories: data.unlockedCharacterStories !== undefined ? data.unlockedCharacterStories : s.unlockedCharacterStories,
+      levelBestScores: data.levelBestScores !== undefined ? data.levelBestScores : s.levelBestScores,
+      levelBestMoves: data.levelBestMoves !== undefined ? data.levelBestMoves : s.levelBestMoves,
+      levelBestTime: data.levelBestTime !== undefined ? data.levelBestTime : s.levelBestTime,
+      unlockedConstellationStories: data.unlockedConstellationStories !== undefined ? data.unlockedConstellationStories : s.unlockedConstellationStories
     };
     localStorage.setItem('starTowerArchive', JSON.stringify(archiveData));
   }, []);
@@ -308,6 +324,64 @@ export const useArchive = () => {
     runAllChecks({ fastLevelCount: newCount });
   }, [fastLevelCount, saveArchive, runAllChecks]);
 
+  const updateLevelBestScore = useCallback((levelId, score) => {
+    const currentBest = levelBestScores[levelId] || 0;
+    if (score > currentBest) {
+      const newBestScores = { ...levelBestScores, [levelId]: score };
+      setLevelBestScores(newBestScores);
+      saveArchive({ levelBestScores: newBestScores });
+      return true;
+    }
+    return false;
+  }, [levelBestScores, saveArchive]);
+
+  const updateLevelBestMoves = useCallback((levelId, moves) => {
+    const currentBest = levelBestMoves[levelId];
+    if (!currentBest || moves < currentBest) {
+      const newBestMoves = { ...levelBestMoves, [levelId]: moves };
+      setLevelBestMoves(newBestMoves);
+      saveArchive({ levelBestMoves: newBestMoves });
+      return true;
+    }
+    return false;
+  }, [levelBestMoves, saveArchive]);
+
+  const updateLevelBestTime = useCallback((levelId, timeLeft) => {
+    const currentBest = levelBestTime[levelId] || 0;
+    if (timeLeft > currentBest) {
+      const newBestTime = { ...levelBestTime, [levelId]: timeLeft };
+      setLevelBestTime(newBestTime);
+      saveArchive({ levelBestTime: newBestTime });
+      return true;
+    }
+    return false;
+  }, [levelBestTime, saveArchive]);
+
+  const unlockConstellationStory = useCallback((starId) => {
+    if (!unlockedConstellationStories.includes(starId)) {
+      const newUnlocked = [...unlockedConstellationStories, starId];
+      setUnlockedConstellationStories(newUnlocked);
+      saveArchive({ unlockedConstellationStories: newUnlocked });
+      return true;
+    }
+    return false;
+  }, [unlockedConstellationStories, saveArchive]);
+
+  const recordLevelCompletion = useCallback((levelId, result) => {
+    const scoreUpdated = updateLevelBestScore(levelId, result.score);
+    const movesUpdated = updateLevelBestMoves(levelId, result.moves);
+    const timeUpdated = updateLevelBestTime(levelId, result.timeLeft);
+    
+    const level = LEVELS.find(l => l.id === levelId);
+    if (level) {
+      level.stars.forEach(starId => {
+        unlockConstellationStory(starId);
+      });
+    }
+    
+    return { scoreUpdated, movesUpdated, timeUpdated };
+  }, [updateLevelBestScore, updateLevelBestMoves, updateLevelBestTime, unlockConstellationStory]);
+
   const claimReward = useCallback((rewardId) => {
     if (!claimedRewards.includes(rewardId) && unlockedRewards.includes(rewardId)) {
       const newClaimed = [...claimedRewards, rewardId];
@@ -344,12 +418,40 @@ export const useArchive = () => {
     return LEVELS.map(level => ({
       ...level,
       unlocked: unlockedChapters.includes(level.id),
-      stars: chapterStars[level.id] || 0
+      stars: chapterStars[level.id] || 0,
+      bestScore: levelBestScores[level.id] || 0,
+      bestMoves: levelBestMoves[level.id] || null,
+      bestTimeLeft: levelBestTime[level.id] || 0
     }));
   };
 
   const getLetterProgressPercent = () => {
     return Math.min(100, (letterProgress / 5) * 100);
+  };
+
+  const getCollectionStats = () => {
+    const totalStars = STAR_PATTERNS.length;
+    const collectedStars = collectedFragments.length;
+    const totalEndings = HIDDEN_ENDINGS.length;
+    const unlockedEndingsCount = unlockedEndings.length;
+    const totalChapters = LEVELS.length;
+    const unlockedChaptersCount = unlockedChapters.length;
+    const threeStarCount = getThreeStarCount(chapterStars);
+    
+    return {
+      totalStars,
+      collectedStars,
+      starPercentage: Math.round((collectedStars / totalStars) * 100),
+      totalEndings,
+      unlockedEndings: unlockedEndingsCount,
+      endingPercentage: Math.round((unlockedEndingsCount / totalEndings) * 100),
+      totalChapters,
+      unlockedChapters: unlockedChaptersCount,
+      chapterPercentage: Math.round((unlockedChaptersCount / totalChapters) * 100),
+      threeStarCount,
+      totalPlayTime,
+      maxCombo
+    };
   };
 
   const resetArchive = () => {
@@ -367,6 +469,10 @@ export const useArchive = () => {
     setCharacterAffection({});
     setUnlockedStoryBranches([]);
     setUnlockedCharacterStories([]);
+    setLevelBestScores({});
+    setLevelBestMoves({});
+    setLevelBestTime({});
+    setUnlockedConstellationStories([]);
     localStorage.removeItem('starTowerArchive');
   };
 
@@ -499,6 +605,10 @@ export const useArchive = () => {
     characterAffection,
     unlockedStoryBranches,
     unlockedCharacterStories,
+    levelBestScores,
+    levelBestMoves,
+    levelBestTime,
+    unlockedConstellationStories,
     checkStarUnlockConditions,
     collectFragmentsFromLevel,
     unlockChapter,
@@ -507,12 +617,18 @@ export const useArchive = () => {
     updateMaxCombo,
     addPlayTime,
     incrementFastLevel,
+    updateLevelBestScore,
+    updateLevelBestMoves,
+    updateLevelBestTime,
+    unlockConstellationStory,
+    recordLevelCompletion,
     claimReward,
     getFragmentCollection,
     getEndingsWithStatus,
     getRewardsWithStatus,
     getChaptersWithStatus,
     getLetterProgressPercent,
+    getCollectionStats,
     checkEndingConditions,
     checkRewardConditions,
     makeStoryChoice,

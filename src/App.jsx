@@ -151,6 +151,7 @@ function App() {
     const level = getLevelById(result.levelId);
     if (level) {
       archive.collectFragmentsFromLevel(level.stars);
+      archive.recordLevelCompletion(result.levelId, result);
       archive.unlockChapter(result.levelId);
       archive.updateLetterProgress(result.levelId);
 
@@ -516,6 +517,7 @@ function App() {
             unlockedLevel={unlockedLevel}
             highScores={highScores}
             collectedStars={archive.collectedFragments.length}
+            archive={archive}
             achievements={achievements}
             shop={shop}
             seasonChallenge={seasonChallenge}
@@ -576,6 +578,8 @@ function App() {
           hasNextLevel={hasNextLevel}
           achievements={achievements}
           onOpenAchievements={handleOpenAchievementsFromResult}
+          archive={archive}
+          onOpenStarAlbum={handleOpenStarAlbum}
           isChapterMode={!!currentNodeId}
           currentChapter={currentChapter}
           currentNodeId={currentNodeId}

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { LEVELS, getAchievementStats, CURRENCY_INFO, CURRENCY_TYPES, getCurrentSeason, getDailyThemeById } from '../data/gameData';
 
-const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, onOpenDailyChallenge, onOpenAchievements, onOpenShop, onOpenStoryCorridor, onOpenSeasonChallenge, onOpenLetterWorkshop, onOpenVisitorCommission, onOpenRepairRoom, onOpenChapterSelect, unlockedLevel = 1, highScores = {}, collectedStars = 0, achievements, shop, seasonChallenge, letterWorkshop, visitorCommission, repairRoom, chapterProgress = {}, dailyChallenge }) => {
+const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, onOpenDailyChallenge, onOpenAchievements, onOpenShop, onOpenStoryCorridor, onOpenSeasonChallenge, onOpenLetterWorkshop, onOpenVisitorCommission, onOpenRepairRoom, onOpenChapterSelect, unlockedLevel = 1, highScores = {}, collectedStars = 0, archive, achievements, shop, seasonChallenge, letterWorkshop, visitorCommission, repairRoom, chapterProgress = {}, dailyChallenge }) => {
   const [showClassicLevels, setShowClassicLevels] = useState(false);
   const currentSeason = getCurrentSeason();
   const hasUnclaimedRewards = seasonChallenge?.unclaimedStageRewardsCount > 0 || 
@@ -146,6 +146,55 @@ const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, 
           </div>
         </div>
       )}
+
+      <div className="w-full max-w-md mb-6">
+        <div 
+          onClick={onOpenStarAlbum}
+          className="bg-gradient-to-br from-star-gold/10 to-star-purple/20 rounded-2xl p-5 border border-star-gold/30 cursor-pointer hover:border-star-gold/50 hover:shadow-lg hover:shadow-star-gold/20 transition-all"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">📖</span>
+              <div>
+                <h3 className="font-bold text-star-gold">星纹图鉴</h3>
+                <p className="text-xs text-white/50">收集星座，解锁传说</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold gold-gradient-text">{collectedStars}/12</div>
+              <div className="text-xs text-white/50">已收集</div>
+            </div>
+          </div>
+          
+          <div className="relative h-2 bg-white/10 rounded-full overflow-hidden mb-4">
+            <div 
+              className="absolute inset-y-0 left-0 bg-gradient-to-r from-star-gold to-star-pink rounded-full progress-glow"
+              style={{ width: `${(collectedStars / 12) * 100}%` }}
+            />
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="bg-white/5 rounded-lg p-2">
+              <div className="text-star-cyan font-bold text-sm">
+                {archive ? archive.getCollectionStats().unlockedChapters : 0}/5
+              </div>
+              <div className="text-[10px] text-white/50">章节</div>
+            </div>
+            <div className="bg-white/5 rounded-lg p-2">
+              <div className="text-star-pink font-bold text-sm">
+                {archive ? archive.getCollectionStats().threeStarCount : 0}
+              </div>
+              <div className="text-[10px] text-white/50">三星关卡</div>
+            </div>
+            <div className="bg-white/5 rounded-lg p-2">
+              <div className="text-star-gold font-bold text-sm">
+                {archive ? archive.getCollectionStats().unlockedEndings : 0}/3
+              </div>
+              <div className="text-[10px] text-white/50">隐藏结局</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="flex flex-col sm:flex-row gap-4 mb-4">
         <button
