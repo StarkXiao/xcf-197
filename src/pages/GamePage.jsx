@@ -42,7 +42,11 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     setGameStatus,
     showHint,
     mistakeProtected,
-    flippedCards
+    flippedCards,
+    getUnmatchedCards,
+    shuffleUnmatchedCards,
+    instantMatchPair,
+    revealAllCards
   } = useGameLogic(level, {
     perfectStart: shop?.hasPerfectStart?.(),
     hasMistakeProtect: (gameEffects[ITEM_EFFECT_TYPES.MISTAKE_PROTECT] || 0) > 0
@@ -59,7 +63,8 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     startTimer,
     stopTimer,
     resetTimer,
-    addTime
+    addTime,
+    reduceTime
   } = useTimer(adjustedTimeLimit, false, () => {
     setGameStatus('lost');
   });
@@ -70,7 +75,10 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     maxCombo,
     addMatchScore,
     resetScore,
-    setScore
+    setScore,
+    resetCombo,
+    addScore,
+    reduceScore
   } = useScore(level?.baseScore || 1000);
 
   const {
@@ -269,6 +277,7 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
       },
       resetCombo: () => {
         resetCombo();
+        handleRailMistake();
       },
       getUnmatchedCards: () => getUnmatchedCards(),
       showHint: () => showHint(),
@@ -284,15 +293,17 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     }, 3000);
 
     return event;
-  }, [tryTriggerEvent, applyEventEffect, removeActiveEvent, addTime, reduceTime, addScore, reduceScore, resetCombo, getUnmatchedCards, showHint, revealAllCards, shuffleUnmatchedCards, instantMatchPair]);
+  }, [tryTriggerEvent, applyEventEffect, removeActiveEvent, addTime, reduceTime, addScore, reduceScore, resetCombo, handleRailMistake, getUnmatchedCards, showHint, revealAllCards, shuffleUnmatchedCards, instantMatchPair]);
 
   const handleCardClick = (cardId) => {
     if (frozenOperation) return;
+    if (isLocked) return;
     
     if (gameStatus === 'idle') {
       setGameStatus('playing');
     }
     
+    const flippedCountBefore = flippedCards.length;
     const hasProtect = protectCount > 0;
     const result = flipCard(cardId, { useMistakeProtect: hasProtect });
     
@@ -300,7 +311,11 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
       setProtectCount(prev => Math.max(0, prev - 1));
     }
     
-    if (flippedCards.length === 1 && !result.matched && !result.mistakeProtected) {
+    const isFirstCard = (flippedCountBefore === 0);
+    const isSecondCard = (flippedCountBefore === 1);
+    const isMismatch = isSecondCard && !result.matched && !result.mistakeProtected;
+    
+    if (isMismatch) {
       setTimeout(() => {
         handleRailMistake();
       }, 1000);
@@ -308,12 +323,14 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
 
     incrementFlipCount();
 
-    if (flippedCards.length === 1 && !result.matched) {
+    setTimeout(() => {
+      triggerAndApplyEvent('flip');
+    }, 100);
+
+    if (isMismatch) {
       setTimeout(() => {
-        if (!result.mistakeProtected) {
-          triggerAndApplyEvent('mismatch');
-        }
-      }, 800);
+        triggerAndApplyEvent('mismatch');
+      }, 1200);
     }
   };
 

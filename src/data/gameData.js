@@ -4363,9 +4363,10 @@ export const GAME_EVENTS = [
 
 export const GAME_EVENT_CONFIG = {
   baseTriggerChance: 0.25,
+  flipTriggerChance: 0.2,
   mismatchTriggerChance: 0.45,
   matchTriggerChance: 0.35,
-  minFlipsBetweenEvents: 2,
+  minFlipsBetweenEvents: 1,
   maxActiveEvents: 3
 };
 
@@ -4378,7 +4379,10 @@ export const getEventsByCategory = (category) => {
 };
 
 export const getEventsByTrigger = (triggerType) => {
-  return GAME_EVENTS.filter(ev => ev.triggerOn === triggerType || ev.triggerOn === 'everyFlip');
+  if (triggerType === 'flip') {
+    return GAME_EVENTS.filter(ev => ev.triggerOn === 'everyFlip');
+  }
+  return GAME_EVENTS.filter(ev => ev.triggerOn === triggerType);
 };
 
 export const pickRandomEvent = (triggerType, excludeIds = []) => {
@@ -4400,6 +4404,7 @@ export const shouldTriggerEvent = (triggerType, flipCountSinceLastEvent) => {
   if (flipCountSinceLastEvent < GAME_EVENT_CONFIG.minFlipsBetweenEvents) return false;
   
   let chance = GAME_EVENT_CONFIG.baseTriggerChance;
+  if (triggerType === 'flip') chance = GAME_EVENT_CONFIG.flipTriggerChance;
   if (triggerType === 'mismatch') chance = GAME_EVENT_CONFIG.mismatchTriggerChance;
   if (triggerType === 'match') chance = GAME_EVENT_CONFIG.matchTriggerChance;
   
