@@ -4652,19 +4652,26 @@ export const calculateLoveLetterEnding = (stats) => {
   const isSuccess = affection >= config.SUCCESS_THRESHOLD;
   const ending = isSuccess ? LOVE_LETTER_ENDINGS.CONFESSION_SUCCESS : LOVE_LETTER_ENDINGS.CONFESSION_FAILURE;
   
+  const moveEfficiencyBonus = Math.floor(moveEfficiency * 20);
+  const perfectBonus = (perfectMoves || 0) * config.PERFECT_MOVE_BONUS;
+  const mistakePenalty = -(mistakes || 0) * config.MISTAKE_PENALTY;
+  const timeoutPenalty = -(timeouts || 0) * config.TIMEOUT_PENALTY;
+  const restartPenalty = -(restarts || 0) * config.RESTART_PENALTY;
+
   return {
     affection,
     isSuccess,
     ending,
-    breakdown: {
-      baseAffection: config.BASE_AFFECTION,
-      moveEfficiencyBonus: Math.floor(moveEfficiency * 20),
-      comboBonus,
-      perfectBonus: (perfectMoves || 0) * config.PERFECT_MOVE_BONUS,
-      mistakePenalty: -(mistakes || 0) * config.MISTAKE_PENALTY,
-      timeoutPenalty: -(timeouts || 0) * config.TIMEOUT_PENALTY,
-      restartPenalty: -(restarts || 0) * config.RESTART_PENALTY,
-      finalAffection: affection
-    }
+    maxCombo,
+    breakdown: [
+      { label: '基础好感度', value: config.BASE_AFFECTION },
+      { label: '步数效率加成', value: moveEfficiencyBonus },
+      { label: '连击加成', value: comboBonus },
+      { label: '完美操作加成', value: perfectBonus },
+      { label: '失误惩罚', value: mistakePenalty },
+      { label: '超时惩罚', value: timeoutPenalty },
+      { label: '重开惩罚', value: restartPenalty },
+      { label: '最终好感度', value: affection, isTotal: true }
+    ]
   };
 };

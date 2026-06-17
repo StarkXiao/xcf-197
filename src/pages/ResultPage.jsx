@@ -18,6 +18,8 @@ const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLeve
   const hasLoveLetterResult = result?.loveLetterResult?.ending;
   const loveLetterEnding = result?.loveLetterResult?.ending;
   const loveLetterStats = result?.loveLetterStats;
+  const loveLetterFinalAffection = result?.loveLetterResult?.affection ?? loveLetterStats?.affection ?? 0;
+  const loveLetterMaxCombo = result?.loveLetterResult?.maxCombo ?? result?.maxCombo ?? 0;
 
   useEffect(() => {
     if (hasLoveLetterResult && isWin) {
@@ -283,7 +285,6 @@ const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLeve
               {loveLetterEnding.description}
             </p>
 
-            {loveLetterStats && (
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="bg-black/20 rounded-lg p-3 text-center">
                   <div className="text-xs text-white/50 mb-1">最终好感度</div>
@@ -291,56 +292,60 @@ const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLeve
                     className="text-lg font-bold"
                     style={{ color: loveLetterEnding.color }}
                   >
-                    {loveLetterStats.finalAffection > 0 ? '+' : ''}{loveLetterStats.finalAffection}
+                    {loveLetterFinalAffection > 0 ? '+' : ''}{loveLetterFinalAffection}
                   </div>
                 </div>
                 <div className="bg-black/20 rounded-lg p-3 text-center">
                   <div className="text-xs text-white/50 mb-1">完美操作</div>
                   <div className="text-lg font-bold text-green-400">
-                    {loveLetterStats.perfectMoves}
+                    {loveLetterStats?.perfectMoves ?? 0}
                   </div>
                 </div>
                 <div className="bg-black/20 rounded-lg p-3 text-center">
                   <div className="text-xs text-white/50 mb-1">失误次数</div>
                   <div className="text-lg font-bold text-red-400">
-                    {loveLetterStats.mistakes}
+                    {loveLetterStats?.mistakes ?? 0}
                   </div>
                 </div>
                 <div className="bg-black/20 rounded-lg p-3 text-center">
                   <div className="text-xs text-white/50 mb-1">超时次数</div>
                   <div className="text-lg font-bold text-orange-400">
-                    {loveLetterStats.timeouts}
+                    {loveLetterStats?.timeouts ?? 0}
                   </div>
                 </div>
                 <div className="bg-black/20 rounded-lg p-3 text-center">
                   <div className="text-xs text-white/50 mb-1">重开次数</div>
                   <div className="text-lg font-bold text-yellow-400">
-                    {loveLetterStats.restarts}
+                    {loveLetterStats?.restarts ?? 0}
                   </div>
                 </div>
                 <div className="bg-black/20 rounded-lg p-3 text-center">
                   <div className="text-xs text-white/50 mb-1">最高连击</div>
                   <div className="text-lg font-bold text-purple-400">
-                    x{loveLetterStats.maxCombo}
+                    x{loveLetterMaxCombo}
                   </div>
                 </div>
               </div>
-            )}
 
-            {result?.loveLetterResult?.breakdown && (
+            {result?.loveLetterResult?.breakdown && Array.isArray(result.loveLetterResult.breakdown) && (
               <div className="bg-black/20 rounded-lg p-4">
                 <div className="text-xs text-white/50 mb-2 text-center">结局判定依据</div>
                 <div className="space-y-2">
                   {result.loveLetterResult.breakdown.map((item, i) => (
-                    <div key={i} className="flex items-center justify-between text-sm">
-                      <span className="text-white/70">{item.label}</span>
+                    <div 
+                      key={i} 
+                      className={`flex items-center justify-between text-sm ${item.isTotal ? 'pt-2 mt-2 border-t border-white/10' : ''}`}
+                    >
+                      <span className={item.isTotal ? 'text-white font-bold' : 'text-white/70'}>{item.label}</span>
                       <span 
-                        className="font-bold"
+                        className={`font-bold ${item.isTotal ? 'text-base' : ''}`}
                         style={{ 
-                          color: item.value >= 0 ? '#10b981' : '#ef4444'
+                          color: item.isTotal 
+                            ? (item.value >= LOVE_LETTER_CONFIG?.SUCCESS_THRESHOLD ? '#ec4899' : '#6366f1')
+                            : (item.value >= 0 ? '#10b981' : '#ef4444')
                         }}
                       >
-                        {item.value > 0 ? '+' : ''}{item.value}
+                        {item.value > 0 && !item.isTotal ? '+' : ''}{item.value}
                       </span>
                     </div>
                   ))}
