@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { LEVELS, getAchievementStats, CURRENCY_INFO, CURRENCY_TYPES, getCurrentSeason } from '../data/gameData';
 
 const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, onOpenDailyChallenge, onOpenAchievements, onOpenShop, onOpenStoryCorridor, onOpenSeasonChallenge, onOpenLetterWorkshop, onOpenVisitorCommission, onOpenRepairRoom, onOpenChapterSelect, unlockedLevel = 1, highScores = {}, collectedStars = 0, achievements, shop, seasonChallenge, letterWorkshop, visitorCommission, repairRoom, chapterProgress = {} }) => {
+  const [showClassicLevels, setShowClassicLevels] = useState(false);
   const currentSeason = getCurrentSeason();
   const hasUnclaimedRewards = seasonChallenge?.unclaimedStageRewardsCount > 0 || 
                               seasonChallenge?.unclaimedTaskRewardsCount > 0;
@@ -44,26 +46,28 @@ const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, 
 
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <button
-          onClick={() => onStartGame(1)}
-          className="btn-star text-lg px-12 py-4 animate-pulse-slow"
+          onClick={onOpenChapterSelect}
+          className="btn-star text-lg px-12 py-4 animate-pulse-slow relative"
         >
-          ✨ 开始占卜 ✨
+          <span className="flex items-center gap-2 justify-center">
+            🗺️ 星图征程
+          </span>
+          {chapterProgress?.lastPlayedChapter && (
+            <span className="absolute -top-2 -right-2 bg-star-pink text-white text-xs px-2 py-0.5 rounded-full animate-bounce">
+              继续冒险
+            </span>
+          )}
         </button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 mb-8">
         <button
-          onClick={onOpenChapterSelect}
+          onClick={() => onStartGame(1)}
           className="px-8 py-3 rounded-full font-bold transition-all
-            border-2 border-star-cyan/50 text-star-cyan hover:bg-star-cyan/10 hover:border-star-cyan hover:shadow-lg hover:shadow-star-cyan/30
+            border-2 border-star-cyan/30 text-star-cyan/70 hover:bg-star-cyan/10 hover:border-star-cyan/50
             relative overflow-hidden group"
         >
-          <span className="relative z-10">🗺️ 星图征程</span>
-          {chapterProgress?.lastPlayedChapter && (
-            <span className="absolute -top-1 -right-1 bg-star-cyan text-white text-xs px-2 py-0.5 rounded-full">
-              继续
-            </span>
-          )}
+          <span className="relative z-10">⚡ 快速开始 · 第1关</span>
         </button>
       </div>
 
@@ -268,60 +272,66 @@ const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, 
         </div>
       )}
 
-      <div className="w-full max-w-md">
-        <h3 className="text-lg font-bold text-star-gold mb-4 text-center">
-          选择关卡
-        </h3>
-        <div className="space-y-3">
-          {LEVELS.map((level) => {
-            const isUnlocked = level.id <= unlockedLevel;
-            const highScore = highScores[level.id] || 0;
+      <div className="w-full max-w-md mt-4">
+        <button
+          onClick={() => setShowClassicLevels(!showClassicLevels)}
+          className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 
+            text-white/50 hover:text-white/70 hover:bg-white/10 transition-all
+            flex items-center justify-between"
+        >
+          <span className="text-sm">📋 旧版关卡列表（经典模式）</span>
+          <span className={`transition-transform duration-300 ${showClassicLevels ? 'rotate-180' : ''}`}>
+            ▼
+          </span>
+        </button>
+        
+        {showClassicLevels && (
+          <div className="mt-4 space-y-3 animate-fade-in">
+            <div className="text-xs text-white/40 text-center mb-2">
+              ⚠️ 建议使用「星图征程」体验完整章节剧情
+            </div>
+            {LEVELS.map((level) => {
+              const isUnlocked = level.id <= unlockedLevel;
+              const highScore = highScores[level.id] || 0;
 
-            return (
-              <div
-                key={level.id}
-                className={`p-4 rounded-xl border-2 transition-all cursor-pointer
-                  ${isUnlocked
-                    ? 'border-star-gold/50 bg-star-purple/30 hover:bg-star-purple/50 hover:border-star-gold'
-                    : 'border-gray-600/30 bg-gray-800/30 opacity-50 cursor-not-allowed'
-                  }
-                `}
-                onClick={() => isUnlocked && onSelectLevel(level.id)}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="text-2xl">
-                      {isUnlocked ? '⭐' : '🔒'}
-                    </div>
-                    <div>
-                      <div className={`font-bold ${isUnlocked ? 'text-white' : 'text-gray-500'}`}>
-                        第 {level.id} 关 · {level.name}
+              return (
+                <div
+                  key={level.id}
+                  className={`p-4 rounded-xl border-2 transition-all cursor-pointer
+                    ${isUnlocked
+                      ? 'border-star-gold/30 bg-star-purple/20 hover:bg-star-purple/40 hover:border-star-gold/50'
+                      : 'border-gray-600/20 bg-gray-800/20 opacity-50 cursor-not-allowed'
+                    }
+                  `}
+                  onClick={() => isUnlocked && onSelectLevel(level.id)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="text-xl opacity-70">
+                        {isUnlocked ? '⭐' : '🔒'}
                       </div>
-                      <div className="text-sm text-white/60">
-                        {level.description}
+                      <div>
+                        <div className={`font-bold text-sm ${isUnlocked ? 'text-white/80' : 'text-gray-500'}`}>
+                          第 {level.id} 关 · {level.name}
+                        </div>
+                        <div className="text-xs text-white/50">
+                          {level.description}
+                        </div>
                       </div>
                     </div>
+                    {highScore > 0 && (
+                      <div className="text-right">
+                        <div className="text-star-gold text-xs font-bold">
+                          {highScore}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  {highScore > 0 && (
-                    <div className="text-right">
-                      <div className="text-star-gold text-sm font-bold">
-                        {highScore}
-                      </div>
-                      <div className="text-xs text-white/40">
-                        最高分
-                      </div>
-                    </div>
-                  )}
                 </div>
-                <div className="flex gap-4 mt-2 text-xs text-white/50">
-                  <span>⏱️ {level.timeLimit}秒</span>
-                  <span>🃏 {level.pairs}对</span>
-                  <span>🎯 {level.baseScore}分</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div className="mt-8 text-center text-xs text-white/40">

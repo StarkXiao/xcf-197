@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { getChapterById, getChapterStats, NODE_TYPES } from '../data/gameData';
 
-const StarMap = ({ chapterId, onSelectNode, onBack, currentProgress = {}, onClaimReward }) => {
+const StarMap = ({ chapterId, onSelectNode, onBack, onBackHome, currentProgress = {}, onClaimReward }) => {
   const [selectedNode, setSelectedNode] = useState(null);
   const [showNodeDetail, setShowNodeDetail] = useState(false);
   const [animatingNodes, setAnimatingNodes] = useState([]);
@@ -144,9 +144,12 @@ const StarMap = ({ chapterId, onSelectNode, onBack, currentProgress = {}, onClai
       <div className="flex items-center justify-between px-4 py-4">
         <button
           onClick={onBack}
-          className="text-white/70 hover:text-white transition-colors text-2xl z-20"
+          className="flex items-center gap-1 px-3 py-1.5 rounded-full
+            border border-white/20 bg-white/5 text-white/70 hover:text-white hover:bg-white/10
+            transition-all text-sm z-20"
         >
-          ← 返回
+          <span>←</span>
+          <span>章节列表</span>
         </button>
         <div className="text-center">
           <div className="flex items-center gap-2 justify-center mb-1">
@@ -157,7 +160,18 @@ const StarMap = ({ chapterId, onSelectNode, onBack, currentProgress = {}, onClai
           </div>
           <p className="text-xs text-white/50">{chapter.subtitle}</p>
         </div>
-        <div className="w-8" />
+        {onBackHome && (
+          <button
+            onClick={onBackHome}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full
+              border border-white/20 bg-white/5 text-white/70 hover:text-white hover:bg-white/10
+              transition-all text-sm z-20"
+          >
+            <span>🏠</span>
+            <span>首页</span>
+          </button>
+        )}
+        {!onBackHome && <div className="w-20" />}
       </div>
 
       <div className="px-4 mb-4">

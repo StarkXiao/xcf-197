@@ -1,6 +1,6 @@
 import { CHAPTERS, getChapterStats, getRarityInfo } from '../data/gameData';
 
-const ChapterSelect = ({ onSelectChapter, onContinue, currentProgress = {}, lastPlayedChapter = null, lastPlayedNode = null }) => {
+const ChapterSelect = ({ onSelectChapter, onContinue, onBack, currentProgress = {}, lastPlayedChapter = null, lastPlayedNode = null }) => {
   const chapterStats = getChapterStats(currentProgress.completedNodes || {}, currentProgress.starRatings || {});
   
   const isChapterUnlocked = (chapterId) => {
@@ -36,6 +36,20 @@ const ChapterSelect = ({ onSelectChapter, onContinue, currentProgress = {}, last
 
   return (
     <div className="relative z-10 min-h-screen flex flex-col items-center px-4 py-8">
+      {onBack && (
+        <div className="absolute top-4 left-4 z-20">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 px-4 py-2 rounded-full
+              border border-white/20 bg-white/5 text-white/70 hover:text-white hover:bg-white/10
+              transition-all text-sm"
+          >
+            <span>←</span>
+            <span>返回首页</span>
+          </button>
+        </div>
+      )}
+      
       <div className="text-center mb-8">
         <div className="text-5xl mb-4 animate-float">🗺️</div>
         <h1 className="text-3xl md:text-4xl font-bold text-star-gold mb-2 glow-text">

@@ -532,6 +532,7 @@ function App() {
           <ChapterSelect
             onSelectChapter={handleSelectChapter}
             onContinue={handleContinueGame}
+            onBack={handleBackFromChapterSelect}
             currentProgress={chapterProgress.progress}
             lastPlayedChapter={chapterProgress.progress.lastPlayedChapter}
             lastPlayedNode={chapterProgress.progress.lastPlayedNode}
@@ -545,6 +546,7 @@ function App() {
             chapterId={currentChapter}
             onSelectNode={handleSelectNode}
             onBack={handleBackFromStarMap}
+            onBackHome={handleBackFromChapterSelect}
             currentProgress={chapterProgress.progress}
             onClaimReward={handleClaimReward}
           />
