@@ -126,13 +126,21 @@ const DailyChallengeGamePage = ({ dailyChallenge, onBack, onComplete, skinTheme 
           isWin: true
         };
         
-        const recordResult = dailyChallenge.recordChallengeResult(result);
+        let recordResult = null;
+        try {
+          recordResult = dailyChallenge.recordChallengeResult(result);
+        } catch (e) {
+          console.error('记录挑战结果失败:', e);
+        }
+        
         if (recordResult) {
-          if (recordResult.shardResult) {
+          if (recordResult.shardResult && recordResult.shardResult.shard) {
             setEarnedShards(recordResult.shardResult);
+            console.log('[游戏] 胜利结算获得碎片:', recordResult.shardResult);
           }
           if (recordResult.newlyCompletedTasks && recordResult.newlyCompletedTasks.length > 0) {
             setCompletedTasksInfo(recordResult.newlyCompletedTasks);
+            console.log('[游戏] 新完成任务:', recordResult.newlyCompletedTasks);
           }
         }
         
@@ -154,10 +162,17 @@ const DailyChallengeGamePage = ({ dailyChallenge, onBack, onComplete, skinTheme 
           isWin: false
         };
         
-        const recordResult = dailyChallenge.recordChallengeResult(result);
+        let recordResult = null;
+        try {
+          recordResult = dailyChallenge.recordChallengeResult(result);
+        } catch (e) {
+          console.error('记录挑战结果失败:', e);
+        }
+        
         if (recordResult) {
-          if (recordResult.shardResult) {
+          if (recordResult.shardResult && recordResult.shardResult.shard) {
             setEarnedShards(recordResult.shardResult);
+            console.log('[游戏] 失败结算获得碎片:', recordResult.shardResult);
           }
           if (recordResult.newlyCompletedTasks && recordResult.newlyCompletedTasks.length > 0) {
             setCompletedTasksInfo(recordResult.newlyCompletedTasks);
@@ -428,26 +443,37 @@ const DailyChallengeGamePage = ({ dailyChallenge, onBack, onComplete, skinTheme 
               {challengeResult.isWin ? '挑战成功！' : '继续加油！'}
             </div>
 
-            {earnedShards && earnedShards.amount > 0 && (
+            {earnedShards && earnedShards.shard && earnedShards.amount > 0 && (
               <div
                 className="mb-4 p-3 rounded-xl border-2 animate-pulse-slow"
                 style={{
-                  borderColor: `${getRarityColor(earnedShards.shard.rarity)}60`,
-                  background: `linear-gradient(135deg, ${getRarityColor(earnedShards.shard.rarity)}15 0%, ${getRarityColor(earnedShards.shard.rarity)}05 100%)`
+                  borderColor: `${getRarityColor(earnedShards.shard.rarity || 'rare')}60`,
+                  background: `linear-gradient(135deg, ${getRarityColor(earnedShards.shard.rarity || 'rare')}15 0%, ${getRarityColor(earnedShards.shard.rarity || 'rare')}05 100%)`
                 }}
               >
                 <div className="text-xs text-white/60 mb-1">获得限定碎片</div>
                 <div className="flex items-center justify-center gap-2">
-                  <span className="text-3xl">{earnedShards.shard.icon}</span>
+                  <span className="text-3xl">{earnedShards.shard.icon || '💎'}</span>
                   <div className="text-left">
-                    <div className="font-bold" style={{ color: getRarityColor(earnedShards.shard.rarity) }}>
-                      {earnedShards.shard.name}
+                    <div className="font-bold" style={{ color: getRarityColor(earnedShards.shard.rarity || 'rare') }}>
+                      {earnedShards.shard.name || '神秘碎片'}
                     </div>
                     <div className="text-star-gold font-bold">
                       ×{earnedShards.amount}
                     </div>
                   </div>
                 </div>
+                {earnedShards.newlyUnlockedRewards && earnedShards.newlyUnlockedRewards.length > 0 && (
+                  <div className="mt-2 pt-2 border-t border-white/10">
+                    <div className="text-xs text-green-400 mb-1">🎉 解锁新奖励</div>
+                    {earnedShards.newlyUnlockedRewards.map((reward, idx) => (
+                      <div key={idx} className="text-xs text-white/80 flex items-center justify-center gap-1">
+                        <span>{reward.icon}</span>
+                        <span>{reward.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

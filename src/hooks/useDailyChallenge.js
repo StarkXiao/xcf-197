@@ -335,53 +335,79 @@ export const useDailyChallenge = () => {
   }, [currentTheme]);
 
   const collectLimitedShard = useCallback((themeId, amount = 1) => {
-    const shardInfo = getDailyShardByThemeId(themeId);
-    if (!shardInfo) return null;
-
-    const shardId = shardInfo.id;
-    const newCollected = { ...collectedShards };
-    newCollected[shardId] = (newCollected[shardId] || 0) + amount;
-    
-    const newTotal = totalShardsCollected + amount;
-    const newToday = todayShardsEarned + amount;
-
-    setCollectedShards(newCollected);
-    setTotalShardsCollected(newTotal);
-    setTodayShardsEarned(newToday);
-
-    const newUnlocked = [...shardRewardsUnlocked];
-    const shardRewards = getShardRewardProgress(newTotal);
-    shardRewards.forEach(reward => {
-      if (reward.unlocked && !newUnlocked.includes(reward.id)) {
-        newUnlocked.push(reward.id);
+    try {
+      const shardInfo = getDailyShardByThemeId(themeId);
+      if (!shardInfo) {
+        console.warn('collectLimitedShard: 未找到主题对应的碎片，themeId:', themeId);
+        return null;
       }
-    });
-    setShardRewardsUnlocked(newUnlocked);
+      if (amount <= 0) {
+        console.warn('collectLimitedShard: 碎片数量必须大于0，amount:', amount);
+        return null;
+      }
 
-    saveDailyChallenge({
-      collectedShards: newCollected,
-      totalShardsCollected: newTotal,
-      todayShardsEarned: newToday,
-      shardRewardsUnlocked: newUnlocked
-    });
+      const shardId = shardInfo.id;
+      const newCollected = { ...(collectedShards || {}) };
+      newCollected[shardId] = (newCollected[shardId] || 0) + amount;
+      
+      const newTotal = (totalShardsCollected || 0) + amount;
+      const newToday = (todayShardsEarned || 0) + amount;
 
-    return {
-      shard: shardInfo,
-      amount,
-      newTotal,
-      newlyUnlockedRewards: shardRewards.filter(r => 
-        reward.unlocked && !shardRewardsUnlocked.includes(r.id)
-      )
-    };
+      setCollectedShards(newCollected);
+      setTotalShardsCollected(newTotal);
+      setTodayShardsEarned(newToday);
+
+      const newUnlocked = [...(shardRewardsUnlocked || [])];
+      let shardRewards = [];
+      try {
+        shardRewards = getShardRewardProgress(newTotal) || [];
+      } catch (e) {
+        console.error('获取碎片奖励进度失败:', e);
+      }
+      
+      shardRewards.forEach(reward => {
+        if (reward && reward.unlocked && !newUnlocked.includes(reward.id)) {
+          newUnlocked.push(reward.id);
+        }
+      });
+      setShardRewardsUnlocked(newUnlocked);
+
+      saveDailyChallenge({
+        collectedShards: newCollected,
+        totalShardsCollected: newTotal,
+        todayShardsEarned: newToday,
+        shardRewardsUnlocked: newUnlocked
+      });
+
+      const newlyUnlocked = shardRewards.filter(r => 
+        r && r.unlocked && !shardRewardsUnlocked.includes(r.id)
+      );
+
+      console.log(`[每日挑战] 获得限定碎片: ${shardInfo.name} x${amount}, 累计: ${newTotal}枚`);
+      if (newlyUnlocked.length > 0) {
+        console.log('[每日挑战] 解锁新的碎片奖励:', newlyUnlocked.map(r => r.name));
+      }
+
+      return {
+        shard: shardInfo,
+        amount,
+        newTotal,
+        newlyUnlockedRewards: newlyUnlocked
+      };
+    } catch (error) {
+      console.error('collectLimitedShard 错误:', error);
+      return null;
+    }
   }, [collectedShards, totalShardsCollected, todayShardsEarned, shardRewardsUnlocked, saveDailyChallenge]);
 
   const calculateShardReward = useCallback((result) => {
+    if (!result) return 0;
     const baseAmount = result.isWin ? 1 : 0;
     let bonusAmount = 0;
     
     if (result.stars === 3) bonusAmount += 1;
-    if (result.maxCombo >= 10) bonusAmount += 1;
-    if (result.score >= 8000) bonusAmount += 1;
+    if ((result.maxCombo || 0) >= 10) bonusAmount += 1;
+    if ((result.score || 0) >= 8000) bonusAmount += 1;
     
     return baseAmount + bonusAmount;
   }, []);
@@ -477,66 +503,105 @@ export const useDailyChallenge = () => {
   }, [claimedTasks, completedTasks, totalBonusPoints, saveDailyChallenge]);
 
   const recordChallengeResult = useCallback((result) => {
-    const completeTime = result.timeLimit - result.timeLeft;
-    const newlyCompletedTasks = checkTaskCompletion({ ...result, timeLimit: result.timeLimit });
-    
-    const record = {
-      id: Date.now(),
-      date: getTodayDateString(),
-      score: result.score,
-      maxCombo: result.maxCombo,
-      timeLeft: result.timeLeft,
-      completeTime,
-      moves: result.moves,
-      stars: result.stars,
-      tasksCompleted: newlyCompletedTasks,
-      isWin: result.isWin
-    };
-    
-    const newRecords = [record, ...challengeRecords].slice(0, 20);
-    setChallengeRecords(newRecords);
-    
-    const shardAmount = calculateShardReward(result);
-    let shardResult = null;
-    if (shardAmount > 0 && currentTheme) {
-      shardResult = collectLimitedShard(currentTheme, shardAmount);
-    }
-    
-    let newEntryStatus = challengeEntryStatus;
-    if (challengeEntryStatus === DAILY_CHALLENGE_ENTRY_STATUS.NOT_STARTED) {
-      newEntryStatus = DAILY_CHALLENGE_ENTRY_STATUS.IN_PROGRESS;
-    }
-    if (result.isWin && newEntryStatus === DAILY_CHALLENGE_ENTRY_STATUS.IN_PROGRESS) {
-      newEntryStatus = DAILY_CHALLENGE_ENTRY_STATUS.COMPLETED;
-    }
-    
-    const newCompletedTasks = [...completedTasks, ...newlyCompletedTasks];
-    const allTasksDone = dailyTasks.every(t => newCompletedTasks.includes(t));
-    if (allTasksDone && newEntryStatus !== DAILY_CHALLENGE_ENTRY_STATUS.REWARD_CLAIMED) {
-      newEntryStatus = DAILY_CHALLENGE_ENTRY_STATUS.ALL_TASKS_DONE;
-    }
-    
-    setChallengeEntryStatus(newEntryStatus);
-    
-    if (result.score > todayBestScore) {
-      setTodayBestScore(result.score);
-      saveDailyChallenge({
-        challengeRecords: newRecords,
-        todayBestScore: result.score,
-        challengeEntryStatus: newEntryStatus
+    try {
+      console.log('[每日挑战] 开始结算，结果:', result);
+      
+      if (!result) {
+        console.error('recordChallengeResult: result 为空');
+        return null;
+      }
+
+      const completeTime = (result.timeLimit || 0) - (result.timeLeft || 0);
+      
+      let newlyCompletedTasks = [];
+      try {
+        newlyCompletedTasks = checkTaskCompletion({ ...result, timeLimit: result.timeLimit || 90 }) || [];
+      } catch (e) {
+        console.error('检查任务完成情况失败:', e);
+      }
+      
+      const record = {
+        id: Date.now(),
+        date: getTodayDateString(),
+        score: result.score || 0,
+        maxCombo: result.maxCombo || 0,
+        timeLeft: result.timeLeft || 0,
+        completeTime,
+        moves: result.moves || 0,
+        stars: result.stars || 1,
+        tasksCompleted: newlyCompletedTasks,
+        isWin: !!result.isWin
+      };
+      
+      const newRecords = [record, ...(challengeRecords || [])].slice(0, 20);
+      setChallengeRecords(newRecords);
+      
+      let shardResult = null;
+      try {
+        const shardAmount = calculateShardReward(result);
+        if (shardAmount > 0 && currentTheme) {
+          shardResult = collectLimitedShard(currentTheme, shardAmount);
+        }
+      } catch (e) {
+        console.error('计算/发放碎片奖励失败:', e);
+      }
+      
+      let newEntryStatus = challengeEntryStatus;
+      try {
+        if (challengeEntryStatus === DAILY_CHALLENGE_ENTRY_STATUS.NOT_STARTED) {
+          newEntryStatus = DAILY_CHALLENGE_ENTRY_STATUS.IN_PROGRESS;
+        }
+        if (result.isWin && newEntryStatus === DAILY_CHALLENGE_ENTRY_STATUS.IN_PROGRESS) {
+          newEntryStatus = DAILY_CHALLENGE_ENTRY_STATUS.COMPLETED;
+        }
+        
+        const newCompletedTasks = [...(completedTasks || []), ...newlyCompletedTasks];
+        const allTasksDone = dailyTasks && dailyTasks.length > 0 && 
+          dailyTasks.every(t => newCompletedTasks.includes(t));
+        if (allTasksDone && newEntryStatus !== DAILY_CHALLENGE_ENTRY_STATUS.REWARD_CLAIMED) {
+          newEntryStatus = DAILY_CHALLENGE_ENTRY_STATUS.ALL_TASKS_DONE;
+        }
+      } catch (e) {
+        console.error('更新挑战状态失败:', e);
+      }
+      
+      setChallengeEntryStatus(newEntryStatus);
+      
+      try {
+        if (result.score > todayBestScore) {
+          setTodayBestScore(result.score);
+          saveDailyChallenge({
+            challengeRecords: newRecords,
+            todayBestScore: result.score,
+            challengeEntryStatus: newEntryStatus
+          });
+        } else {
+          saveDailyChallenge({
+            challengeRecords: newRecords,
+            challengeEntryStatus: newEntryStatus
+          });
+        }
+      } catch (e) {
+        console.error('保存挑战记录失败:', e);
+      }
+      
+      console.log('[每日挑战] 结算完成', {
+        score: result.score,
+        stars: result.stars,
+        isWin: result.isWin,
+        shardAmount: shardResult?.amount || 0,
+        tasksCompleted: newlyCompletedTasks.length
       });
-    } else {
-      saveDailyChallenge({
-        challengeRecords: newRecords,
-        challengeEntryStatus: newEntryStatus
-      });
+      
+      return {
+        record,
+        shardResult,
+        newlyCompletedTasks
+      };
+    } catch (error) {
+      console.error('recordChallengeResult 结算错误:', error);
+      return null;
     }
-    
-    return {
-      record,
-      shardResult,
-      newlyCompletedTasks
-    };
   }, [
     challengeRecords, 
     todayBestScore, 
