@@ -6,7 +6,8 @@ import { useTimer } from '../hooks/useTimer';
 import { useScore } from '../hooks/useScore';
 import { useStarRailChain } from '../hooks/useStarRailChain';
 import { useGameEvents } from '../hooks/useGameEvents';
-import { getLevelById, ITEM_EFFECT_TYPES, getItemEffectInfo, getShopItemById, getRarityInfo, getStarRailChainLevel, GAME_EVENT_CATEGORIES } from '../data/gameData';
+import { useLoveLetterEnding } from '../hooks/useLoveLetterEnding';
+import { getLevelById, ITEM_EFFECT_TYPES, getItemEffectInfo, getShopItemById, getRarityInfo, getStarRailChainLevel, GAME_EVENT_CATEGORIES, LOVE_LETTER_CONFIG } from '../data/gameData';
 
 const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
   const level = getLevelById(levelId);
@@ -26,10 +27,12 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
   const [storyEventResult, setStoryEventResult] = useState(null);
   const [eventScorePopup, setEventScorePopup] = useState(null);
   const [eventTimePopup, setEventTimePopup] = useState(null);
+  const [showAffectionMeter, setShowAffectionMeter] = useState(true);
   const prevMatchedRef = useRef(0);
   const prevRailLevelRef = useRef(null);
   const effectsAppliedRef = useRef(false);
   const lastTriggerTypeRef = useRef(null);
+  const loveLetterEndingRef = useRef(null);
 
   const {
     cards,
@@ -120,6 +123,38 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     isCardRevealed
   } = useGameEvents();
 
+  const {
+    affection,
+    currentEvent: loveLetterEvent,
+    showEventPopup: showLoveLetterPopup,
+    setShowTendencyHint,
+    onMatch: onLoveLetterMatch,
+    onMismatch: onLoveLetterMismatch,
+    onTimeout: onLoveLetterTimeout,
+    onRestart: onLoveLetterRestart,
+    onHintUsed: onLoveLetterHintUsed,
+    onProtectUsed: onLoveLetterProtectUsed,
+    onTimeWarning: onLoveLetterTimeWarning,
+    resetSession: resetLoveLetterSession,
+    fullReset: fullResetLoveLetter,
+    getCurrentTendency,
+    getEndingResult,
+    getAffectionBreakdown,
+    getStatsSummary,
+    restarts: loveLetterRestarts,
+    timeouts: loveLetterTimeouts,
+    perfectMoves,
+    mistakes
+  } = useLoveLetterEnding(level);
+
+  useEffect(() => {
+    loveLetterEndingRef.current = {
+      affection,
+      getEndingResult,
+      getStatsSummary
+    };
+  }, [affection, getEndingResult, getStatsSummary]);
+
   useEffect(() => {
     if (shop && shop.selectedItems.length > 0 && !effectsAppliedRef.current && gameStatus === 'idle') {
       effectsAppliedRef.current = true;
@@ -146,9 +181,16 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     if (mistakeProtected) {
       setShowProtectAnimation(true);
       setProtectCount(prev => Math.max(0, prev - 1));
+      onLoveLetterProtectUsed();
       setTimeout(() => setShowProtectAnimation(false), 1500);
     }
-  }, [mistakeProtected]);
+  }, [mistakeProtected, onLoveLetterProtectUsed]);
+
+  useEffect(() => {
+    if (gameStatus === 'playing' && timeLeft <= 10 && timeLeft > 9) {
+      onLoveLetterTimeWarning();
+    }
+  }, [timeLeft, gameStatus, onLoveLetterTimeWarning]);
 
   useEffect(() => {
     if (matchedPairs.length > prevMatchedRef.current) {
@@ -157,6 +199,12 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
       const comboBoostVal = consumePendingComboBoost();
       
       const newRailCombo = handleRailMatch();
+      const currentCombo = Math.max(combo, newRailCombo);
+      
+      const optimalMoves = level?.pairs || 4;
+      const moveEfficiency = Math.max(0, (optimalMoves * 2) / (moves || 1));
+      
+      onLoveLetterMatch(currentCombo, moveEfficiency);
       
       const currentRailLevel = getStarRailChainLevel(newRailCombo);
       if (currentRailLevel && (!prevRailLevelRef.current || currentRailLevel.level > prevRailLevelRef.current.level)) {
@@ -200,7 +248,7 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
         triggerAndApplyEvent('match');
       }, 300);
     }
-  }, [matchedPairs.length, timeLeft, adjustedTimeLimit, moves, addMatchScore, shop, combo, handleRailMatch, railMultiplier, setScore, consumePendingComboBoost, triggerAndApplyEvent]);
+  }, [matchedPairs.length, timeLeft, adjustedTimeLimit, moves, addMatchScore, shop, combo, handleRailMatch, railMultiplier, setScore, consumePendingComboBoost, triggerAndApplyEvent, onLoveLetterMatch, level?.pairs]);
 
   useEffect(() => {
     if (gameStatus === 'won') {
@@ -214,6 +262,12 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
       
       const railTitle = getRailTitle();
       
+      const loveLetterResult = loveLetterEndingRef.current?.getEndingResult?.({
+        moves,
+        maxCombo: Math.max(maxCombo, railMaxCombo),
+        timeLeft
+      });
+      
       const timer = setTimeout(() => {
         onWin && onWin({
           score: shop ? shop.calculateFinalScore(score) : score,
@@ -224,17 +278,28 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
           rewardInfo,
           railMaxCombo,
           railTitle,
-          railLevel
+          railLevel,
+          loveLetterResult,
+          loveLetterStats: loveLetterEndingRef.current?.getStatsSummary?.()
         });
       }, 1500);
       return () => clearTimeout(timer);
     } else if (gameStatus === 'lost') {
       stopTimer();
+      
+      onLoveLetterTimeout();
+      
       if (shop) {
         shop.resetActiveEffects();
       }
       
       const railTitle = getRailTitle();
+      
+      const loveLetterResult = loveLetterEndingRef.current?.getEndingResult?.({
+        moves,
+        maxCombo: Math.max(maxCombo, railMaxCombo),
+        timeLeft: 0
+      });
       
       const timer = setTimeout(() => {
         onLose && onLose({
@@ -243,12 +308,14 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
           moves,
           levelId,
           railMaxCombo,
-          railTitle
+          railTitle,
+          loveLetterResult,
+          loveLetterStats: loveLetterEndingRef.current?.getStatsSummary?.()
         });
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [gameStatus, score, timeLeft, moves, levelId, maxCombo, onWin, onLose, stopTimer, shop, rewardInfo, getRailTitle, railMaxCombo, railLevel]);
+  }, [gameStatus, score, timeLeft, moves, levelId, maxCombo, onWin, onLose, stopTimer, shop, rewardInfo, getRailTitle, railMaxCombo, railLevel, onLoveLetterTimeout]);
 
   const triggerAndApplyEvent = useCallback((triggerType) => {
     const event = tryTriggerEvent(triggerType);
@@ -316,6 +383,7 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     const isMismatch = isSecondCard && !result.matched && !result.mistakeProtected;
     
     if (isMismatch) {
+      onLoveLetterMismatch();
       setTimeout(() => {
         handleRailMistake();
       }, 1000);
@@ -341,6 +409,7 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     if (result.success) {
       showHint();
       setHintCount(result.remaining);
+      onLoveLetterHintUsed();
     }
   };
 
@@ -349,6 +418,10 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     prevRailLevelRef.current = null;
     effectsAppliedRef.current = false;
     lastTriggerTypeRef.current = null;
+    
+    onLoveLetterRestart();
+    resetLoveLetterSession();
+    
     resetGame();
     resetTimer(adjustedTimeLimit);
     resetScore();
@@ -533,6 +606,50 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
         </div>
       </div>
 
+      {showAffectionMeter && (
+        <div 
+          className="mb-4 rounded-xl p-3 border"
+          style={{
+            backgroundColor: `${getCurrentTendency().color}15`,
+            borderColor: `${getCurrentTendency().color}40`
+          }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">{getCurrentTendency().icon}</span>
+              <span className="text-xs text-white/70">好感度</span>
+            </div>
+            <span 
+              className="text-sm font-bold"
+              style={{ color: getCurrentTendency().color }}
+            >
+              {affection > 0 ? '+' : ''}{affection}
+            </span>
+          </div>
+          <div className="h-2 bg-black/30 rounded-full overflow-hidden">
+            <div 
+              className="h-full rounded-full transition-all duration-500"
+              style={{
+                width: `${((affection + 100) / 2)}%`,
+                background: affection >= 30 
+                  ? 'linear-gradient(90deg, #ec4899, #f472b6)'
+                  : affection >= 0
+                  ? 'linear-gradient(90deg, #fbbf24, #f59e0b)'
+                  : 'linear-gradient(90deg, #6366f1, #8b5cf6)'
+              }}
+            />
+          </div>
+          <div className="text-center mt-2">
+            <span 
+              className="text-xs"
+              style={{ color: getCurrentTendency().color }}
+            >
+              {getCurrentTendency().text}
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="flex justify-center gap-3 mb-4">
         <button
           onClick={handleUseHint}
@@ -685,6 +802,38 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
               style={{ color: railLevelUpInfo.color }}
             >
               分数倍率 x{railLevelUpInfo.scoreMultiplier}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showLoveLetterPopup && loveLetterEvent && (
+        <div className="fixed top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50 animate-slide-in">
+          <div 
+            className="text-center px-6 py-4 rounded-2xl border-2"
+            style={{ 
+              backgroundColor: `${loveLetterEvent.color}20`,
+              borderColor: `${loveLetterEvent.color}60`,
+              boxShadow: `0 0 25px ${loveLetterEvent.color}40`
+            }}
+          >
+            <div className="text-3xl mb-2">{loveLetterEvent.icon}</div>
+            <div 
+              className="text-lg font-bold mb-1"
+              style={{ color: loveLetterEvent.color }}
+            >
+              {loveLetterEvent.title}
+            </div>
+            <div className="text-sm text-white/80 mb-2">
+              {loveLetterEvent.message}
+            </div>
+            <div 
+              className="text-sm font-bold"
+              style={{ 
+                color: loveLetterEvent.actualChange >= 0 ? '#10b981' : '#ef4444'
+              }}
+            >
+              {loveLetterEvent.actualChange >= 0 ? '+' : ''}{loveLetterEvent.actualChange} 好感度
             </div>
           </div>
         </div>

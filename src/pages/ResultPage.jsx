@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getLevelById, FULL_LETTER, getRarityInfo, getAchievementById, getTitleById, getStarRailTitle, getChapterById, getNodeById, getChapterStats } from '../data/gameData';
+import { getLevelById, FULL_LETTER, getRarityInfo, getAchievementById, getTitleById, getStarRailTitle, getChapterById, getNodeById, getChapterStats, LOVE_LETTER_CONFIG } from '../data/gameData';
 
 const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLevel, achievements, onOpenAchievements, isChapterMode = false, currentChapter, currentNodeId, onContinue, onBackToStarMap, chapterProgress = {} }) => {
   const level = getLevelById(result?.levelId || 1);
@@ -12,6 +12,35 @@ const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLeve
   
   const [showAchievementSection, setShowAchievementSection] = useState(false);
   const [showChapterProgress, setShowChapterProgress] = useState(false);
+  const [showLoveLetterEnding, setShowLoveLetterEnding] = useState(false);
+  const [endingStage, setEndingStage] = useState(0);
+
+  const hasLoveLetterResult = result?.loveLetterResult?.ending;
+  const loveLetterEnding = result?.loveLetterResult?.ending;
+  const loveLetterStats = result?.loveLetterStats;
+
+  useEffect(() => {
+    if (hasLoveLetterResult && isWin) {
+      const timer1 = setTimeout(() => {
+        setShowLoveLetterEnding(true);
+        setEndingStage(1);
+      }, 500);
+      
+      const timer2 = setTimeout(() => {
+        setEndingStage(2);
+      }, 2500);
+      
+      const timer3 = setTimeout(() => {
+        setEndingStage(3);
+      }, 5000);
+      
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+      };
+    }
+  }, [hasLoveLetterResult, isWin]);
 
   useEffect(() => {
     if (achievements?.newAchievements?.length > 0) {
@@ -46,6 +75,90 @@ const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLeve
 
   return (
     <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-8">
+      {showLoveLetterEnding && loveLetterEnding && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
+          style={{
+            background: `linear-gradient(135deg, ${loveLetterEnding.color}20 0%, ${loveLetterEnding.color}40 50%, ${loveLetterEnding.color}60 100%)`,
+            backdropFilter: 'blur(8px)'
+          }}
+        >
+          <div className="text-center max-w-lg mx-auto px-6">
+            {endingStage >= 1 && (
+              <div className="animate-fade-in mb-8">
+                <div className="text-8xl mb-6 animate-float">
+                  {loveLetterEnding.icon}
+                </div>
+                <h2 
+                  className="text-4xl font-bold mb-2 animate-slide-up"
+                  style={{ 
+                    color: loveLetterEnding.color,
+                    textShadow: `0 0 30px ${loveLetterEnding.color}60`
+                  }}
+                >
+                  {loveLetterEnding.title}
+                </h2>
+                <p className="text-white/80 text-lg animate-slide-up" style={{ animationDelay: '0.2s' }}>
+                  {loveLetterEnding.subtitle}
+                </p>
+              </div>
+            )}
+
+            {endingStage >= 2 && (
+              <div className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                <div 
+                  className="rounded-2xl p-6 mb-6 border-2 max-h-60 overflow-y-auto"
+                  style={{
+                    backgroundColor: `${loveLetterEnding.color}20`,
+                    borderColor: `${loveLetterEnding.color}60`
+                  }}
+                >
+                  <p 
+                    className="text-white/90 whitespace-pre-line leading-relaxed text-sm"
+                    style={{ color: loveLetterEnding.isSuccess ? '#fce7f3' : '#e0e7ff' }}
+                  >
+                    {loveLetterEnding.fullText}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {endingStage >= 3 && (
+              <div className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
+                <button
+                  onClick={() => setShowLoveLetterEnding(false)}
+                  className="btn-star px-8 py-3 text-lg font-bold"
+                  style={{
+                    background: `linear-gradient(135deg, ${loveLetterEnding.color}40 0%, ${loveLetterEnding.color}20 100%)`,
+                    border: `2px solid ${loveLetterEnding.color}80`
+                  }}
+                >
+                  查看结算详情 →
+                </button>
+              </div>
+            )}
+          </div>
+
+          {loveLetterEnding.id === 'confession_success' && (
+            <>
+              <div className="absolute top-1/4 left-1/4 text-4xl animate-float" style={{ animationDelay: '0.5s' }}>💕</div>
+              <div className="absolute top-1/3 right-1/4 text-3xl animate-float" style={{ animationDelay: '0.7s' }}>💖</div>
+              <div className="absolute bottom-1/3 left-1/3 text-3xl animate-float" style={{ animationDelay: '0.9s' }}>✨</div>
+              <div className="absolute bottom-1/4 right-1/3 text-4xl animate-float" style={{ animationDelay: '1.1s' }}>💗</div>
+            </>
+          )}
+
+          {loveLetterEnding.id === 'confession_failure' && (
+            <>
+              <div className="absolute top-1/4 left-1/4 text-3xl animate-float opacity-50" style={{ animationDelay: '0.5s' }}>⭐</div>
+              <div className="absolute top-1/3 right-1/4 text-2xl animate-float opacity-50" style={{ animationDelay: '0.7s' }}>💫</div>
+              <div className="absolute bottom-1/3 left-1/3 text-2xl animate-float opacity-50" style={{ animationDelay: '0.9s' }}>🌙</div>
+              <div className="absolute bottom-1/4 right-1/3 text-3xl animate-float opacity-50" style={{ animationDelay: '1.1s' }}>✨</div>
+            </>
+          )}
+        </div>
+      )}
+
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="text-6xl mb-4 animate-float">
@@ -142,6 +255,98 @@ const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLeve
             <div className="text-xs text-star-gold/80 mt-2">
               最高连击: x{result.railMaxCombo || result.maxCombo || 0}
             </div>
+          </div>
+        )}
+
+        {loveLetterEnding && isWin && (
+          <div 
+            className="rounded-2xl p-5 mb-6 border-2 animate-slide-in"
+            style={{ 
+              backgroundColor: `${loveLetterEnding.color}20`,
+              borderColor: `${loveLetterEnding.color}60`
+            }}
+          >
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <span className="text-4xl">{loveLetterEnding.icon}</span>
+              <div>
+                <h3 
+                  className="text-xl font-bold"
+                  style={{ color: loveLetterEnding.color }}
+                >
+                  {loveLetterEnding.name}
+                </h3>
+                <p className="text-sm text-white/70">{loveLetterEnding.subtitle}</p>
+              </div>
+            </div>
+
+            <p className="text-sm text-white/80 text-center mb-4">
+              {loveLetterEnding.description}
+            </p>
+
+            {loveLetterStats && (
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="bg-black/20 rounded-lg p-3 text-center">
+                  <div className="text-xs text-white/50 mb-1">最终好感度</div>
+                  <div 
+                    className="text-lg font-bold"
+                    style={{ color: loveLetterEnding.color }}
+                  >
+                    {loveLetterStats.finalAffection > 0 ? '+' : ''}{loveLetterStats.finalAffection}
+                  </div>
+                </div>
+                <div className="bg-black/20 rounded-lg p-3 text-center">
+                  <div className="text-xs text-white/50 mb-1">完美操作</div>
+                  <div className="text-lg font-bold text-green-400">
+                    {loveLetterStats.perfectMoves}
+                  </div>
+                </div>
+                <div className="bg-black/20 rounded-lg p-3 text-center">
+                  <div className="text-xs text-white/50 mb-1">失误次数</div>
+                  <div className="text-lg font-bold text-red-400">
+                    {loveLetterStats.mistakes}
+                  </div>
+                </div>
+                <div className="bg-black/20 rounded-lg p-3 text-center">
+                  <div className="text-xs text-white/50 mb-1">超时次数</div>
+                  <div className="text-lg font-bold text-orange-400">
+                    {loveLetterStats.timeouts}
+                  </div>
+                </div>
+                <div className="bg-black/20 rounded-lg p-3 text-center">
+                  <div className="text-xs text-white/50 mb-1">重开次数</div>
+                  <div className="text-lg font-bold text-yellow-400">
+                    {loveLetterStats.restarts}
+                  </div>
+                </div>
+                <div className="bg-black/20 rounded-lg p-3 text-center">
+                  <div className="text-xs text-white/50 mb-1">最高连击</div>
+                  <div className="text-lg font-bold text-purple-400">
+                    x{loveLetterStats.maxCombo}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {result?.loveLetterResult?.breakdown && (
+              <div className="bg-black/20 rounded-lg p-4">
+                <div className="text-xs text-white/50 mb-2 text-center">结局判定依据</div>
+                <div className="space-y-2">
+                  {result.loveLetterResult.breakdown.map((item, i) => (
+                    <div key={i} className="flex items-center justify-between text-sm">
+                      <span className="text-white/70">{item.label}</span>
+                      <span 
+                        className="font-bold"
+                        style={{ 
+                          color: item.value >= 0 ? '#10b981' : '#ef4444'
+                        }}
+                      >
+                        {item.value > 0 ? '+' : ''}{item.value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

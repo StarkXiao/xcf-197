@@ -4410,3 +4410,261 @@ export const shouldTriggerEvent = (triggerType, flipCountSinceLastEvent) => {
   
   return Math.random() < chance;
 };
+
+export const LOVE_LETTER_ENDINGS = {
+  CONFESSION_SUCCESS: {
+    id: 'confession_success',
+    name: '告白成功',
+    icon: '💕',
+    title: '星光下的告白',
+    subtitle: '两心相悦，终成眷属',
+    color: '#ec4899',
+    bgGradient: 'from-pink-900/60 via-rose-900/40 to-red-900/30',
+    description: '你的真诚与坚持终于打动了ta的心。在星光的见证下，你们许下了永恒的誓言。',
+    fullText: `当最后一片情书碎片归位，
+整座星塔都被温暖的光芒笼罩。
+
+你转过身，看见ta就站在星光之中，
+眼中倒映着整片银河。
+
+"我知道，"ta轻声说，
+"每一次配对，每一次连击，
+都是你在用行动告诉我——
+你有多在乎。"
+
+你握住ta的手，
+感受着掌心传来的温度。
+
+"千年等待，只为与你相遇。"
+"从今以后，换我们一起，
+书写属于我们的故事。"
+
+星光汇聚成祝福的花环，
+十二星座齐齐闪耀。
+
+——这是最好的结局——
+💕 告白成功 💕`,
+    achievementReward: 'achv-love-success',
+    titleReward: 'title-love-success'
+  },
+  CONFESSION_FAILURE: {
+    id: 'confession_failure',
+    name: '告白失败',
+    icon: '💔',
+    title: '未说出口的心意',
+    subtitle: '有些故事，还未开始就已结束',
+    color: '#6366f1',
+    bgGradient: 'from-indigo-900/60 via-blue-900/40 to-slate-900/30',
+    description: '虽然心意未能传达，但这段旅程让你成长。也许，这就是命运最好的安排。',
+    fullText: `情书碎片在你手中颤抖，
+星光似乎也变得黯淡。
+
+ta站在你面前，眼中带着歉意。
+
+"对不起，"ta的声音很轻，
+"我很感激你所做的一切，
+但是...我的心，
+已经属于另一个人了。"
+
+你愣住了，指尖的星光滑落。
+
+千年的等待，
+无数次的尝试，
+最终还是...
+
+"不过，"ta微笑着说，
+"你让我相信，
+真爱是存在的。
+只是我们，相遇得太晚了。"
+
+星风吹过，情书化为点点星尘，
+散落在银河之中。
+
+有些故事，
+注定没有完美的结局。
+但那些为之奋斗的日子，
+那些心跳加速的瞬间，
+会永远留在记忆里。
+
+——也许下一次，
+在另一个时空，
+我们会有不同的结局——
+💔 再见，我的初恋 💔`,
+    achievementReward: 'achv-love-failure',
+    titleReward: 'title-love-failure'
+  }
+};
+
+export const LOVE_LETTER_TENDENCY_HINTS = {
+  HIGH_AFFECTION: [
+    { threshold: 80, text: '💕 ta似乎对你很有好感...', color: '#ec4899', icon: '💖' },
+    { threshold: 60, text: '✨ 你感觉到ta在关注你', color: '#f472b6', icon: '✨' },
+    { threshold: 40, text: '😊 ta对你印象不错', color: '#fbbf24', icon: '😊' },
+    { threshold: 20, text: '🙂 你们正在逐渐熟悉', color: '#60a5fa', icon: '🙂' },
+    { threshold: 0, text: '😐 你们还不太熟悉', color: '#9ca3af', icon: '😐' }
+  ],
+  LOW_AFFECTION: [
+    { threshold: -80, text: '💔 ta似乎在刻意回避...', color: '#6366f1', icon: '💔' },
+    { threshold: -60, text: '😰 你感觉到了距离感', color: '#8b5cf6', icon: '😰' },
+    { threshold: -40, text: '😕 ta对你有些冷淡', color: '#a78bfa', icon: '😕' },
+    { threshold: -20, text: '😐 你们的关系有些微妙', color: '#9ca3af', icon: '😐' },
+    { threshold: 0, text: '😐 你们还不太熟悉', color: '#9ca3af', icon: '😐' }
+  ]
+};
+
+export const LOVE_LETTER_BRANCH_EVENTS = {
+  PERFECT_MATCH: {
+    id: 'perfect_match',
+    trigger: 'perfect_match',
+    title: '✨ 心有灵犀',
+    message: '你的精准配对让ta心动不已！',
+    affectionChange: 15,
+    icon: '💖',
+    color: '#ec4899'
+  },
+  GREAT_COMBO: {
+    id: 'great_combo',
+    trigger: 'great_combo',
+    title: '🔥 默契满分',
+    message: '精彩的连击！ta被你的魅力深深吸引。',
+    affectionChange: 20,
+    icon: '🔥',
+    color: '#f97316'
+  },
+  TIME_RUNNING_OUT: {
+    id: 'time_running_out',
+    trigger: 'time_running_out',
+    title: '⏰ 时间紧迫',
+    message: '你似乎有些手忙脚乱...',
+    affectionChange: -10,
+    icon: '😰',
+    color: '#ef4444'
+  },
+  TOO_MANY_MISTAKES: {
+    id: 'too_many_mistakes',
+    trigger: 'too_many_mistakes',
+    title: '💔 连连失误',
+    message: '太多错误了...ta开始怀疑你的诚意。',
+    affectionChange: -15,
+    icon: '💔',
+    color: '#6366f1'
+  },
+  RESTART_TOO_MANY: {
+    id: 'restart_too_many',
+    trigger: 'restart_too_many',
+    title: '🔄 反复重开',
+    message: '你真的有在认真对待吗？',
+    affectionChange: -8,
+    icon: '😕',
+    color: '#f59e0b'
+  },
+  TIMEOUT_OCCURRED: {
+    id: 'timeout_occurred',
+    trigger: 'timeout_occurred',
+    title: '⌛ 超时了...',
+    message: '时间到了，你没能完成挑战。',
+    affectionChange: -12,
+    icon: '😔',
+    color: '#6b7280'
+  },
+  HINT_USED: {
+    id: 'hint_used',
+    trigger: 'hint_used',
+    title: '💡 寻求帮助',
+    message: '使用了提示，虽然顺利了，但少了些惊喜...',
+    affectionChange: -3,
+    icon: '🤔',
+    color: '#fbbf24'
+  },
+  PROTECT_USED: {
+    id: 'protect_used',
+    trigger: 'protect_used',
+    title: '🛡️ 护符生效',
+    message: '幸好有护符保护，化解了一次失误。',
+    affectionChange: 0,
+    icon: '😌',
+    color: '#8b5cf6'
+  }
+};
+
+export const LOVE_LETTER_CONFIG = {
+  BASE_AFFECTION: 50,
+  MIN_AFFECTION: -100,
+  MAX_AFFECTION: 100,
+  SUCCESS_THRESHOLD: 30,
+  
+  MOVE_SCORE_WEIGHT: 0.5,
+  COMBO_SCORE_WEIGHT: 2.0,
+  TIMEOUT_PENALTY: 15,
+  RESTART_PENALTY: 8,
+  
+  PERFECT_MOVE_BONUS: 3,
+  GOOD_MOVE_BONUS: 1,
+  BAD_MOVE_PENALTY: 2,
+  
+  COMBO_BONUS_PER_LEVEL: 5,
+  MISTAKE_PENALTY: 3
+};
+
+export const getTendencyHint = (affection) => {
+  const hints = affection >= 0 
+    ? LOVE_LETTER_TENDENCY_HINTS.HIGH_AFFECTION 
+    : LOVE_LETTER_TENDENCY_HINTS.LOW_AFFECTION;
+  
+  for (const hint of hints) {
+    if (affection >= 0 && affection >= hint.threshold) {
+      return hint;
+    }
+    if (affection < 0 && affection <= hint.threshold) {
+      return hint;
+    }
+  }
+  return hints[hints.length - 1];
+};
+
+export const calculateLoveLetterEnding = (stats) => {
+  const { moves, maxCombo, timeouts, restarts, level, perfectMoves, mistakes } = stats;
+  const config = LOVE_LETTER_CONFIG;
+  
+  let affection = config.BASE_AFFECTION;
+  
+  const optimalMoves = level?.pairs || 4;
+  const moveEfficiency = Math.max(0, (optimalMoves * 2) / (moves || 1));
+  affection += Math.floor(moveEfficiency * 20);
+  
+  const comboBonus = Math.floor(maxCombo * config.COMBO_BONUS_PER_LEVEL);
+  affection += comboBonus;
+  
+  if (perfectMoves) {
+    affection += perfectMoves * config.PERFECT_MOVE_BONUS;
+  }
+  
+  if (mistakes) {
+    affection -= mistakes * config.MISTAKE_PENALTY;
+  }
+  
+  affection -= (timeouts || 0) * config.TIMEOUT_PENALTY;
+  
+  affection -= (restarts || 0) * config.RESTART_PENALTY;
+  
+  affection = Math.max(config.MIN_AFFECTION, Math.min(config.MAX_AFFECTION, affection));
+  
+  const isSuccess = affection >= config.SUCCESS_THRESHOLD;
+  const ending = isSuccess ? LOVE_LETTER_ENDINGS.CONFESSION_SUCCESS : LOVE_LETTER_ENDINGS.CONFESSION_FAILURE;
+  
+  return {
+    affection,
+    isSuccess,
+    ending,
+    breakdown: {
+      baseAffection: config.BASE_AFFECTION,
+      moveEfficiencyBonus: Math.floor(moveEfficiency * 20),
+      comboBonus,
+      perfectBonus: (perfectMoves || 0) * config.PERFECT_MOVE_BONUS,
+      mistakePenalty: -(mistakes || 0) * config.MISTAKE_PENALTY,
+      timeoutPenalty: -(timeouts || 0) * config.TIMEOUT_PENALTY,
+      restartPenalty: -(restarts || 0) * config.RESTART_PENALTY,
+      finalAffection: affection
+    }
+  };
+};
