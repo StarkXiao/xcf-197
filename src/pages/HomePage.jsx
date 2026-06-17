@@ -1,12 +1,20 @@
 import { useState } from 'react';
-import { LEVELS, getAchievementStats, CURRENCY_INFO, CURRENCY_TYPES, getCurrentSeason } from '../data/gameData';
+import { LEVELS, getAchievementStats, CURRENCY_INFO, CURRENCY_TYPES, getCurrentSeason, getDailyThemeById } from '../data/gameData';
 
-const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, onOpenDailyChallenge, onOpenAchievements, onOpenShop, onOpenStoryCorridor, onOpenSeasonChallenge, onOpenLetterWorkshop, onOpenVisitorCommission, onOpenRepairRoom, onOpenChapterSelect, unlockedLevel = 1, highScores = {}, collectedStars = 0, achievements, shop, seasonChallenge, letterWorkshop, visitorCommission, repairRoom, chapterProgress = {} }) => {
+const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, onOpenDailyChallenge, onOpenAchievements, onOpenShop, onOpenStoryCorridor, onOpenSeasonChallenge, onOpenLetterWorkshop, onOpenVisitorCommission, onOpenRepairRoom, onOpenChapterSelect, unlockedLevel = 1, highScores = {}, collectedStars = 0, achievements, shop, seasonChallenge, letterWorkshop, visitorCommission, repairRoom, chapterProgress = {}, dailyChallenge }) => {
   const [showClassicLevels, setShowClassicLevels] = useState(false);
   const currentSeason = getCurrentSeason();
   const hasUnclaimedRewards = seasonChallenge?.unclaimedStageRewardsCount > 0 || 
                               seasonChallenge?.unclaimedTaskRewardsCount > 0;
   const achievementStats = achievements ? getAchievementStats(achievements.unlockedAchievements) : null;
+
+  const dailyChallengeStatus = dailyChallenge?.getEntryStatusInfo?.();
+  const dailyThemeId = dailyChallenge?.currentTheme;
+  const dailyTheme = dailyThemeId ? getDailyThemeById(dailyThemeId) : null;
+  const dailyReminderLevel = dailyChallenge?.getResetReminderLevel?.();
+  const showDailyReminder = dailyChallenge?.shouldShowResetReminder?.();
+  const todayBestScore = dailyChallenge?.todayBestScore;
+  const currentRank = dailyChallenge?.getCurrentRank?.();
   return (
     <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-8">
       {shop && (
@@ -78,10 +86,30 @@ const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, 
             border-2 border-star-pink/50 text-star-pink hover:bg-star-pink/10 hover:border-star-pink hover:shadow-lg hover:shadow-star-pink/30
             relative overflow-hidden group"
         >
-          <span className="relative z-10">🔮 每日挑战</span>
-          <span className="absolute -top-1 -right-1 bg-star-pink text-white text-xs px-2 py-0.5 rounded-full animate-bounce">
-            NEW
+          <span className="relative z-10 flex items-center gap-2">
+            🔮 每日挑战
+            {dailyTheme && (
+              <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ background: `${dailyTheme.color}30`, color: dailyTheme.color }}>
+                {dailyTheme.icon} {dailyTheme.name}
+              </span>
+            )}
           </span>
+          {dailyChallengeStatus && (
+            <span
+              className="absolute -top-1 -right-1 text-xs px-2 py-0.5 rounded-full font-bold"
+              style={{
+                backgroundColor: dailyChallengeStatus.badgeColor,
+                color: '#fff'
+              }}
+            >
+              {dailyChallengeStatus.badge}
+            </span>
+          )}
+          {!dailyChallengeStatus && (
+            <span className="absolute -top-1 -right-1 bg-star-pink text-white text-xs px-2 py-0.5 rounded-full animate-bounce">
+              NEW
+            </span>
+          )}
         </button>
         <button
           onClick={onOpenArchive}
@@ -91,6 +119,33 @@ const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, 
           🏛️ 星塔档案馆
         </button>
       </div>
+
+      {dailyChallenge && (
+        <div className="w-full max-w-md mb-4">
+          <div className="flex items-center justify-between px-4 py-2 rounded-xl bg-white/5 border border-white/10">
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-white/50">每日挑战</span>
+              {todayBestScore > 0 && (
+                <span className="text-xs text-star-gold">最高分: {todayBestScore}</span>
+              )}
+              {currentRank && (
+                <span className="text-xs text-star-pink">排名: #{currentRank}</span>
+              )}
+            </div>
+            {showDailyReminder && (
+              <span className={`text-xs ${
+                dailyReminderLevel === 'urgent' ? 'text-red-400 animate-pulse' :
+                dailyReminderLevel === 'warning' ? 'text-orange-400' :
+                'text-yellow-400'
+              }`}>
+                {dailyReminderLevel === 'urgent' ? '⏰ 即将重置' :
+                 dailyReminderLevel === 'warning' ? '⚠️ 1小时内重置' :
+                 '⏳ 2小时内重置'}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-4 mb-4">
         <button

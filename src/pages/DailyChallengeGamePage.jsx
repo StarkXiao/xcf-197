@@ -4,11 +4,11 @@ import Modal from '../components/Modal';
 import { useGameLogic } from '../hooks/useGameLogic';
 import { useTimer } from '../hooks/useTimer';
 import { useScore } from '../hooks/useScore';
-import { getStarById, STAR_PATTERNS } from '../data/gameData';
+import { getStarById, STAR_PATTERNS, DAILY_CHALLENGE_TASKS, getRarityColor } from '../data/gameData';
 
-const createDailyChallengeLevel = (config) => {
-  const shuffledStars = [...STAR_PATTERNS].sort(() => Math.random() - 0.5);
-  const selectedStars = shuffledStars.slice(0, config.pairs).map(s => s.id);
+const createDailyChallengeLevel = (config, themeDeck) => {
+  const deckSource = themeDeck && themeDeck.length > 0 ? themeDeck : [...STAR_PATTERNS].sort(() => Math.random() - 0.5);
+  const selectedStars = deckSource.slice(0, config.pairs).map(s => s.id);
   
   return {
     id: 'daily-challenge',
@@ -24,16 +24,20 @@ const createDailyChallengeLevel = (config) => {
 
 const DailyChallengeGamePage = ({ dailyChallenge, onBack, onComplete, skinTheme }) => {
   const challengeConfig = dailyChallenge.getChallengeConfig();
-  const [challengeLevel] = useState(() => createDailyChallengeLevel(challengeConfig));
+  const themeDeck = dailyChallenge.generateThemeDeck();
+  const [challengeLevel] = useState(() => createDailyChallengeLevel(challengeConfig, themeDeck));
   const [showThemeModal, setShowThemeModal] = useState(true);
   const [showPauseModal, setShowPauseModal] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
   const [earnedPoints, setEarnedPoints] = useState(0);
   const [showPointsPopup, setShowPointsPopup] = useState(false);
   const [challengeResult, setChallengeResult] = useState(null);
+  const [earnedShards, setEarnedShards] = useState(null);
+  const [completedTasksInfo, setCompletedTasksInfo] = useState([]);
   const prevMatchedRef = useRef(0);
 
   const theme = challengeConfig.theme;
+  const themeShard = dailyChallenge.getCurrentThemeShard();
 
   const {
     cards,
@@ -122,10 +126,18 @@ const DailyChallengeGamePage = ({ dailyChallenge, onBack, onComplete, skinTheme 
           isWin: true
         };
         
+        const recordResult = dailyChallenge.recordChallengeResult(result);
+        if (recordResult) {
+          if (recordResult.shardResult) {
+            setEarnedShards(recordResult.shardResult);
+          }
+          if (recordResult.newlyCompletedTasks && recordResult.newlyCompletedTasks.length > 0) {
+            setCompletedTasksInfo(recordResult.newlyCompletedTasks);
+          }
+        }
+        
         setChallengeResult(result);
         setShowResultModal(true);
-        
-        dailyChallenge.recordChallengeResult(result);
       }, 1500);
       return () => clearTimeout(timer);
     } else if (gameStatus === 'lost') {
@@ -142,10 +154,18 @@ const DailyChallengeGamePage = ({ dailyChallenge, onBack, onComplete, skinTheme 
           isWin: false
         };
         
+        const recordResult = dailyChallenge.recordChallengeResult(result);
+        if (recordResult) {
+          if (recordResult.shardResult) {
+            setEarnedShards(recordResult.shardResult);
+          }
+          if (recordResult.newlyCompletedTasks && recordResult.newlyCompletedTasks.length > 0) {
+            setCompletedTasksInfo(recordResult.newlyCompletedTasks);
+          }
+        }
+        
         setChallengeResult(result);
         setShowResultModal(true);
-        
-        dailyChallenge.recordChallengeResult(result);
       }, 1000);
       return () => clearTimeout(timer);
     }
@@ -166,6 +186,8 @@ const DailyChallengeGamePage = ({ dailyChallenge, onBack, onComplete, skinTheme 
     setShowPauseModal(false);
     setShowResultModal(false);
     setChallengeResult(null);
+    setEarnedShards(null);
+    setCompletedTasksInfo([]);
   };
 
   const handlePause = () => {
@@ -402,9 +424,50 @@ const DailyChallengeGamePage = ({ dailyChallenge, onBack, onComplete, skinTheme 
             <div className="text-4xl font-bold text-star-gold mb-2">
               {challengeResult.score.toLocaleString()}
             </div>
-            <div className="text-sm text-white/50 mb-6">
+            <div className="text-sm text-white/50 mb-4">
               {challengeResult.isWin ? '挑战成功！' : '继续加油！'}
             </div>
+
+            {earnedShards && earnedShards.amount > 0 && (
+              <div
+                className="mb-4 p-3 rounded-xl border-2 animate-pulse-slow"
+                style={{
+                  borderColor: `${getRarityColor(earnedShards.shard.rarity)}60`,
+                  background: `linear-gradient(135deg, ${getRarityColor(earnedShards.shard.rarity)}15 0%, ${getRarityColor(earnedShards.shard.rarity)}05 100%)`
+                }}
+              >
+                <div className="text-xs text-white/60 mb-1">获得限定碎片</div>
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-3xl">{earnedShards.shard.icon}</span>
+                  <div className="text-left">
+                    <div className="font-bold" style={{ color: getRarityColor(earnedShards.shard.rarity) }}>
+                      {earnedShards.shard.name}
+                    </div>
+                    <div className="text-star-gold font-bold">
+                      ×{earnedShards.amount}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {completedTasksInfo && completedTasksInfo.length > 0 && (
+              <div className="mb-4 p-3 rounded-xl bg-green-500/10 border border-green-500/30">
+                <div className="text-xs text-green-400 mb-2">🎉 新完成任务</div>
+                <div className="space-y-1">
+                  {completedTasksInfo.map((taskId, idx) => {
+                    const task = DAILY_CHALLENGE_TASKS.find(t => t.id === taskId);
+                    return task ? (
+                      <div key={idx} className="flex items-center justify-center gap-2 text-sm">
+                        <span>{task.icon}</span>
+                        <span className="text-white">{task.name}</span>
+                        <span className="text-star-gold">+{task.reward.value}</span>
+                      </div>
+                    ) : null;
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-3 mb-6">
               <div className="bg-star-purple/20 rounded-xl p-3">

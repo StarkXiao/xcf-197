@@ -1,6 +1,13 @@
 import { useState } from 'react';
 import Modal from '../components/Modal';
-import { getDailyThemeById, getDifficultyColor, getRarityColor, DAILY_CHALLENGE_TASKS } from '../data/gameData';
+import { 
+  getDailyThemeById, 
+  getDifficultyColor, 
+  getRarityColor, 
+  DAILY_CHALLENGE_TASKS,
+  DAILY_CHALLENGE_SHARDS,
+  getShardRewardProgress
+} from '../data/gameData';
 
 const DailyChallengePage = ({ dailyChallenge, onStartChallenge, onBack }) => {
   const [showRecordsModal, setShowRecordsModal] = useState(false);
@@ -17,13 +24,24 @@ const DailyChallengePage = ({ dailyChallenge, onStartChallenge, onBack }) => {
     challengeRecords,
     rankRewardClaimed,
     starShards,
+    todayShardsEarned,
+    totalShardsCollected,
+    collectedShards,
+    challengeEntryStatus,
+    isNewTheme,
     getTasksWithStatus,
     getTimeUntilResetFormatted,
     shouldShowResetReminder,
+    getResetReminderLevel,
     claimTaskReward,
     claimRankReward,
     getCurrentRank,
-    getRankReward
+    getRankReward,
+    getEntryStatusInfo,
+    getShardCollectionStats,
+    getCurrentThemeShard,
+    dismissNewThemeNotice,
+    getLeaderboardPosition
   } = dailyChallenge;
 
   const theme = currentTheme ? getDailyThemeById(currentTheme) : null;
@@ -32,6 +50,11 @@ const DailyChallengePage = ({ dailyChallenge, onStartChallenge, onBack }) => {
   const rankReward = getRankReward();
   const timeUntilReset = getTimeUntilResetFormatted();
   const showReminder = shouldShowResetReminder();
+  const reminderLevel = getResetReminderLevel();
+  const entryStatusInfo = getEntryStatusInfo();
+  const shardStats = getShardCollectionStats();
+  const currentThemeShard = getCurrentThemeShard();
+  const leaderboardPos = getLeaderboardPosition();
 
   const handleClaimReward = (taskId) => {
     const reward = claimTaskReward(taskId);
@@ -87,13 +110,80 @@ const DailyChallengePage = ({ dailyChallenge, onStartChallenge, onBack }) => {
       </div>
 
       {showReminder && (
-        <div className="mb-4 p-3 rounded-xl bg-orange-500/20 border border-orange-500/50 animate-pulse">
-          <div className="flex items-center gap-2 text-orange-300">
-            <span className="text-xl">⚠️</span>
-            <span className="text-sm">距离挑战重置还有不到1小时，抓紧时间！</span>
+        <div
+          className={`mb-4 p-3 rounded-xl border animate-pulse ${
+            reminderLevel === 'urgent'
+              ? 'bg-red-500/20 border-red-500/60'
+              : reminderLevel === 'warning'
+              ? 'bg-orange-500/20 border-orange-500/50'
+              : 'bg-yellow-500/20 border-yellow-500/40'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-xl">
+              {reminderLevel === 'urgent' ? '🚨' : reminderLevel === 'warning' ? '⚠️' : '⏰'}
+            </span>
+            <span
+              className={`text-sm ${
+                reminderLevel === 'urgent'
+                  ? 'text-red-300 font-bold'
+                  : reminderLevel === 'warning'
+                  ? 'text-orange-300'
+                  : 'text-yellow-300'
+              }`}
+            >
+              {reminderLevel === 'urgent'
+                ? '距离挑战重置仅剩5分钟！抓紧时间！'
+                : reminderLevel === 'warning'
+                ? '距离挑战重置还有不到1小时，抓紧时间！'
+                : '距离挑战重置还有不到2小时，别忘了完成任务！'}
+            </span>
           </div>
         </div>
       )}
+
+      {isNewTheme && (
+        <div className="mb-4 p-3 rounded-xl bg-star-pink/20 border border-star-pink/50 animate-pulse-slow">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">✨</span>
+              <span className="text-star-pink text-sm font-bold">
+                今日新主题已刷新！{theme?.icon} {theme?.name}
+              </span>
+            </div>
+            <button
+              onClick={dismissNewThemeNotice}
+              className="text-white/50 hover:text-white text-xs px-2 py-1 rounded"
+            >
+              知道了
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="mb-4 p-3 rounded-xl bg-white/5 border border-white/10">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span
+              className="w-2 h-2 rounded-full"
+              style={{ backgroundColor: entryStatusInfo.badgeColor }}
+            />
+            <span className="text-sm text-white/70">挑战状态</span>
+          </div>
+          <span
+            className="text-sm font-bold px-2 py-0.5 rounded-full"
+            style={{
+              backgroundColor: `${entryStatusInfo.badgeColor}20`,
+              color: entryStatusInfo.badgeColor
+            }}
+          >
+            {entryStatusInfo.label}
+          </span>
+        </div>
+        <p className="text-xs text-white/40 mt-1 pl-4">
+          {entryStatusInfo.description}
+        </p>
+      </div>
 
       {theme && (
         <div
@@ -134,7 +224,7 @@ const DailyChallengePage = ({ dailyChallenge, onStartChallenge, onBack }) => {
         </div>
       )}
 
-      <div className="grid grid-cols-4 gap-2 mb-6 bg-star-purple/30 rounded-xl p-4">
+      <div className="grid grid-cols-4 gap-2 mb-4 bg-star-purple/30 rounded-xl p-4">
         <div className="text-center">
           <div className="text-xs text-white/50">今日最高分</div>
           <div className="text-xl font-bold text-star-gold">
@@ -158,8 +248,66 @@ const DailyChallengePage = ({ dailyChallenge, onStartChallenge, onBack }) => {
           <div className="text-xl font-bold text-star-pink">
             {currentRank ? `#${currentRank}` : '-'}
           </div>
+          {leaderboardPos && (
+            <div className="text-xs text-white/40">
+              前{leaderboardPos.percentile}%
+            </div>
+          )}
         </div>
       </div>
+
+      {currentThemeShard && (
+        <div
+          className="mb-6 p-3 rounded-xl border"
+          style={{
+            borderColor: `${getRarityColor(currentThemeShard.rarity)}40`,
+            background: `linear-gradient(135deg, ${getRarityColor(currentThemeShard.rarity)}10 0%, ${getRarityColor(currentThemeShard.rarity)}05 100%)`
+          }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">{currentThemeShard.icon}</span>
+              <div>
+                <div className="font-bold text-sm" style={{ color: getRarityColor(currentThemeShard.rarity) }}>
+                  {currentThemeShard.name}
+                </div>
+                <div className="text-xs text-white/50">今日限定碎片</div>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-lg font-bold text-star-gold">+{todayShardsEarned}</div>
+              <div className="text-xs text-white/40">今日获得</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 text-xs text-white/50">
+            <span>累计收集: <span className="text-white/80">{totalShardsCollected}枚</span></span>
+            <span>·</span>
+            <span>种类: <span className="text-white/80">{Object.keys(collectedShards).length}/{Object.keys(DAILY_CHALLENGE_SHARDS).length}</span></span>
+          </div>
+          {shardStats.shardRewards && shardStats.shardRewards.length > 0 && (
+            <div className="mt-2 pt-2 border-t border-white/10">
+              <div className="flex items-center gap-2">
+                {shardStats.shardRewards.map((reward, idx) => (
+                  <div
+                    key={idx}
+                    className={`flex-1 p-2 rounded-lg text-center ${
+                      reward.unlocked ? 'bg-star-gold/20' : 'bg-white/5'
+                    }`}
+                  >
+                    <div className="text-lg">{reward.icon}</div>
+                    <div className={`text-xs ${reward.unlocked ? 'text-star-gold' : 'text-white/30'}`}>
+                      {reward.name}
+                    </div>
+                    <div className="text-xs text-white/40">
+                      {reward.progress}/{reward.requirement}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="mb-6">
         <div className="flex items-center justify-between mb-3">

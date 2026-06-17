@@ -2,8 +2,14 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   DAILY_CHALLENGE_THEMES,
   DAILY_CHALLENGE_TASKS,
+  DAILY_CHALLENGE_ENTRY_STATUS,
   getDailyThemeById,
-  getDailyRewardByRank
+  getDailyRewardByRank,
+  getDailyShardByThemeId,
+  getShardRewardProgress,
+  getThemeDeckConfig,
+  STAR_PATTERNS,
+  getRarityColor
 } from '../data/gameData';
 
 const STORAGE_KEY = 'starTowerDailyChallenge';
@@ -25,6 +31,14 @@ export const useDailyChallenge = () => {
   const [timeUntilReset, setTimeUntilReset] = useState(0);
   const [rankRewardClaimed, setRankRewardClaimed] = useState(false);
   const [starShards, setStarShards] = useState(0);
+  const [collectedShards, setCollectedShards] = useState({});
+  const [totalShardsCollected, setTotalShardsCollected] = useState(0);
+  const [todayShardsEarned, setTodayShardsEarned] = useState(0);
+  const [shardRewardsUnlocked, setShardRewardsUnlocked] = useState([]);
+  const [challengeEntryStatus, setChallengeEntryStatus] = useState(DAILY_CHALLENGE_ENTRY_STATUS.NOT_STARTED);
+  const [isNewTheme, setIsNewTheme] = useState(false);
+  const [lastThemeId, setLastThemeId] = useState(null);
+  const [leaderboardHistory, setLeaderboardHistory] = useState([]);
 
   const stateRef = useRef({});
 
@@ -121,7 +135,14 @@ export const useDailyChallenge = () => {
       lastResetDate: data.lastResetDate !== undefined ? data.lastResetDate : s.lastResetDate,
       reminderShown: data.reminderShown !== undefined ? data.reminderShown : s.reminderShown,
       rankRewardClaimed: data.rankRewardClaimed !== undefined ? data.rankRewardClaimed : s.rankRewardClaimed,
-      starShards: data.starShards !== undefined ? data.starShards : s.starShards
+      starShards: data.starShards !== undefined ? data.starShards : s.starShards,
+      collectedShards: data.collectedShards !== undefined ? data.collectedShards : s.collectedShards,
+      totalShardsCollected: data.totalShardsCollected !== undefined ? data.totalShardsCollected : s.totalShardsCollected,
+      todayShardsEarned: data.todayShardsEarned !== undefined ? data.todayShardsEarned : s.todayShardsEarned,
+      shardRewardsUnlocked: data.shardRewardsUnlocked !== undefined ? data.shardRewardsUnlocked : s.shardRewardsUnlocked,
+      challengeEntryStatus: data.challengeEntryStatus !== undefined ? data.challengeEntryStatus : s.challengeEntryStatus,
+      lastThemeId: data.lastThemeId !== undefined ? data.lastThemeId : s.lastThemeId,
+      leaderboardHistory: data.leaderboardHistory !== undefined ? data.leaderboardHistory : s.leaderboardHistory
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
   }, []);
@@ -133,6 +154,12 @@ export const useDailyChallenge = () => {
     const newTheme = theme.id;
     const newTasks = tasks.map(t => t.id);
     
+    const themeChanged = lastThemeId && lastThemeId !== newTheme;
+    if (themeChanged) {
+      setIsNewTheme(true);
+    }
+    setLastThemeId(newTheme);
+    
     setCurrentTheme(newTheme);
     setDailyTasks(newTasks);
     setCompletedTasks([]);
@@ -143,6 +170,8 @@ export const useDailyChallenge = () => {
     setReminderShown(false);
     setLeaderboard(generateMockLeaderboard(todayStr, 0));
     setRankRewardClaimed(false);
+    setTodayShardsEarned(0);
+    setChallengeEntryStatus(DAILY_CHALLENGE_ENTRY_STATUS.NOT_STARTED);
     
     saveDailyChallenge({
       currentTheme: newTheme,
@@ -153,9 +182,12 @@ export const useDailyChallenge = () => {
       todayBestScore: 0,
       lastResetDate: todayStr,
       reminderShown: false,
-      rankRewardClaimed: false
+      rankRewardClaimed: false,
+      todayShardsEarned: 0,
+      challengeEntryStatus: DAILY_CHALLENGE_ENTRY_STATUS.NOT_STARTED,
+      lastThemeId: newTheme
     });
-  }, [generateDailyChallenge, generateMockLeaderboard, saveDailyChallenge]);
+  }, [generateDailyChallenge, generateMockLeaderboard, saveDailyChallenge, lastThemeId]);
 
   const checkAndResetDaily = useCallback(() => {
     const todayStr = getTodayDateString();
@@ -182,6 +214,13 @@ export const useDailyChallenge = () => {
         setReminderShown(data.reminderShown || false);
         setRankRewardClaimed(data.rankRewardClaimed || false);
         setStarShards(data.starShards || 0);
+        setCollectedShards(data.collectedShards || {});
+        setTotalShardsCollected(data.totalShardsCollected || 0);
+        setTodayShardsEarned(data.todayShardsEarned || 0);
+        setShardRewardsUnlocked(data.shardRewardsUnlocked || []);
+        setChallengeEntryStatus(data.challengeEntryStatus || DAILY_CHALLENGE_ENTRY_STATUS.NOT_STARTED);
+        setLastThemeId(data.lastThemeId || null);
+        setLeaderboardHistory(data.leaderboardHistory || []);
       } catch (e) {
         console.error('Failed to load daily challenge:', e);
       }
@@ -200,7 +239,14 @@ export const useDailyChallenge = () => {
       lastResetDate,
       reminderShown,
       rankRewardClaimed,
-      starShards
+      starShards,
+      collectedShards,
+      totalShardsCollected,
+      todayShardsEarned,
+      shardRewardsUnlocked,
+      challengeEntryStatus,
+      lastThemeId,
+      leaderboardHistory
     };
   });
 
@@ -238,18 +284,107 @@ export const useDailyChallenge = () => {
   const getChallengeConfig = useCallback(() => {
     const theme = currentTheme ? getDailyThemeById(currentTheme) : null;
     let bonusTime = 0;
+    let pairs = CHALLENGE_PAIRS;
     
-    if (theme && theme.bonusType === 'time') {
-      bonusTime = theme.bonusValue;
+    if (theme) {
+      if (theme.bonusType === 'time') {
+        bonusTime = theme.bonusValue;
+      }
+      if (theme.deckRules?.pairsBonus) {
+        pairs += theme.deckRules.pairsBonus;
+      }
     }
     
+    const deckConfig = getThemeDeckConfig(currentTheme);
+    
     return {
-      pairs: CHALLENGE_PAIRS,
+      pairs,
       timeLimit: CHALLENGE_TIME_LIMIT + bonusTime,
       baseScore: CHALLENGE_BASE_SCORE,
-      theme: theme
+      theme,
+      deckConfig
     };
   }, [currentTheme]);
+
+  const generateThemeDeck = useCallback(() => {
+    const theme = currentTheme ? getDailyThemeById(currentTheme) : null;
+    if (!theme || !theme.deckRules) {
+      return [...STAR_PATTERNS].sort(() => Math.random() - 0.5);
+    }
+
+    const { preferredElements, preferredStars } = theme.deckRules;
+    let deck = [...STAR_PATTERNS];
+
+    if (preferredStars && preferredStars.length > 0) {
+      const preferred = deck.filter(s => preferredStars.includes(s.id));
+      const others = deck.filter(s => !preferredStars.includes(s.id));
+      const shuffledPreferred = preferred.sort(() => Math.random() - 0.5);
+      const shuffledOthers = others.sort(() => Math.random() - 0.5);
+      deck = [...shuffledPreferred, ...shuffledOthers];
+    } else if (preferredElements && preferredElements.length > 0) {
+      const preferred = deck.filter(s => preferredElements.includes(s.element));
+      const others = deck.filter(s => !preferredElements.includes(s.element));
+      const shuffledPreferred = preferred.sort(() => Math.random() - 0.5);
+      const shuffledOthers = others.sort(() => Math.random() - 0.5);
+      deck = [...shuffledPreferred, ...shuffledOthers];
+    } else {
+      deck.sort(() => Math.random() - 0.5);
+    }
+
+    return deck;
+  }, [currentTheme]);
+
+  const collectLimitedShard = useCallback((themeId, amount = 1) => {
+    const shardInfo = getDailyShardByThemeId(themeId);
+    if (!shardInfo) return null;
+
+    const shardId = shardInfo.id;
+    const newCollected = { ...collectedShards };
+    newCollected[shardId] = (newCollected[shardId] || 0) + amount;
+    
+    const newTotal = totalShardsCollected + amount;
+    const newToday = todayShardsEarned + amount;
+
+    setCollectedShards(newCollected);
+    setTotalShardsCollected(newTotal);
+    setTodayShardsEarned(newToday);
+
+    const newUnlocked = [...shardRewardsUnlocked];
+    const shardRewards = getShardRewardProgress(newTotal);
+    shardRewards.forEach(reward => {
+      if (reward.unlocked && !newUnlocked.includes(reward.id)) {
+        newUnlocked.push(reward.id);
+      }
+    });
+    setShardRewardsUnlocked(newUnlocked);
+
+    saveDailyChallenge({
+      collectedShards: newCollected,
+      totalShardsCollected: newTotal,
+      todayShardsEarned: newToday,
+      shardRewardsUnlocked: newUnlocked
+    });
+
+    return {
+      shard: shardInfo,
+      amount,
+      newTotal,
+      newlyUnlockedRewards: shardRewards.filter(r => 
+        reward.unlocked && !shardRewardsUnlocked.includes(r.id)
+      )
+    };
+  }, [collectedShards, totalShardsCollected, todayShardsEarned, shardRewardsUnlocked, saveDailyChallenge]);
+
+  const calculateShardReward = useCallback((result) => {
+    const baseAmount = result.isWin ? 1 : 0;
+    let bonusAmount = 0;
+    
+    if (result.stars === 3) bonusAmount += 1;
+    if (result.maxCombo >= 10) bonusAmount += 1;
+    if (result.score >= 8000) bonusAmount += 1;
+    
+    return baseAmount + bonusAmount;
+  }, []);
 
   const calculateChallengeScore = useCallback((matchScore, combo, timeLeft, timeLimit, moves) => {
     let finalScore = matchScore;
@@ -343,6 +478,8 @@ export const useDailyChallenge = () => {
 
   const recordChallengeResult = useCallback((result) => {
     const completeTime = result.timeLimit - result.timeLeft;
+    const newlyCompletedTasks = checkTaskCompletion({ ...result, timeLimit: result.timeLimit });
+    
     const record = {
       id: Date.now(),
       date: getTodayDateString(),
@@ -352,24 +489,66 @@ export const useDailyChallenge = () => {
       completeTime,
       moves: result.moves,
       stars: result.stars,
-      tasksCompleted: checkTaskCompletion({ ...result, timeLimit: result.timeLimit })
+      tasksCompleted: newlyCompletedTasks,
+      isWin: result.isWin
     };
     
     const newRecords = [record, ...challengeRecords].slice(0, 20);
     setChallengeRecords(newRecords);
     
+    const shardAmount = calculateShardReward(result);
+    let shardResult = null;
+    if (shardAmount > 0 && currentTheme) {
+      shardResult = collectLimitedShard(currentTheme, shardAmount);
+    }
+    
+    let newEntryStatus = challengeEntryStatus;
+    if (challengeEntryStatus === DAILY_CHALLENGE_ENTRY_STATUS.NOT_STARTED) {
+      newEntryStatus = DAILY_CHALLENGE_ENTRY_STATUS.IN_PROGRESS;
+    }
+    if (result.isWin && newEntryStatus === DAILY_CHALLENGE_ENTRY_STATUS.IN_PROGRESS) {
+      newEntryStatus = DAILY_CHALLENGE_ENTRY_STATUS.COMPLETED;
+    }
+    
+    const newCompletedTasks = [...completedTasks, ...newlyCompletedTasks];
+    const allTasksDone = dailyTasks.every(t => newCompletedTasks.includes(t));
+    if (allTasksDone && newEntryStatus !== DAILY_CHALLENGE_ENTRY_STATUS.REWARD_CLAIMED) {
+      newEntryStatus = DAILY_CHALLENGE_ENTRY_STATUS.ALL_TASKS_DONE;
+    }
+    
+    setChallengeEntryStatus(newEntryStatus);
+    
     if (result.score > todayBestScore) {
       setTodayBestScore(result.score);
       saveDailyChallenge({
         challengeRecords: newRecords,
-        todayBestScore: result.score
+        todayBestScore: result.score,
+        challengeEntryStatus: newEntryStatus
       });
     } else {
-      saveDailyChallenge({ challengeRecords: newRecords });
+      saveDailyChallenge({
+        challengeRecords: newRecords,
+        challengeEntryStatus: newEntryStatus
+      });
     }
     
-    return record;
-  }, [challengeRecords, todayBestScore, checkTaskCompletion, saveDailyChallenge]);
+    return {
+      record,
+      shardResult,
+      newlyCompletedTasks
+    };
+  }, [
+    challengeRecords, 
+    todayBestScore, 
+    checkTaskCompletion, 
+    saveDailyChallenge, 
+    calculateShardReward, 
+    currentTheme, 
+    collectLimitedShard,
+    challengeEntryStatus,
+    completedTasks,
+    dailyTasks
+  ]);
 
   const getCurrentRank = useCallback(() => {
     const playerEntry = leaderboard.find(e => e.isCurrentPlayer);
@@ -414,10 +593,13 @@ export const useDailyChallenge = () => {
     const newPoints = totalBonusPoints + reward.bonusPoints;
     setTotalBonusPoints(newPoints);
     
+    setChallengeEntryStatus(DAILY_CHALLENGE_ENTRY_STATUS.REWARD_CLAIMED);
+    
     saveDailyChallenge({
       rankRewardClaimed: true,
       starShards: newShards,
-      totalBonusPoints: newPoints
+      totalBonusPoints: newPoints,
+      challengeEntryStatus: DAILY_CHALLENGE_ENTRY_STATUS.REWARD_CLAIMED
     });
     
     return {
@@ -452,6 +634,83 @@ export const useDailyChallenge = () => {
     return timeUntilReset < 3600000;
   }, [timeUntilReset]);
 
+  const getResetReminderLevel = useCallback(() => {
+    if (timeUntilReset < 300000) return 'urgent';
+    if (timeUntilReset < 3600000) return 'warning';
+    if (timeUntilReset < 7200000) return 'info';
+    return 'normal';
+  }, [timeUntilReset]);
+
+  const getEntryStatusInfo = useCallback(() => {
+    const statusMap = {
+      [DAILY_CHALLENGE_ENTRY_STATUS.NOT_STARTED]: {
+        label: '未开始',
+        badge: 'NEW',
+        badgeColor: '#ec4899',
+        showPulse: true,
+        description: '点击开始今日挑战'
+      },
+      [DAILY_CHALLENGE_ENTRY_STATUS.IN_PROGRESS]: {
+        label: '进行中',
+        badge: '进行中',
+        badgeColor: '#fbbf24',
+        showPulse: false,
+        description: '继续挑战提升分数'
+      },
+      [DAILY_CHALLENGE_ENTRY_STATUS.COMPLETED]: {
+        label: '已完成',
+        badge: '已完成',
+        badgeColor: '#10b981',
+        showPulse: false,
+        description: '完成任务获取更多奖励'
+      },
+      [DAILY_CHALLENGE_ENTRY_STATUS.ALL_TASKS_DONE]: {
+        label: '领取奖励',
+        badge: '🎁',
+        badgeColor: '#f97316',
+        showPulse: true,
+        description: '任务全部完成，领取排行奖励！'
+      },
+      [DAILY_CHALLENGE_ENTRY_STATUS.REWARD_CLAIMED]: {
+        label: '今日已结束',
+        badge: '✓',
+        badgeColor: '#6b7280',
+        showPulse: false,
+        description: '明天再来挑战吧'
+      }
+    };
+    return statusMap[challengeEntryStatus] || statusMap[DAILY_CHALLENGE_ENTRY_STATUS.NOT_STARTED];
+  }, [challengeEntryStatus]);
+
+  const getShardCollectionStats = useCallback(() => {
+    return {
+      collectedShards,
+      totalShardsCollected,
+      todayShardsEarned,
+      shardRewards: getShardRewardProgress(totalShardsCollected),
+      shardRewardsUnlocked
+    };
+  }, [collectedShards, totalShardsCollected, todayShardsEarned, shardRewardsUnlocked]);
+
+  const getCurrentThemeShard = useCallback(() => {
+    if (!currentTheme) return null;
+    return getDailyShardByThemeId(currentTheme);
+  }, [currentTheme]);
+
+  const dismissNewThemeNotice = useCallback(() => {
+    setIsNewTheme(false);
+  }, []);
+
+  const getLeaderboardPosition = useCallback(() => {
+    const playerEntry = leaderboard.find(e => e.isCurrentPlayer);
+    if (!playerEntry) return null;
+    return {
+      rank: playerEntry.rank,
+      total: leaderboard.length,
+      percentile: Math.round((playerEntry.rank / leaderboard.length) * 100)
+    };
+  }, [leaderboard]);
+
   return {
     currentTheme,
     dailyTasks,
@@ -466,6 +725,13 @@ export const useDailyChallenge = () => {
     reminderShown,
     rankRewardClaimed,
     starShards,
+    collectedShards,
+    totalShardsCollected,
+    todayShardsEarned,
+    shardRewardsUnlocked,
+    challengeEntryStatus,
+    isNewTheme,
+    leaderboardHistory,
     getChallengeConfig,
     calculateChallengeScore,
     recordChallengeResult,
@@ -478,6 +744,15 @@ export const useDailyChallenge = () => {
     getTimeUntilResetFormatted,
     shouldShowResetReminder,
     checkAndResetDaily,
-    resetDailyChallenge
+    resetDailyChallenge,
+    generateThemeDeck,
+    collectLimitedShard,
+    calculateShardReward,
+    getResetReminderLevel,
+    getEntryStatusInfo,
+    getShardCollectionStats,
+    getCurrentThemeShard,
+    dismissNewThemeNotice,
+    getLeaderboardPosition
   };
 };

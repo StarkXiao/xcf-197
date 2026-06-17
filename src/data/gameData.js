@@ -410,7 +410,19 @@ export const DAILY_CHALLENGE_THEMES = [
     description: '今日的爱情运势如何？',
     color: '#ff6b9d',
     bonusType: 'score',
-    bonusValue: 1.5
+    bonusValue: 1.5,
+    deckRules: {
+      preferredElements: ['水', '木'],
+      preferredStars: ['star-4', 'star-11', 'star-6', 'star-10'],
+      pairsBonus: 0,
+      specialRule: null
+    },
+    limitedShard: {
+      id: 'shard-love',
+      name: '玫瑰星辉碎片',
+      icon: '🌹',
+      description: '蕴含着恋爱运势的神秘碎片，收集足够数量可解锁特殊奖励'
+    }
   },
   {
     id: 'theme-career',
@@ -419,7 +431,19 @@ export const DAILY_CHALLENGE_THEMES = [
     description: '工作上将有什么机遇？',
     color: '#3b82f6',
     bonusType: 'combo',
-    bonusValue: 2
+    bonusValue: 2,
+    deckRules: {
+      preferredElements: ['风', '土'],
+      preferredStars: ['star-2', 'star-5', 'star-9', 'star-12'],
+      pairsBonus: 0,
+      specialRule: null
+    },
+    limitedShard: {
+      id: 'shard-career',
+      name: '紫晶星辉碎片',
+      icon: '💎',
+      description: '蕴含着事业运势的神秘碎片，收集足够数量可解锁特殊奖励'
+    }
   },
   {
     id: 'theme-wealth',
@@ -428,7 +452,19 @@ export const DAILY_CHALLENGE_THEMES = [
     description: '财富之门是否为你敞开？',
     color: '#fbbf24',
     bonusType: 'score',
-    bonusValue: 1.3
+    bonusValue: 1.3,
+    deckRules: {
+      preferredElements: ['土', '火'],
+      preferredStars: ['star-1', 'star-5', 'star-9', 'star-3'],
+      pairsBonus: 1,
+      specialRule: null
+    },
+    limitedShard: {
+      id: 'shard-wealth',
+      name: '金辉星辉碎片',
+      icon: '🪙',
+      description: '蕴含着财运的神秘碎片，收集足够数量可解锁特殊奖励'
+    }
   },
   {
     id: 'theme-health',
@@ -437,7 +473,19 @@ export const DAILY_CHALLENGE_THEMES = [
     description: '身体状态今日如何？',
     color: '#10b981',
     bonusType: 'time',
-    bonusValue: 30
+    bonusValue: 30,
+    deckRules: {
+      preferredElements: ['木', '火'],
+      preferredStars: ['star-5', 'star-7', 'star-9', 'star-8'],
+      pairsBonus: 0,
+      specialRule: 'timeBonus'
+    },
+    limitedShard: {
+      id: 'shard-health',
+      name: '翡翠星辉碎片',
+      icon: '🌿',
+      description: '蕴含着健康运势的神秘碎片，收集足够数量可解锁特殊奖励'
+    }
   },
   {
     id: 'theme-friendship',
@@ -446,7 +494,19 @@ export const DAILY_CHALLENGE_THEMES = [
     description: '人际关系会有什么变化？',
     color: '#8b5cf6',
     bonusType: 'combo',
-    bonusValue: 1.5
+    bonusValue: 1.5,
+    deckRules: {
+      preferredElements: ['风', '水'],
+      preferredStars: ['star-10', 'star-7', 'star-3', 'star-6'],
+      pairsBonus: 0,
+      specialRule: null
+    },
+    limitedShard: {
+      id: 'shard-friendship',
+      name: '紫罗星辉碎片',
+      icon: '💜',
+      description: '蕴含着人际运势的神秘碎片，收集足够数量可解锁特殊奖励'
+    }
   },
   {
     id: 'theme-luck',
@@ -455,7 +515,19 @@ export const DAILY_CHALLENGE_THEMES = [
     description: '今日的幸运指数如何？',
     color: '#14b8a6',
     bonusType: 'score',
-    bonusValue: 2
+    bonusValue: 2,
+    deckRules: {
+      preferredElements: ['光', '风'],
+      preferredStars: ['star-1', 'star-2', 'star-3', 'star-7'],
+      pairsBonus: 2,
+      specialRule: 'luckyStreak'
+    },
+    limitedShard: {
+      id: 'shard-luck',
+      name: '幸运星辉碎片',
+      icon: '🍀',
+      description: '蕴含着幸运之力的神秘碎片，收集足够数量可解锁特殊奖励'
+    }
   },
   {
     id: 'theme-dream',
@@ -464,7 +536,19 @@ export const DAILY_CHALLENGE_THEMES = [
     description: '昨夜的梦境预示着什么？',
     color: '#6366f1',
     bonusType: 'time',
-    bonusValue: 60
+    bonusValue: 60,
+    deckRules: {
+      preferredElements: ['水', '光'],
+      preferredStars: ['star-4', 'star-11', 'star-1', 'star-7'],
+      pairsBonus: 0,
+      specialRule: 'dreamBonus'
+    },
+    limitedShard: {
+      id: 'shard-dream',
+      name: '月华星辉碎片',
+      icon: '🌙',
+      description: '蕴含着梦境之力的神秘碎片，收集足够数量可解锁特殊奖励'
+    }
   },
   {
     id: 'theme-destiny',
@@ -473,9 +557,46 @@ export const DAILY_CHALLENGE_THEMES = [
     description: '命运的齿轮开始转动...',
     color: '#ec4899',
     bonusType: 'score',
-    bonusValue: 1.8
+    bonusValue: 1.8,
+    deckRules: {
+      preferredElements: null,
+      preferredStars: null,
+      pairsBonus: 3,
+      specialRule: 'destinyWildcard'
+    },
+    limitedShard: {
+      id: 'shard-destiny',
+      name: '命运星辉碎片',
+      icon: '🎡',
+      description: '蕴含着命运之力的神秘碎片，收集足够数量可解锁特殊奖励'
+    }
   }
 ];
+
+export const DAILY_CHALLENGE_SHARDS = {
+  'shard-love': { id: 'shard-love', name: '玫瑰星辉碎片', icon: '🌹', rarity: 'rare', themeId: 'theme-love' },
+  'shard-career': { id: 'shard-career', name: '紫晶星辉碎片', icon: '💎', rarity: 'rare', themeId: 'theme-career' },
+  'shard-wealth': { id: 'shard-wealth', name: '金辉星辉碎片', icon: '🪙', rarity: 'rare', themeId: 'theme-wealth' },
+  'shard-health': { id: 'shard-health', name: '翡翠星辉碎片', icon: '🌿', rarity: 'rare', themeId: 'theme-health' },
+  'shard-friendship': { id: 'shard-friendship', name: '紫罗星辉碎片', icon: '💜', rarity: 'rare', themeId: 'theme-friendship' },
+  'shard-luck': { id: 'shard-luck', name: '幸运星辉碎片', icon: '🍀', rarity: 'epic', themeId: 'theme-luck' },
+  'shard-dream': { id: 'shard-dream', name: '月华星辉碎片', icon: '🌙', rarity: 'epic', themeId: 'theme-dream' },
+  'shard-destiny': { id: 'shard-destiny', name: '命运星辉碎片', icon: '🎡', rarity: 'legendary', themeId: 'theme-destiny' }
+};
+
+export const DAILY_SHARD_REWARDS = [
+  { id: 'reward-shard-title', name: '碎片收藏家', type: 'title', requirement: 20, icon: '🏅', description: '累计收集20枚限定碎片' },
+  { id: 'reward-shard-skin', name: '星辉卡背', type: 'skin', requirement: 50, icon: '🎴', description: '累计收集50枚限定碎片解锁特殊卡背' },
+  { id: 'reward-shard-frame', name: '命运光环', type: 'frame', requirement: 100, icon: '✨', description: '累计收集100枚限定碎片解锁专属头像框' }
+];
+
+export const DAILY_CHALLENGE_ENTRY_STATUS = {
+  NOT_STARTED: 'not_started',
+  IN_PROGRESS: 'in_progress',
+  COMPLETED: 'completed',
+  ALL_TASKS_DONE: 'all_tasks_done',
+  REWARD_CLAIMED: 'reward_claimed'
+};
 
 export const DAILY_CHALLENGE_TASKS = [
   {
@@ -614,6 +735,27 @@ export const getDailyRewardByRank = (rank) => {
   if (rank === 3) return DAILY_CHALLENGE_REWARDS[2];
   if (rank <= 10) return DAILY_CHALLENGE_REWARDS[3];
   return DAILY_CHALLENGE_REWARDS[4];
+};
+
+export const getDailyShardById = (id) => {
+  return DAILY_CHALLENGE_SHARDS[id] || null;
+};
+
+export const getDailyShardByThemeId = (themeId) => {
+  return Object.values(DAILY_CHALLENGE_SHARDS).find(s => s.themeId === themeId) || null;
+};
+
+export const getShardRewardProgress = (totalShards) => {
+  return DAILY_SHARD_REWARDS.map(reward => ({
+    ...reward,
+    progress: Math.min(totalShards, reward.requirement),
+    unlocked: totalShards >= reward.requirement
+  }));
+};
+
+export const getThemeDeckConfig = (themeId) => {
+  const theme = getDailyThemeById(themeId);
+  return theme?.deckRules || null;
 };
 
 export const getDifficultyColor = (difficulty) => {

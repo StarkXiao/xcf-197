@@ -523,6 +523,7 @@ function App() {
             visitorCommission={visitorCommission}
             repairRoom={repairRoom}
             chapterProgress={chapterProgress.progress}
+            dailyChallenge={dailyChallenge}
           />
         </div>
       )}
