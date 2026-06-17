@@ -1,9 +1,17 @@
 import { useState, useEffect } from 'react';
-import { getLevelById, FULL_LETTER, getRarityInfo, getAchievementById, getTitleById, getStarRailTitle } from '../data/gameData';
+import { getLevelById, FULL_LETTER, getRarityInfo, getAchievementById, getTitleById, getStarRailTitle, getChapterById, getNodeById, getChapterStats } from '../data/gameData';
 
-const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLevel, achievements, onOpenAchievements }) => {
+const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLevel, achievements, onOpenAchievements, isChapterMode = false, currentChapter, currentNodeId, onContinue, onBackToStarMap, chapterProgress = {} }) => {
   const level = getLevelById(result?.levelId || 1);
+  const chapter = currentChapter ? getChapterById(currentChapter) : null;
+  const currentNode = currentChapter && currentNodeId ? getNodeById(currentChapter, currentNodeId) : null;
+  const chapterStats = currentChapter ? getChapterStats(
+    chapterProgress.completedNodes || {}, 
+    chapterProgress.starRatings || {}
+  ).find(s => s.chapterId === currentChapter) : null;
+  
   const [showAchievementSection, setShowAchievementSection] = useState(false);
+  const [showChapterProgress, setShowChapterProgress] = useState(false);
 
   useEffect(() => {
     if (achievements?.newAchievements?.length > 0) {
@@ -13,6 +21,15 @@ const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLeve
       return () => clearTimeout(timer);
     }
   }, [achievements?.newAchievements?.length]);
+
+  useEffect(() => {
+    if (isChapterMode && isWin) {
+      const timer = setTimeout(() => {
+        setShowChapterProgress(true);
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [isChapterMode, isWin]);
 
   const getStarsRating = () => {
     if (!isWin) return 0;
@@ -229,7 +246,7 @@ const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLeve
           </div>
         )}
 
-        {isWin && !hasNextLevel && (
+        {isWin && !hasNextLevel && !isChapterMode && (
           <div className="letter-fragment p-6 mb-8 max-w-sm mx-auto">
             <div className="text-center text-xs text-amber-700/60 mb-3">
               💌 完整情书 💌
@@ -240,8 +257,69 @@ const ResultPage = ({ isWin, result, onRestart, onNextLevel, onHome, hasNextLeve
           </div>
         )}
 
+        {isChapterMode && isWin && showChapterProgress && chapter && chapterStats && (
+          <div className="bg-star-purple/30 rounded-2xl p-5 mb-6 border border-star-gold/20 animate-slide-in">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xl">{chapter.icon}</span>
+              <span className="font-bold" style={{ color: chapter.themeColor }}>
+                {chapter.name} · 进度
+              </span>
+            </div>
+            
+            <div className="mb-3">
+              <div className="flex justify-between text-xs text-white/60 mb-1">
+                <span>章节进度</span>
+                <span>{chapterStats.completedCount}/{chapterStats.totalNodes} 节点</span>
+              </div>
+              <div className="h-2 bg-black/30 rounded-full overflow-hidden">
+                <div 
+                  className="h-full rounded-full transition-all duration-1000"
+                  style={{ 
+                    width: `${chapterStats.progress}%`,
+                    background: `linear-gradient(90deg, ${chapter.themeColor}, ${chapter.themeColor}80)`
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-star-gold">⭐</span>
+              <span className="text-white/70 text-sm">
+                本章星星: {chapterStats.earnedStars}/{chapterStats.totalStars}
+              </span>
+            </div>
+
+            {currentNode?.isChapterEnd && (
+              <div className="mt-4 pt-4 border-t border-star-gold/20 text-center">
+                <div className="text-star-gold font-bold mb-1">🎉 章节完成！</div>
+                <div className="text-xs text-white/60">
+                  {chapter.id < 5 ? '下一章节已解锁' : '恭喜你完成所有章节！'}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="space-y-3">
-          {isWin && hasNextLevel && (
+          {isChapterMode && isWin && (
+            <button
+              onClick={onContinue}
+              className="w-full btn-star text-lg py-4"
+            >
+              继续冒险 →
+            </button>
+          )}
+
+          {isChapterMode && (
+            <button
+              onClick={onBackToStarMap}
+              className="w-full py-3 rounded-full border-2 border-star-cyan/50 text-star-cyan hover:bg-star-cyan/10 transition-colors"
+            >
+              🗺️ 返回星图
+            </button>
+          )}
+
+          {!isChapterMode && isWin && hasNextLevel && (
             <button
               onClick={onNextLevel}
               className="w-full btn-star text-lg py-4"

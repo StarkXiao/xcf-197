@@ -3592,3 +3592,437 @@ export const getRepairRoomStats = (repairedFragments = [], completedChapters = [
     overallProgress: Math.round(((repairedFragments.length / totalFragments) + (completedChapters.length / totalChapters) + (unlockedSentences.length / totalSentences)) / 3 * 100)
   };
 };
+
+export const CHAPTERS = [
+  {
+    id: 1,
+    name: '星之序章',
+    subtitle: '初识星纹',
+    description: '翻开神秘的星纹卡牌，开启你的占卜之旅',
+    icon: '🌅',
+    themeColor: '#ffd700',
+    bgGradient: 'from-amber-900/40 via-orange-900/30 to-yellow-900/20',
+    unlockCondition: null,
+    totalStars: 6,
+    reward: { type: 'stardust', value: 200 },
+    nodes: [
+      {
+        id: 'ch1-node-1',
+        type: 'level',
+        levelId: 1,
+        name: '星之起点',
+        description: '初识星纹的第一步',
+        position: { x: 50, y: 80 },
+        connections: ['ch1-node-2'],
+        difficulty: 'easy'
+      },
+      {
+        id: 'ch1-node-2',
+        type: 'level',
+        levelId: 1,
+        name: '星光小径',
+        description: '沿着星光继续前行',
+        position: { x: 30, y: 60 },
+        connections: ['ch1-node-3'],
+        difficulty: 'easy'
+      },
+      {
+        id: 'ch1-node-3',
+        type: 'reward',
+        name: '星尘宝箱',
+        description: '获得星尘奖励',
+        position: { x: 70, y: 55 },
+        connections: ['ch1-boss'],
+        reward: { type: 'stardust', value: 100 }
+      },
+      {
+        id: 'ch1-boss',
+        type: 'boss',
+        levelId: 1,
+        name: '星之守护者',
+        description: '第一章的终极挑战',
+        position: { x: 50, y: 25 },
+        connections: [],
+        difficulty: 'medium',
+        isChapterEnd: true
+      }
+    ]
+  },
+  {
+    id: 2,
+    name: '月光私语',
+    subtitle: '月下告白',
+    description: '皎洁月光下，星座诉说着古老的爱情故事',
+    icon: '🌙',
+    themeColor: '#a78bfa',
+    bgGradient: 'from-indigo-900/40 via-purple-900/30 to-blue-900/20',
+    unlockCondition: { type: 'chapter', value: 1 },
+    totalStars: 9,
+    reward: { type: 'stardust', value: 300 },
+    nodes: [
+      {
+        id: 'ch2-node-1',
+        type: 'level',
+        levelId: 2,
+        name: '月光入口',
+        description: '踏入月光笼罩的领域',
+        position: { x: 20, y: 80 },
+        connections: ['ch2-node-2', 'ch2-node-3'],
+        difficulty: 'easy'
+      },
+      {
+        id: 'ch2-node-2',
+        type: 'level',
+        levelId: 2,
+        name: '月影回廊',
+        description: '在月影中寻找方向',
+        position: { x: 40, y: 60 },
+        connections: ['ch2-node-4'],
+        difficulty: 'medium'
+      },
+      {
+        id: 'ch2-node-3',
+        type: 'challenge',
+        levelId: 2,
+        name: '暗月挑战',
+        description: '高难度隐藏关卡',
+        position: { x: 80, y: 65 },
+        connections: ['ch2-node-5'],
+        difficulty: 'hard',
+        isHidden: true
+      },
+      {
+        id: 'ch2-node-4',
+        type: 'reward',
+        name: '月华宝箱',
+        description: '月华凝聚的宝藏',
+        position: { x: 30, y: 40 },
+        connections: ['ch2-boss'],
+        reward: { type: 'stardust', value: 150 }
+      },
+      {
+        id: 'ch2-node-5',
+        type: 'reward',
+        name: '暗影宝箱',
+        description: '隐藏的珍贵奖励',
+        position: { x: 70, y: 40 },
+        connections: ['ch2-boss'],
+        reward: { type: 'starShard', value: 3 }
+      },
+      {
+        id: 'ch2-boss',
+        type: 'boss',
+        levelId: 2,
+        name: '月之精灵',
+        description: '第二章的终极挑战',
+        position: { x: 50, y: 15 },
+        connections: [],
+        difficulty: 'medium',
+        isChapterEnd: true
+      }
+    ]
+  },
+  {
+    id: 3,
+    name: '银河情书',
+    subtitle: '跨越星河',
+    description: '跨越银河的爱恋，在星塔之巅重逢',
+    icon: '🌌',
+    themeColor: '#00d4ff',
+    bgGradient: 'from-cyan-900/40 via-blue-900/30 to-indigo-900/20',
+    unlockCondition: { type: 'chapter', value: 2 },
+    totalStars: 9,
+    reward: { type: 'stardust', value: 400 },
+    nodes: [
+      {
+        id: 'ch3-node-1',
+        type: 'level',
+        levelId: 3,
+        name: '银河渡口',
+        description: '银河之旅的起点',
+        position: { x: 50, y: 85 },
+        connections: ['ch3-node-2', 'ch3-node-3'],
+        difficulty: 'easy'
+      },
+      {
+        id: 'ch3-node-2',
+        type: 'level',
+        levelId: 3,
+        name: '星域漫步',
+        description: '在星域中悠然漫步',
+        position: { x: 25, y: 65 },
+        connections: ['ch3-node-4'],
+        difficulty: 'medium'
+      },
+      {
+        id: 'ch3-node-3',
+        type: 'level',
+        levelId: 3,
+        name: '星云迷宫',
+        description: '穿越迷幻的星云',
+        position: { x: 75, y: 65 },
+        connections: ['ch3-node-5'],
+        difficulty: 'medium'
+      },
+      {
+        id: 'ch3-node-4',
+        type: 'challenge',
+        levelId: 3,
+        name: '超新星试炼',
+        description: '挑战极限的试炼',
+        position: { x: 20, y: 40 },
+        connections: ['ch3-node-6'],
+        difficulty: 'hard',
+        isHidden: true
+      },
+      {
+        id: 'ch3-node-5',
+        type: 'reward',
+        name: '星河宝箱',
+        description: '星河汇聚的宝藏',
+        position: { x: 80, y: 40 },
+        connections: ['ch3-node-6'],
+        reward: { type: 'stardust', value: 200 }
+      },
+      {
+        id: 'ch3-node-6',
+        type: 'reward',
+        name: '极光宝箱',
+        description: '极光凝结的珍宝',
+        position: { x: 50, y: 25 },
+        connections: ['ch3-boss'],
+        reward: { type: 'starShard', value: 5 }
+      },
+      {
+        id: 'ch3-boss',
+        type: 'boss',
+        levelId: 3,
+        name: '银河龙王',
+        description: '第三章的终极挑战',
+        position: { x: 50, y: 8 },
+        connections: [],
+        difficulty: 'hard',
+        isChapterEnd: true
+      }
+    ]
+  },
+  {
+    id: 4,
+    name: '星座誓言',
+    subtitle: '十二见证',
+    description: '十二星座齐聚，见证你们的爱情誓言',
+    icon: '⭐',
+    themeColor: '#ec4899',
+    bgGradient: 'from-pink-900/40 via-rose-900/30 to-purple-900/20',
+    unlockCondition: { type: 'chapter', value: 3 },
+    totalStars: 9,
+    reward: { type: 'stardust', value: 500 },
+    nodes: [
+      {
+        id: 'ch4-node-1',
+        type: 'level',
+        levelId: 4,
+        name: '白羊之门',
+        description: '勇气的起点',
+        position: { x: 50, y: 85 },
+        connections: ['ch4-node-2', 'ch4-node-3'],
+        difficulty: 'easy'
+      },
+      {
+        id: 'ch4-node-2',
+        type: 'level',
+        levelId: 4,
+        name: '金牛之殿',
+        description: '坚韧的考验',
+        position: { x: 30, y: 65 },
+        connections: ['ch4-node-4'],
+        difficulty: 'medium'
+      },
+      {
+        id: 'ch4-node-3',
+        type: 'level',
+        levelId: 4,
+        name: '双子之庭',
+        description: '智慧的谜题',
+        position: { x: 70, y: 65 },
+        connections: ['ch4-node-5'],
+        difficulty: 'medium'
+      },
+      {
+        id: 'ch4-node-4',
+        type: 'reward',
+        name: '星辰宝箱',
+        description: '星座的馈赠',
+        position: { x: 25, y: 45 },
+        connections: ['ch4-node-6'],
+        reward: { type: 'stardust', value: 200 }
+      },
+      {
+        id: 'ch4-node-5',
+        type: 'challenge',
+        levelId: 4,
+        name: '巨蟹之巢',
+        description: '温柔的守护',
+        position: { x: 75, y: 45 },
+        connections: ['ch4-node-6'],
+        difficulty: 'hard',
+        isHidden: true
+      },
+      {
+        id: 'ch4-node-6',
+        type: 'level',
+        levelId: 4,
+        name: '狮子王座',
+        description: '王者的试炼',
+        position: { x: 50, y: 28 },
+        connections: ['ch4-boss'],
+        difficulty: 'medium'
+      },
+      {
+        id: 'ch4-boss',
+        type: 'boss',
+        levelId: 4,
+        name: '处女之神',
+        description: '第四章的终极挑战',
+        position: { x: 50, y: 8 },
+        connections: [],
+        difficulty: 'hard',
+        isChapterEnd: true
+      }
+    ]
+  },
+  {
+    id: 5,
+    name: '星塔终章',
+    subtitle: '情书修复',
+    description: '登上星塔之巅，修复那封完整的情书',
+    icon: '🏰',
+    themeColor: '#f59e0b',
+    bgGradient: 'from-yellow-900/40 via-amber-900/30 to-orange-900/20',
+    unlockCondition: { type: 'chapter', value: 4 },
+    totalStars: 9,
+    reward: { type: 'stardust', value: 800 },
+    nodes: [
+      {
+        id: 'ch5-node-1',
+        type: 'level',
+        levelId: 5,
+        name: '星塔一层',
+        description: '踏入星塔的第一步',
+        position: { x: 50, y: 90 },
+        connections: ['ch5-node-2', 'ch5-node-3'],
+        difficulty: 'medium'
+      },
+      {
+        id: 'ch5-node-2',
+        type: 'level',
+        levelId: 5,
+        name: '星塔三层',
+        description: '继续向上攀登',
+        position: { x: 30, y: 70 },
+        connections: ['ch5-node-4'],
+        difficulty: 'medium'
+      },
+      {
+        id: 'ch5-node-3',
+        type: 'challenge',
+        levelId: 5,
+        name: '星塔试炼',
+        description: '隐藏的试炼之路',
+        position: { x: 70, y: 70 },
+        connections: ['ch5-node-5'],
+        difficulty: 'hard',
+        isHidden: true
+      },
+      {
+        id: 'ch5-node-4',
+        type: 'reward',
+        name: '星辉宝箱',
+        description: '星辉凝聚的宝藏',
+        position: { x: 25, y: 50 },
+        connections: ['ch5-node-6'],
+        reward: { type: 'stardust', value: 300 }
+      },
+      {
+        id: 'ch5-node-5',
+        type: 'reward',
+        name: '永恒宝箱',
+        description: '永恒的珍贵奖励',
+        position: { x: 75, y: 50 },
+        connections: ['ch5-node-6'],
+        reward: { type: 'starShard', value: 8 }
+      },
+      {
+        id: 'ch5-node-6',
+        type: 'level',
+        levelId: 5,
+        name: '星塔七层',
+        description: '接近塔顶',
+        position: { x: 50, y: 32 },
+        connections: ['ch5-boss'],
+        difficulty: 'hard'
+      },
+      {
+        id: 'ch5-boss',
+        type: 'boss',
+        levelId: 5,
+        name: '星塔之主',
+        description: '最终的考验',
+        position: { x: 50, y: 10 },
+        connections: [],
+        difficulty: 'legendary',
+        isChapterEnd: true,
+        isFinalBoss: true
+      }
+    ]
+  }
+];
+
+export const NODE_TYPES = {
+  LEVEL: 'level',
+  BOSS: 'boss',
+  CHALLENGE: 'challenge',
+  REWARD: 'reward'
+};
+
+export const getChapterById = (id) => {
+  return CHAPTERS.find(ch => ch.id === id);
+};
+
+export const getNodeById = (chapterId, nodeId) => {
+  const chapter = getChapterById(chapterId);
+  if (!chapter) return null;
+  return chapter.nodes.find(n => n.id === nodeId);
+};
+
+export const getChapterNodes = (chapterId) => {
+  const chapter = getChapterById(chapterId);
+  return chapter ? chapter.nodes : [];
+};
+
+export const getTotalChapters = () => CHAPTERS.length;
+
+export const getChapterStats = (completedNodes = {}, starRatings = {}) => {
+  return CHAPTERS.map(chapter => {
+    const totalNodes = chapter.nodes.filter(n => n.type !== 'reward').length;
+    const completedCount = chapter.nodes.filter(n => 
+      completedNodes[`${chapter.id}-${n.id}`] && n.type !== 'reward'
+    ).length;
+    const totalStars = chapter.nodes.filter(n => n.type !== 'reward').length * 3;
+    const earnedStars = chapter.nodes.reduce((sum, n) => {
+      if (n.type === 'reward') return sum;
+      const key = `${chapter.id}-${n.id}`;
+      return sum + (starRatings[key] || 0);
+    }, 0);
+    
+    return {
+      chapterId: chapter.id,
+      totalNodes,
+      completedCount,
+      progress: Math.round((completedCount / totalNodes) * 100),
+      totalStars,
+      earnedStars,
+      isCompleted: completedCount === totalNodes
+    };
+  });
+};

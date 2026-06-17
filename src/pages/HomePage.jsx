@@ -1,6 +1,6 @@
 import { LEVELS, getAchievementStats, CURRENCY_INFO, CURRENCY_TYPES, getCurrentSeason } from '../data/gameData';
 
-const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, onOpenDailyChallenge, onOpenAchievements, onOpenShop, onOpenStoryCorridor, onOpenSeasonChallenge, onOpenLetterWorkshop, onOpenVisitorCommission, onOpenRepairRoom, unlockedLevel = 1, highScores = {}, collectedStars = 0, achievements, shop, seasonChallenge, letterWorkshop, visitorCommission, repairRoom }) => {
+const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, onOpenDailyChallenge, onOpenAchievements, onOpenShop, onOpenStoryCorridor, onOpenSeasonChallenge, onOpenLetterWorkshop, onOpenVisitorCommission, onOpenRepairRoom, onOpenChapterSelect, unlockedLevel = 1, highScores = {}, collectedStars = 0, achievements, shop, seasonChallenge, letterWorkshop, visitorCommission, repairRoom, chapterProgress = {} }) => {
   const currentSeason = getCurrentSeason();
   const hasUnclaimedRewards = seasonChallenge?.unclaimedStageRewardsCount > 0 || 
                               seasonChallenge?.unclaimedTaskRewardsCount > 0;
@@ -48,6 +48,22 @@ const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, 
           className="btn-star text-lg px-12 py-4 animate-pulse-slow"
         >
           ✨ 开始占卜 ✨
+        </button>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-4 mb-8">
+        <button
+          onClick={onOpenChapterSelect}
+          className="px-8 py-3 rounded-full font-bold transition-all
+            border-2 border-star-cyan/50 text-star-cyan hover:bg-star-cyan/10 hover:border-star-cyan hover:shadow-lg hover:shadow-star-cyan/30
+            relative overflow-hidden group"
+        >
+          <span className="relative z-10">🗺️ 星图征程</span>
+          {chapterProgress?.lastPlayedChapter && (
+            <span className="absolute -top-1 -right-1 bg-star-cyan text-white text-xs px-2 py-0.5 rounded-full">
+              继续
+            </span>
+          )}
         </button>
       </div>
 

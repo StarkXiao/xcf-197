@@ -17,7 +17,9 @@ import RepairRoomPage from './pages/RepairRoomPage';
 import StarryBackground from './components/StarryBackground';
 import AchievementUnlockModal from './components/AchievementUnlockModal';
 import StoryChoiceModal from './components/StoryChoiceModal';
-import { LEVELS, getLevelById, getStoryBranchByChapter } from './data/gameData';
+import ChapterSelect from './components/ChapterSelect';
+import StarMap from './components/StarMap';
+import { LEVELS, getLevelById, getStoryBranchByChapter, getChapterById, getNodeById, NODE_TYPES } from './data/gameData';
 import { useArchive } from './hooks/useArchive';
 import { useDailyChallenge } from './hooks/useDailyChallenge';
 import { useAchievements } from './hooks/useAchievements';
@@ -26,6 +28,7 @@ import { useSeasonChallenge } from './hooks/useSeasonChallenge';
 import { useLetterWorkshop } from './hooks/useLetterWorkshop';
 import { useVisitorCommission } from './hooks/useVisitorCommission';
 import { useRepairRoom } from './hooks/useRepairRoom';
+import { useChapterProgress } from './hooks/useChapterProgress';
 
 const PAGES = {
   HOME: 'home',
@@ -42,7 +45,9 @@ const PAGES = {
   SEASON_SETTLEMENT: 'season-settlement',
   LETTER_WORKSHOP: 'letter-workshop',
   VISITOR_COMMISSION: 'visitor-commission',
-  REPAIR_ROOM: 'repair-room'
+  REPAIR_ROOM: 'repair-room',
+  CHAPTER_SELECT: 'chapter-select',
+  STAR_MAP: 'star-map'
 };
 
 function App() {
@@ -54,6 +59,12 @@ function App() {
   const [highScores, setHighScores] = useState({});
   const [showStoryChoiceModal, setShowStoryChoiceModal] = useState(false);
   const [pendingStoryChapterId, setPendingStoryChapterId] = useState(null);
+  const [currentChapter, setCurrentChapter] = useState(1);
+  const [currentNodeId, setCurrentNodeId] = useState(null);
+  const [pageTransition, setPageTransition] = useState(false);
+  const [transitionDirection, setTransitionDirection] = useState('left');
+  const [gameSourcePage, setGameSourcePage] = useState(PAGES.HOME);
+  
   const archive = useArchive();
   const dailyChallenge = useDailyChallenge();
   const achievements = useAchievements(archive);
@@ -62,6 +73,7 @@ function App() {
   const letterWorkshop = useLetterWorkshop(archive);
   const visitorCommission = useVisitorCommission(archive, shop);
   const repairRoom = useRepairRoom(archive, shop);
+  const chapterProgress = useChapterProgress(shop);
 
   useEffect(() => {
     const savedProgress = localStorage.getItem('starTowerProgress');
@@ -96,12 +108,16 @@ function App() {
   };
 
   const handleStartGame = (levelId) => {
+    setGameSourcePage(PAGES.HOME);
+    setCurrentNodeId(null);
     setCurrentLevel(levelId);
     setCurrentPage(PAGES.GAME);
   };
 
   const handleSelectLevel = (levelId) => {
     if (levelId <= unlockedLevel) {
+      setGameSourcePage(PAGES.HOME);
+      setCurrentNodeId(null);
       setCurrentLevel(levelId);
       setCurrentPage(PAGES.GAME);
     }
@@ -121,6 +137,16 @@ function App() {
     setIsWin(true);
     setGameResult(result);
     saveProgress(result.levelId, result.score);
+
+    if (currentNodeId && currentChapter) {
+      const stars = getStarsRating(result.levelId, result.timeLeft, result.moves);
+      chapterProgress.completeNode(currentChapter, currentNodeId, {
+        score: result.score,
+        stars,
+        timeLeft: result.timeLeft,
+        moves: result.moves
+      });
+    }
 
     const level = getLevelById(result.levelId);
     if (level) {
@@ -170,6 +196,118 @@ function App() {
     setCurrentPage(PAGES.RESULT);
   };
 
+  const handleOpenChapterSelect = () => {
+    setTransitionDirection('left');
+    setPageTransition(true);
+    setTimeout(() => {
+      setCurrentPage(PAGES.CHAPTER_SELECT);
+      setPageTransition(false);
+    }, 200);
+  };
+
+  const handleBackFromChapterSelect = () => {
+    setTransitionDirection('right');
+    setPageTransition(true);
+    setTimeout(() => {
+      setCurrentPage(PAGES.HOME);
+      setPageTransition(false);
+    }, 200);
+  };
+
+  const handleSelectChapter = (chapterId) => {
+    setCurrentChapter(chapterId);
+    setTransitionDirection('left');
+    setPageTransition(true);
+    setTimeout(() => {
+      setCurrentPage(PAGES.STAR_MAP);
+      setPageTransition(false);
+    }, 200);
+  };
+
+  const handleBackFromStarMap = () => {
+    setTransitionDirection('right');
+    setPageTransition(true);
+    setTimeout(() => {
+      setCurrentPage(PAGES.CHAPTER_SELECT);
+      setPageTransition(false);
+    }, 200);
+  };
+
+  const handleSelectNode = (chapterId, nodeId, levelId) => {
+    setGameSourcePage(PAGES.STAR_MAP);
+    setCurrentChapter(chapterId);
+    setCurrentNodeId(nodeId);
+    setCurrentLevel(levelId);
+    chapterProgress.setLastPlayed(chapterId, nodeId);
+    setCurrentPage(PAGES.GAME);
+  };
+
+  const handleClaimReward = (chapterId, nodeId, reward) => {
+    chapterProgress.claimReward(chapterId, nodeId, reward);
+  };
+
+  const handleContinueGame = (chapterId, nodeId) => {
+    const node = getNodeById(chapterId, nodeId);
+    if (node && node.levelId) {
+      setGameSourcePage(PAGES.STAR_MAP);
+      setCurrentChapter(chapterId);
+      setCurrentNodeId(nodeId);
+      setCurrentLevel(node.levelId);
+      setCurrentPage(PAGES.GAME);
+    }
+  };
+
+  const handleBackToStarMap = () => {
+    setGameResult(null);
+    setCurrentPage(PAGES.STAR_MAP);
+  };
+
+  const handleContinueFromResult = () => {
+    if (!currentNodeId || !currentChapter) {
+      handleHomeFromResult();
+      return;
+    }
+
+    const chapter = getChapterById(currentChapter);
+    if (!chapter) {
+      handleHomeFromResult();
+      return;
+    }
+
+    const currentNode = chapter.nodes.find(n => n.id === currentNodeId);
+    if (!currentNode) {
+      handleHomeFromResult();
+      return;
+    }
+
+    let nextNodeId = null;
+    if (currentNode.connections && currentNode.connections.length > 0) {
+      for (const connId of currentNode.connections) {
+        if (chapterProgress.isNodeUnlocked(currentChapter, connId)) {
+          nextNodeId = connId;
+          break;
+        }
+      }
+      if (!nextNodeId) {
+        nextNodeId = currentNode.connections[0];
+      }
+    }
+
+    if (nextNodeId) {
+      const nextNode = chapter.nodes.find(n => n.id === nextNodeId);
+      if (nextNode && nextNode.type !== NODE_TYPES.REWARD && nextNode.levelId) {
+        setCurrentNodeId(nextNodeId);
+        setCurrentLevel(nextNode.levelId);
+        chapterProgress.setLastPlayed(currentChapter, nextNodeId);
+        setGameResult(null);
+        setCurrentPage(PAGES.GAME);
+        return;
+      }
+    }
+
+    handleBackToStarMap();
+  };
+
   const handleOpenArchive = () => {
     setCurrentPage(PAGES.ARCHIVE);
   };
@@ -210,7 +348,10 @@ function App() {
   };
 
   const handleBack = () => {
-    setCurrentPage(PAGES.HOME);
+    setCurrentPage(gameSourcePage);
+    if (gameSourcePage === PAGES.STAR_MAP) {
+      setCurrentNodeId(null);
+    }
   };
 
   const handleOpenDailyChallenge = () => {
@@ -265,6 +406,8 @@ function App() {
 
   const handleStartGameFromShop = (levelId) => {
     if (levelId) {
+      setGameSourcePage(PAGES.SHOP);
+      setCurrentNodeId(null);
       setCurrentLevel(levelId);
       setCurrentPage(PAGES.GAME);
     } else {
@@ -355,29 +498,57 @@ function App() {
       <StarryBackground skinTheme={skinTheme} />
 
       {currentPage === PAGES.HOME && (
-        <HomePage
-          onStartGame={handleStartGame}
-          onSelectLevel={handleSelectLevel}
-          onOpenArchive={handleOpenArchive}
-          onOpenStarAlbum={handleOpenStarAlbum}
-          onOpenDailyChallenge={handleOpenDailyChallenge}
-          onOpenAchievements={handleOpenAchievements}
-          onOpenShop={handleOpenShop}
-          onOpenStoryCorridor={handleOpenStoryCorridor}
-          onOpenSeasonChallenge={handleOpenSeasonChallenge}
-          onOpenLetterWorkshop={handleOpenLetterWorkshop}
-          onOpenVisitorCommission={handleOpenVisitorCommission}
-          onOpenRepairRoom={handleOpenRepairRoom}
-          unlockedLevel={unlockedLevel}
-          highScores={highScores}
-          collectedStars={archive.collectedFragments.length}
-          achievements={achievements}
-          shop={shop}
-          seasonChallenge={seasonChallenge}
-          letterWorkshop={letterWorkshop}
-          visitorCommission={visitorCommission}
-          repairRoom={repairRoom}
-        />
+        <div className={`transition-all duration-300 ${pageTransition ? (transitionDirection === 'right' ? 'translate-x-[-100%] opacity-0' : 'translate-x-[100%] opacity-0') : 'translate-x-0 opacity-100'}`}>
+          <HomePage
+            onStartGame={handleStartGame}
+            onSelectLevel={handleSelectLevel}
+            onOpenArchive={handleOpenArchive}
+            onOpenStarAlbum={handleOpenStarAlbum}
+            onOpenDailyChallenge={handleOpenDailyChallenge}
+            onOpenAchievements={handleOpenAchievements}
+            onOpenShop={handleOpenShop}
+            onOpenStoryCorridor={handleOpenStoryCorridor}
+            onOpenSeasonChallenge={handleOpenSeasonChallenge}
+            onOpenLetterWorkshop={handleOpenLetterWorkshop}
+            onOpenVisitorCommission={handleOpenVisitorCommission}
+            onOpenRepairRoom={handleOpenRepairRoom}
+            onOpenChapterSelect={handleOpenChapterSelect}
+            unlockedLevel={unlockedLevel}
+            highScores={highScores}
+            collectedStars={archive.collectedFragments.length}
+            achievements={achievements}
+            shop={shop}
+            seasonChallenge={seasonChallenge}
+            letterWorkshop={letterWorkshop}
+            visitorCommission={visitorCommission}
+            repairRoom={repairRoom}
+            chapterProgress={chapterProgress.progress}
+          />
+        </div>
+      )}
+
+      {currentPage === PAGES.CHAPTER_SELECT && (
+        <div className={`transition-all duration-300 ${pageTransition ? (transitionDirection === 'right' ? 'translate-x-[100%] opacity-0' : 'translate-x-[-100%] opacity-0') : 'translate-x-0 opacity-100'}`}>
+          <ChapterSelect
+            onSelectChapter={handleSelectChapter}
+            onContinue={handleContinueGame}
+            currentProgress={chapterProgress.progress}
+            lastPlayedChapter={chapterProgress.progress.lastPlayedChapter}
+            lastPlayedNode={chapterProgress.progress.lastPlayedNode}
+          />
+        </div>
+      )}
+
+      {currentPage === PAGES.STAR_MAP && (
+        <div className={`transition-all duration-300 ${pageTransition ? (transitionDirection === 'right' ? 'translate-x-[100%] opacity-0' : 'translate-x-[-100%] opacity-0') : 'translate-x-0 opacity-100'}`}>
+          <StarMap
+            chapterId={currentChapter}
+            onSelectNode={handleSelectNode}
+            onBack={handleBackFromStarMap}
+            currentProgress={chapterProgress.progress}
+            onClaimReward={handleClaimReward}
+          />
+        </div>
       )}
 
       {currentPage === PAGES.GAME && (
@@ -402,6 +573,12 @@ function App() {
           hasNextLevel={hasNextLevel}
           achievements={achievements}
           onOpenAchievements={handleOpenAchievementsFromResult}
+          isChapterMode={!!currentNodeId}
+          currentChapter={currentChapter}
+          currentNodeId={currentNodeId}
+          onContinue={handleContinueFromResult}
+          onBackToStarMap={handleBackToStarMap}
+          chapterProgress={chapterProgress.progress}
         />
       )}
 
