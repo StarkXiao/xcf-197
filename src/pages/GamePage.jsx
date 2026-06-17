@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Card from '../components/Card';
 import Modal from '../components/Modal';
+import StrategyPanel from '../components/StrategyPanel';
 import { useGameLogic } from '../hooks/useGameLogic';
 import { useTimer } from '../hooks/useTimer';
 import { useScore } from '../hooks/useScore';
@@ -49,7 +50,8 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     getUnmatchedCards,
     shuffleUnmatchedCards,
     instantMatchPair,
-    revealAllCards
+    revealAllCards,
+    seenStars
   } = useGameLogic(level, {
     perfectStart: shop?.hasPerfectStart?.(),
     hasMistakeProtect: (gameEffects[ITEM_EFFECT_TYPES.MISTAKE_PROTECT] || 0) > 0
@@ -1009,33 +1011,28 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
         </div>
       </Modal>
 
-      <Modal
+      <StrategyPanel
         isOpen={showPauseModal}
         onClose={() => setShowPauseModal(false)}
-        title="游戏暂停"
-        showCloseButton={false}
-      >
-        <div className="space-y-4">
-          <button
-            onClick={() => setShowPauseModal(false)}
-            className="w-full btn-star"
-          >
-            继续游戏
-          </button>
-          <button
-            onClick={handleRestart}
-            className="w-full py-3 rounded-full border-2 border-star-gold/50 text-star-gold hover:bg-star-gold/10 transition-colors"
-          >
-            重新开始
-          </button>
-          <button
-            onClick={onBack}
-            className="w-full py-3 rounded-full border-2 border-white/30 text-white/70 hover:bg-white/10 transition-colors"
-          >
-            返回主页
-          </button>
-        </div>
-      </Modal>
+        onRestart={handleRestart}
+        onBack={onBack}
+        seenStars={seenStars}
+        matchedPairs={matchedPairs}
+        totalPairs={level?.pairs || 0}
+        currentMultiplier={railMultiplier}
+        railLevel={railLevel}
+        currentCombo={Math.max(combo, railCombo)}
+        maxCombo={Math.max(maxCombo, railMaxCombo)}
+        currentScore={score}
+        timeLeft={timeLeft}
+        moves={moves}
+        loveLetterRestarts={loveLetterRestarts}
+        affection={affection}
+        hintCount={hintCount}
+        protectCount={protectCount}
+        hasActiveEffects={Object.keys(gameEffects).length > 0}
+        levelName={`第 ${level?.id} 关 · ${level?.name}`}
+      />
     </div>
   );
 };

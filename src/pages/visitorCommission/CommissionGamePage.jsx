@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Card from '../../components/Card';
 import Modal from '../../components/Modal';
+import StrategyPanel from '../../components/StrategyPanel';
 import { useTimer } from '../../hooks/useTimer';
 import { useScore } from '../../hooks/useScore';
 import { COMMISSION_EVALUATION_CRITERIA, getRarityColor, calculateCommissionStars, checkCommissionBonus } from '../../data/gameData';
@@ -17,6 +18,7 @@ const CommissionGamePage = ({ commission, onBack, onComplete, visitor, skinTheme
   const [showBonusCondition, setShowBonusCondition] = useState(false);
   const [earnedPoints, setEarnedPoints] = useState(0);
   const [showPointsPopup, setShowPointsPopup] = useState(false);
+  const [seenStars, setSeenStars] = useState([]);
   const prevMatchedRef = useRef(0);
   const mistakesRef = useRef(0);
 
@@ -115,6 +117,19 @@ const CommissionGamePage = ({ commission, onBack, onComplete, visitor, skinTheme
       setGameStatus('playing');
     }
 
+    setSeenStars(prev => {
+      const existingIndex = prev.findIndex(s => s.starId === card.starId);
+      if (existingIndex >= 0) {
+        const updated = [...prev];
+        updated[existingIndex] = {
+          ...updated[existingIndex],
+          seenCount: (updated[existingIndex].seenCount || 1) + 1
+        };
+        return updated;
+      }
+      return [...prev, { starId: card.starId, star: card.star, seenCount: 1 }];
+    });
+
     const newCards = [...cards];
     newCards[cardIndex] = { ...card, isFlipped: true };
     setCards(newCards);
@@ -170,6 +185,7 @@ const CommissionGamePage = ({ commission, onBack, onComplete, visitor, skinTheme
     setGameStatus('idle');
     setIsLocked(false);
     setFlippedCards([]);
+    setSeenStars([]);
     resetTimer(commission.timeLimit);
     resetScore();
     setShowPauseModal(false);
@@ -388,33 +404,28 @@ const CommissionGamePage = ({ commission, onBack, onComplete, visitor, skinTheme
         </div>
       </Modal>
 
-      <Modal
+      <StrategyPanel
         isOpen={showPauseModal}
         onClose={() => setShowPauseModal(false)}
-        title="游戏暂停"
-        showCloseButton={false}
-      >
-        <div className="space-y-4">
-          <button
-            onClick={() => setShowPauseModal(false)}
-            className="w-full btn-star"
-          >
-            继续游戏
-          </button>
-          <button
-            onClick={handleRestart}
-            className="w-full py-3 rounded-full border-2 border-star-gold/50 text-star-gold hover:bg-star-gold/10 transition-colors"
-          >
-            重新开始
-          </button>
-          <button
-            onClick={onBack}
-            className="w-full py-3 rounded-full border-2 border-white/30 text-white/70 hover:bg-white/10 transition-colors"
-          >
-            放弃委托
-          </button>
-        </div>
-      </Modal>
+        onRestart={handleRestart}
+        onBack={onBack}
+        seenStars={seenStars}
+        matchedPairs={matchedPairs}
+        totalPairs={commission?.pairs || 0}
+        currentMultiplier={1}
+        railLevel={null}
+        currentCombo={combo}
+        maxCombo={maxCombo}
+        currentScore={score}
+        timeLeft={timeLeft}
+        moves={moves}
+        loveLetterRestarts={0}
+        affection={0}
+        hintCount={0}
+        protectCount={0}
+        hasActiveEffects={false}
+        levelName={`${visitor?.name}的委托 · ${commission?.title}`}
+      />
     </div>
   );
 };

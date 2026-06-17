@@ -10,6 +10,7 @@ export const useGameLogic = (level, options = {}) => {
   const [gameStatus, setGameStatus] = useState('idle');
   const [hintCards, setHintCards] = useState([]);
   const [mistakeProtected, setMistakeProtected] = useState(false);
+  const [seenStars, setSeenStars] = useState([]);
 
   const initializedRef = useRef(false);
 
@@ -49,6 +50,7 @@ export const useGameLogic = (level, options = {}) => {
     setGameStatus('idle');
     setHintCards([]);
     setMistakeProtected(false);
+    setSeenStars([]);
   }, [level, options.perfectStart]);
 
   useEffect(() => {
@@ -79,6 +81,19 @@ export const useGameLogic = (level, options = {}) => {
 
     setHintCards([]);
     setCards(prev => prev.map(c => ({ ...c, isHinted: false })));
+
+    setSeenStars(prev => {
+      const existingIndex = prev.findIndex(s => s.starId === card.starId);
+      if (existingIndex >= 0) {
+        const updated = [...prev];
+        updated[existingIndex] = {
+          ...updated[existingIndex],
+          seenCount: (updated[existingIndex].seenCount || 1) + 1
+        };
+        return updated;
+      }
+      return [...prev, { starId: card.starId, star: card.star, seenCount: 1 }];
+    });
 
     const newFlipped = [...flippedCards, cardId];
     setFlippedCards(newFlipped);
@@ -241,6 +256,7 @@ export const useGameLogic = (level, options = {}) => {
     shuffleUnmatchedCards,
     instantMatchPair,
     revealAllCards,
-    setIsLockedExternal
+    setIsLockedExternal,
+    seenStars
   };
 };

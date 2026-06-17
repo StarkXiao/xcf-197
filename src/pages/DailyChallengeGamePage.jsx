@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Card from '../components/Card';
 import Modal from '../components/Modal';
+import StrategyPanel from '../components/StrategyPanel';
 import { useGameLogic } from '../hooks/useGameLogic';
 import { useTimer } from '../hooks/useTimer';
 import { useScore } from '../hooks/useScore';
@@ -47,7 +48,8 @@ const DailyChallengeGamePage = ({ dailyChallenge, onBack, onComplete, skinTheme 
     isLocked,
     flipCard,
     resetGame,
-    setGameStatus
+    setGameStatus,
+    seenStars
   } = useGameLogic(challengeLevel);
 
   const {
@@ -388,33 +390,28 @@ const DailyChallengeGamePage = ({ dailyChallenge, onBack, onComplete, skinTheme 
         )}
       </Modal>
 
-      <Modal
+      <StrategyPanel
         isOpen={showPauseModal}
         onClose={() => setShowPauseModal(false)}
-        title="游戏暂停"
-        showCloseButton={false}
-      >
-        <div className="space-y-4">
-          <button
-            onClick={() => setShowPauseModal(false)}
-            className="w-full btn-star"
-          >
-            继续游戏
-          </button>
-          <button
-            onClick={handleRestart}
-            className="w-full py-3 rounded-full border-2 border-star-gold/50 text-star-gold hover:bg-star-gold/10 transition-colors"
-          >
-            重新开始
-          </button>
-          <button
-            onClick={handleBack}
-            className="w-full py-3 rounded-full border-2 border-white/30 text-white/70 hover:bg-white/10 transition-colors"
-          >
-            返回主页
-          </button>
-        </div>
-      </Modal>
+        onRestart={handleRestart}
+        onBack={handleBack}
+        seenStars={seenStars}
+        matchedPairs={matchedPairs}
+        totalPairs={challengeLevel?.pairs || 0}
+        currentMultiplier={theme?.bonusType === 'score' ? theme.bonusValue : 1}
+        railLevel={null}
+        currentCombo={combo}
+        maxCombo={maxCombo}
+        currentScore={score}
+        timeLeft={timeLeft}
+        moves={moves}
+        loveLetterRestarts={0}
+        affection={0}
+        hintCount={0}
+        protectCount={0}
+        hasActiveEffects={false}
+        levelName={`每日挑战 · ${theme?.name || '占卜'}`}
+      />
 
       <Modal
         isOpen={showResultModal}
