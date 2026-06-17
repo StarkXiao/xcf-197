@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 
-const Card = ({ card, onClick, disabled, skinTheme, starRailLevel = null }) => {
+const Card = ({ card, onClick, disabled, skinTheme, starRailLevel = null, isFogged = false, isRevealed = false }) => {
   const [isFlipped, setIsFlipped] = useState(card.isFlipped);
   const [isMatched, setIsMatched] = useState(card.isMatched);
 
@@ -106,16 +106,16 @@ const Card = ({ card, onClick, disabled, skinTheme, starRailLevel = null }) => {
 
   return (
     <button
-      className={`card-container w-full aspect-[3/4] cursor-pointer select-none
+      className={`card-container w-full aspect-[3/4] cursor-pointer select-none relative
         focus:outline-none focus:ring-2 focus:ring-star-gold/50
-        ${isFlipped ? 'card-flipped' : ''}
+        ${isFlipped || isRevealed ? 'card-flipped' : ''}
         ${isMatched ? 'card-matched' : ''}
         ${railEffect ? getEffectClass() : ''}
         ${disabled ? 'pointer-events-none opacity-50' : ''}
       `}
       onClick={handleClick}
-      disabled={disabled || isFlipped || isMatched}
-      aria-label={isFlipped || isMatched ? card.star.name : '未翻开的星纹卡牌'}
+      disabled={disabled || isFlipped || isMatched || isFogged}
+      aria-label={isFlipped || isMatched || isRevealed ? card.star.name : '未翻开的星纹卡牌'}
     >
       <div className="card-inner w-full h-full relative">
         {railEffect && (
@@ -166,6 +166,33 @@ const Card = ({ card, onClick, disabled, skinTheme, starRailLevel = null }) => {
             </div>
           </div>
         </div>
+
+        {isFogged && (
+          <div 
+            className="absolute inset-0 rounded-xl z-30 pointer-events-none star-fog-overlay"
+            style={{
+              background: 'radial-gradient(circle at 30% 30%, rgba(200, 200, 220, 0.9) 0%, rgba(120, 120, 160, 0.95) 50%, rgba(80, 80, 120, 0.98) 100%)',
+              backdropFilter: 'blur(4px)'
+            }}
+          >
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-4xl opacity-80 animate-pulse">🌫️</span>
+            </div>
+            <div className="absolute inset-0 rounded-xl border-2 border-gray-400/30" />
+          </div>
+        )}
+
+        {isRevealed && !isFlipped && !isMatched && (
+          <div 
+            className="absolute inset-0 rounded-xl z-30 pointer-events-none dream-mirror-glow animate-pulse"
+            style={{
+              boxShadow: '0 0 25px 8px rgba(139, 92, 246, 0.7), inset 0 0 20px rgba(139, 92, 246, 0.3)',
+              border: '3px solid rgba(167, 139, 250, 0.8)'
+            }}
+          >
+            <div className="absolute top-1 right-1 text-lg">🔮</div>
+          </div>
+        )}
       </div>
     </button>
   );

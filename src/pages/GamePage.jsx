@@ -1,11 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Card from '../components/Card';
 import Modal from '../components/Modal';
 import { useGameLogic } from '../hooks/useGameLogic';
 import { useTimer } from '../hooks/useTimer';
 import { useScore } from '../hooks/useScore';
 import { useStarRailChain } from '../hooks/useStarRailChain';
-import { getLevelById, ITEM_EFFECT_TYPES, getItemEffectInfo, getShopItemById, getRarityInfo, getStarRailChainLevel } from '../data/gameData';
+import { useGameEvents } from '../hooks/useGameEvents';
+import { getLevelById, ITEM_EFFECT_TYPES, getItemEffectInfo, getShopItemById, getRarityInfo, getStarRailChainLevel, GAME_EVENT_CATEGORIES } from '../data/gameData';
 
 const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
   const level = getLevelById(levelId);
@@ -23,9 +24,12 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
   const [railLevelUpInfo, setRailLevelUpInfo] = useState(null);
   const [showStoryEventModal, setShowStoryEventModal] = useState(false);
   const [storyEventResult, setStoryEventResult] = useState(null);
+  const [eventScorePopup, setEventScorePopup] = useState(null);
+  const [eventTimePopup, setEventTimePopup] = useState(null);
   const prevMatchedRef = useRef(0);
   const prevRailLevelRef = useRef(null);
   const effectsAppliedRef = useRef(false);
+  const lastTriggerTypeRef = useRef(null);
 
   const {
     cards,
@@ -88,6 +92,26 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     getNextLevel: getNextRailLevel
   } = useStarRailChain();
 
+  const {
+    activeEvents: activeGameEvents,
+    currentEvent,
+    showEventModal,
+    foggedCardIds,
+    frozenOperation,
+    pendingComboBoost,
+    revealedCardIds,
+    tryTriggerEvent,
+    applyEventEffect,
+    closeEventModal,
+    removeActiveEvent,
+    resetEvents,
+    incrementFlipCount,
+    resetFlipCount,
+    consumePendingComboBoost,
+    isCardFogged,
+    isCardRevealed
+  } = useGameEvents();
+
   useEffect(() => {
     if (shop && shop.selectedItems.length > 0 && !effectsAppliedRef.current && gameStatus === 'idle') {
       effectsAppliedRef.current = true;
@@ -122,6 +146,8 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     if (matchedPairs.length > prevMatchedRef.current) {
       prevMatchedRef.current = matchedPairs.length;
       
+      const comboBoostVal = consumePendingComboBoost();
+      
       const newRailCombo = handleRailMatch();
       
       const currentRailLevel = getStarRailChainLevel(newRailCombo);
@@ -134,10 +160,16 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
       
       const basePoints = addMatchScore(timeLeft, adjustedTimeLimit, moves);
       
+      let comboBoostBonus = 0;
+      if (comboBoostVal > 0) {
+        comboBoostBonus = comboBoostVal * 100;
+        setScore(prev => prev + comboBoostBonus);
+      }
+      
       const currentMultiplier = railMultiplier > 1 ? railMultiplier : 1;
       const bonusPoints = currentMultiplier > 1 ? Math.floor(basePoints * (currentMultiplier - 1)) : 0;
       
-      let finalPoints = basePoints + bonusPoints;
+      let finalPoints = basePoints + bonusPoints + comboBoostBonus;
       
       if (shop) {
         finalPoints = shop.calculateFinalScore(finalPoints);
@@ -155,8 +187,12 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
       setEarnedPoints(finalPoints);
       setShowPointsPopup(true);
       setTimeout(() => setShowPointsPopup(false), 1000);
+
+      setTimeout(() => {
+        triggerAndApplyEvent('match');
+      }, 300);
     }
-  }, [matchedPairs.length, timeLeft, adjustedTimeLimit, moves, addMatchScore, shop, combo, handleRailMatch, railMultiplier, setScore]);
+  }, [matchedPairs.length, timeLeft, adjustedTimeLimit, moves, addMatchScore, shop, combo, handleRailMatch, railMultiplier, setScore, consumePendingComboBoost, triggerAndApplyEvent]);
 
   useEffect(() => {
     if (gameStatus === 'won') {
@@ -206,7 +242,53 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     }
   }, [gameStatus, score, timeLeft, moves, levelId, maxCombo, onWin, onLose, stopTimer, shop, rewardInfo, getRailTitle, railMaxCombo, railLevel]);
 
+  const triggerAndApplyEvent = useCallback((triggerType) => {
+    const event = tryTriggerEvent(triggerType);
+    if (!event) return null;
+
+    const eventActions = {
+      addTime: (val) => {
+        addTime(val);
+        setEventTimePopup({ value: val, positive: true });
+        setTimeout(() => setEventTimePopup(null), 1200);
+      },
+      reduceTime: (val) => {
+        reduceTime(val);
+        setEventTimePopup({ value: val, positive: false });
+        setTimeout(() => setEventTimePopup(null), 1200);
+      },
+      addScore: (val) => {
+        addScore(val);
+        setEventScorePopup({ value: val, positive: true });
+        setTimeout(() => setEventScorePopup(null), 1200);
+      },
+      reduceScore: (val) => {
+        reduceScore(val);
+        setEventScorePopup({ value: val, positive: false });
+        setTimeout(() => setEventScorePopup(null), 1200);
+      },
+      resetCombo: () => {
+        resetCombo();
+      },
+      getUnmatchedCards: () => getUnmatchedCards(),
+      showHint: () => showHint(),
+      revealAllCards: (reveal) => revealAllCards(reveal),
+      shuffleUnmatchedCards: () => shuffleUnmatchedCards(),
+      instantMatchPair: () => instantMatchPair()
+    };
+
+    applyEventEffect(event, eventActions);
+
+    setTimeout(() => {
+      removeActiveEvent(event.id);
+    }, 3000);
+
+    return event;
+  }, [tryTriggerEvent, applyEventEffect, removeActiveEvent, addTime, reduceTime, addScore, reduceScore, resetCombo, getUnmatchedCards, showHint, revealAllCards, shuffleUnmatchedCards, instantMatchPair]);
+
   const handleCardClick = (cardId) => {
+    if (frozenOperation) return;
+    
     if (gameStatus === 'idle') {
       setGameStatus('playing');
     }
@@ -222,6 +304,16 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
       setTimeout(() => {
         handleRailMistake();
       }, 1000);
+    }
+
+    incrementFlipCount();
+
+    if (flippedCards.length === 1 && !result.matched) {
+      setTimeout(() => {
+        if (!result.mistakeProtected) {
+          triggerAndApplyEvent('mismatch');
+        }
+      }, 800);
     }
   };
 
@@ -239,10 +331,12 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     prevMatchedRef.current = 0;
     prevRailLevelRef.current = null;
     effectsAppliedRef.current = false;
+    lastTriggerTypeRef.current = null;
     resetGame();
     resetTimer(adjustedTimeLimit);
     resetScore();
     resetRailChain();
+    resetEvents();
     setShowPauseModal(false);
     setGameEffects({});
     setHintCount(0);
@@ -252,6 +346,8 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     setRailLevelUpInfo(null);
     setShowStoryEventModal(false);
     setStoryEventResult(null);
+    setEventScorePopup(null);
+    setEventTimePopup(null);
     if (shop) {
       shop.resetActiveEffects();
     }
@@ -423,9 +519,9 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
       <div className="flex justify-center gap-3 mb-4">
         <button
           onClick={handleUseHint}
-          disabled={hintCount <= 0 || isLocked || gameStatus !== 'playing'}
+          disabled={hintCount <= 0 || isLocked || gameStatus !== 'playing' || frozenOperation}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all
-            ${hintCount > 0 && gameStatus === 'playing' && !isLocked
+            ${hintCount > 0 && gameStatus === 'playing' && !isLocked && !frozenOperation
               ? 'bg-yellow-500/80 text-white hover:bg-yellow-500 active:scale-95'
               : 'bg-gray-600/50 text-gray-400 cursor-not-allowed'
             }
@@ -438,6 +534,18 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
           <span>🛡️</span>
           <span className="text-sm text-purple-300">护符: {protectCount}</span>
         </div>
+        {frozenOperation && (
+          <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-500/20 border border-cyan-500/40 animate-pulse">
+            <span>❄️</span>
+            <span className="text-sm text-cyan-300 font-bold">冰封中</span>
+          </div>
+        )}
+        {pendingComboBoost > 0 && (
+          <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-500/20 border border-orange-500/40">
+            <span>⚡</span>
+            <span className="text-sm text-orange-300 font-bold">连击+{pendingComboBoost}</span>
+          </div>
+        )}
       </div>
 
       <button
@@ -448,7 +556,7 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
       </button>
 
       <div className="flex-1 flex items-center justify-center">
-        <div className={`grid ${getGridCols()} gap-2 md:gap-3 w-full max-w-md mx-auto`}>
+        <div className={`grid ${getGridCols()} gap-2 md:gap-3 w-full max-w-md mx-auto ${frozenOperation ? 'pointer-events-none' : ''}`}>
           {cards.map(card => (
             <div key={card.id} className="relative">
               {card.isHinted && (
@@ -462,9 +570,11 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
               <Card
                 card={card}
                 onClick={handleCardClick}
-                disabled={isLocked || (gameStatus !== 'playing' && gameStatus !== 'idle')}
+                disabled={isLocked || (gameStatus !== 'playing' && gameStatus !== 'idle') || frozenOperation}
                 skinTheme={skinTheme}
                 starRailLevel={railLevel}
+                isFogged={isCardFogged(card.id)}
+                isRevealed={isCardRevealed(card.id)}
               />
             </div>
           ))}
@@ -484,6 +594,41 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
           <div className="text-purple-400 text-4xl font-bold animate-bounce">
             🛡️ 护符生效！
           </div>
+        </div>
+      )}
+
+      {eventScorePopup && (
+        <div className="fixed top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50">
+          <div className={`text-3xl font-bold animate-bounce ${eventScorePopup.positive ? 'text-star-gold' : 'text-red-400'}`}>
+            {eventScorePopup.positive ? '+' : '-'}{eventScorePopup.value} 分
+          </div>
+        </div>
+      )}
+
+      {eventTimePopup && (
+        <div className="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50">
+          <div className={`text-2xl font-bold animate-bounce ${eventTimePopup.positive ? 'text-green-400' : 'text-red-400'}`}>
+            ⏱️ {eventTimePopup.positive ? '+' : '-'}{eventTimePopup.value}s
+          </div>
+        </div>
+      )}
+
+      {activeGameEvents.length > 0 && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 flex gap-2 z-40 pointer-events-none">
+          {activeGameEvents.map(event => (
+            <div
+              key={`${event.id}-${event.triggeredAt}`}
+              className="px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 animate-pulse"
+              style={{
+                backgroundColor: `${event.color}30`,
+                color: event.color,
+                border: `1px solid ${event.color}60`
+              }}
+            >
+              <span>{event.icon}</span>
+              <span>{event.shortDescription}</span>
+            </div>
+          ))}
         </div>
       )}
 
@@ -617,6 +762,54 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
                 closeRailStoryEvent();
               }}
               className="w-full btn-star mt-4"
+            >
+              继续游戏
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {showEventModal && currentEvent && (
+        <Modal
+          isOpen={true}
+          onClose={() => {}}
+          title={currentEvent.title}
+          showCloseButton={false}
+        >
+          <div className="max-w-sm text-center">
+            <div 
+              className="text-6xl mb-4 animate-bounce"
+              style={{ filter: `drop-shadow(0 0 20px ${currentEvent.color})` }}
+            >
+              {currentEvent.icon}
+            </div>
+            <div 
+              className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-4"
+              style={{
+                backgroundColor: `${currentEvent.color}30`,
+                color: currentEvent.color,
+                border: `1px solid ${currentEvent.color}60`
+              }}
+            >
+              {currentEvent.category === GAME_EVENT_CATEGORIES.POSITIVE ? '✨ 增益效果' :
+               currentEvent.category === GAME_EVENT_CATEGORIES.NEGATIVE ? '⚠️ 干扰事件' : '🎲 中立事件'}
+            </div>
+            <p className="text-white/80 mb-6 leading-relaxed text-base">
+              {currentEvent.description}
+            </p>
+            <div 
+              className="text-xl font-bold mb-6"
+              style={{ color: currentEvent.color }}
+            >
+              {currentEvent.shortDescription}
+            </div>
+            <button
+              onClick={closeEventModal}
+              className="w-full btn-star"
+              style={{
+                background: `linear-gradient(135deg, ${currentEvent.color}40 0%, ${currentEvent.color}20 100%)`,
+                border: `2px solid ${currentEvent.color}80`
+              }}
             >
               继续游戏
             </button>

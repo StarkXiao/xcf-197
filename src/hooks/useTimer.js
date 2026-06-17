@@ -60,6 +60,10 @@ export const useTimer = (initialTime, isRunning = false, onTimeUp = null) => {
     setTimeLeft(prev => prev + seconds);
   }, []);
 
+  const reduceTime = useCallback((seconds) => {
+    setTimeLeft(prev => Math.max(0, prev - seconds));
+  }, []);
+
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -81,6 +85,7 @@ export const useTimer = (initialTime, isRunning = false, onTimeUp = null) => {
     startTimer,
     stopTimer,
     resetTimer,
-    addTime
+    addTime,
+    reduceTime
   };
 };

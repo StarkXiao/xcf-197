@@ -4168,3 +4168,240 @@ export const getChapterStats = (completedNodes = {}, starRatings = {}) => {
     };
   });
 };
+
+export const GAME_EVENT_TYPES = {
+  HOURGLASS_BLESSING: 'hourglassBlessing',
+  HOURGLASS_CURSE: 'hourglassCurse',
+  DREAM_MIRROR: 'dreamMirror',
+  STAR_FOG: 'starFog',
+  SCORE_BLESSING: 'scoreBlessing',
+  SCORE_CURSE: 'scoreCurse',
+  COMBO_BOOST: 'comboBoost',
+  COMBO_BREAK: 'comboBreak',
+  CARD_SHUFFLE: 'cardShuffle',
+  FREEZE_CARDS: 'freezeCards',
+  REVEAL_ALL: 'revealAll',
+  INSTANT_MATCH: 'instantMatch'
+};
+
+export const GAME_EVENT_CATEGORIES = {
+  POSITIVE: 'positive',
+  NEGATIVE: 'negative',
+  NEUTRAL: 'neutral'
+};
+
+export const GAME_EVENTS = [
+  {
+    id: GAME_EVENT_TYPES.HOURGLASS_BLESSING,
+    name: '时光祝福',
+    icon: '⏳',
+    category: GAME_EVENT_CATEGORIES.POSITIVE,
+    color: '#10b981',
+    rarity: 'common',
+    weight: 15,
+    title: '⏳ 时光祝福',
+    description: '时光沙漏流淌着温柔的光芒，为你争取到了更多时间！',
+    shortDescription: '时间 +15 秒',
+    effect: { type: 'addTime', value: 15 },
+    triggerOn: 'everyFlip'
+  },
+  {
+    id: GAME_EVENT_TYPES.HOURGLASS_CURSE,
+    name: '时光侵蚀',
+    icon: '⌛',
+    category: GAME_EVENT_CATEGORIES.NEGATIVE,
+    color: '#ef4444',
+    rarity: 'rare',
+    weight: 8,
+    title: '⌛ 时光侵蚀',
+    description: '黑暗的沙漏偷走了你的时间，要抓紧了！',
+    shortDescription: '时间 -10 秒',
+    effect: { type: 'reduceTime', value: 10 },
+    triggerOn: 'mismatch'
+  },
+  {
+    id: GAME_EVENT_TYPES.DREAM_MIRROR,
+    name: '窥梦镜',
+    icon: '🔮',
+    category: GAME_EVENT_CATEGORIES.POSITIVE,
+    color: '#8b5cf6',
+    rarity: 'rare',
+    weight: 8,
+    title: '🔮 窥梦镜',
+    description: '神秘的窥梦镜折射出命运的线索，一对星纹的位置显现了！',
+    shortDescription: '揭示一对匹配卡牌',
+    effect: { type: 'revealPair', duration: 2000 },
+    triggerOn: 'everyFlip'
+  },
+  {
+    id: GAME_EVENT_TYPES.STAR_FOG,
+    name: '星雾遮挡',
+    icon: '🌫️',
+    category: GAME_EVENT_CATEGORIES.NEGATIVE,
+    color: '#6b7280',
+    rarity: 'rare',
+    weight: 10,
+    title: '🌫️ 星雾遮挡',
+    description: '浓厚的星雾笼罩了卡牌，你暂时看不清卡牌的内容...',
+    shortDescription: '部分卡牌被遮挡 3 秒',
+    effect: { type: 'fogCards', duration: 3000, coverage: 0.5 },
+    triggerOn: 'mismatch'
+  },
+  {
+    id: GAME_EVENT_TYPES.SCORE_BLESSING,
+    name: '星辉加护',
+    icon: '⭐',
+    category: GAME_EVENT_CATEGORIES.POSITIVE,
+    color: '#fbbf24',
+    rarity: 'common',
+    weight: 12,
+    title: '⭐ 星辉加护',
+    description: '璀璨的星光洒落，为你带来额外的分数奖励！',
+    shortDescription: '获得 +200 分',
+    effect: { type: 'addScore', value: 200 },
+    triggerOn: 'match'
+  },
+  {
+    id: GAME_EVENT_TYPES.SCORE_CURSE,
+    name: '暗影夺分',
+    icon: '💀',
+    category: GAME_EVENT_CATEGORIES.NEGATIVE,
+    color: '#7c3aed',
+    rarity: 'rare',
+    weight: 5,
+    title: '💀 暗影夺分',
+    description: '黑暗的触手偷走了你的部分分数...',
+    shortDescription: '扣除 -100 分',
+    effect: { type: 'reduceScore', value: 100 },
+    triggerOn: 'mismatch'
+  },
+  {
+    id: GAME_EVENT_TYPES.COMBO_BOOST,
+    name: '雷霆连击',
+    icon: '⚡',
+    category: GAME_EVENT_CATEGORIES.POSITIVE,
+    color: '#f97316',
+    rarity: 'epic',
+    weight: 5,
+    title: '⚡ 雷霆连击',
+    description: '雷霆之力灌注全身，下次配对将获得额外连击加成！',
+    shortDescription: '下次匹配连击 +2',
+    effect: { type: 'comboBoost', value: 2 },
+    triggerOn: 'match'
+  },
+  {
+    id: GAME_EVENT_TYPES.COMBO_BREAK,
+    name: '连击断裂',
+    icon: '💔',
+    category: GAME_EVENT_CATEGORIES.NEGATIVE,
+    color: '#dc2626',
+    rarity: 'rare',
+    weight: 6,
+    title: '💔 连击断裂',
+    description: '一股神秘的力量中断了你的连击节奏...',
+    shortDescription: '连击计数归零',
+    effect: { type: 'resetCombo' },
+    triggerOn: 'mismatch'
+  },
+  {
+    id: GAME_EVENT_TYPES.CARD_SHUFFLE,
+    name: '命运洗牌',
+    icon: '🎴',
+    category: GAME_EVENT_CATEGORIES.NEUTRAL,
+    color: '#06b6d4',
+    rarity: 'epic',
+    weight: 4,
+    title: '🎴 命运洗牌',
+    description: '命运之手重新排列了未翻开的卡牌，一切都变得未知...',
+    shortDescription: '重新打乱未配对的卡牌',
+    effect: { type: 'shuffleUnmatched' },
+    triggerOn: 'everyFlip'
+  },
+  {
+    id: GAME_EVENT_TYPES.FREEZE_CARDS,
+    name: '冰封时刻',
+    icon: '❄️',
+    category: GAME_EVENT_CATEGORIES.NEGATIVE,
+    color: '#0ea5e9',
+    rarity: 'rare',
+    weight: 5,
+    title: '❄️ 冰封时刻',
+    description: '刺骨的寒风冻结了卡牌，你暂时无法操作...',
+    shortDescription: '操作受限 2 秒',
+    effect: { type: 'freezeOperation', duration: 2000 },
+    triggerOn: 'mismatch'
+  },
+  {
+    id: GAME_EVENT_TYPES.REVEAL_ALL,
+    name: '群星闪耀',
+    icon: '✨',
+    category: GAME_EVENT_CATEGORIES.POSITIVE,
+    color: '#ec4899',
+    rarity: 'legendary',
+    weight: 2,
+    title: '✨ 群星闪耀',
+    description: '所有星纹同时绽放光芒，命运的全景在你眼前展开！',
+    shortDescription: '全部卡牌短暂翻开 2 秒',
+    effect: { type: 'revealAll', duration: 2000 },
+    triggerOn: 'match'
+  },
+  {
+    id: GAME_EVENT_TYPES.INSTANT_MATCH,
+    name: '命运之约',
+    icon: '💫',
+    category: GAME_EVENT_CATEGORIES.POSITIVE,
+    color: '#a855f7',
+    rarity: 'legendary',
+    weight: 1,
+    title: '💫 命运之约',
+    description: '命运女神眷顾了你，一对星纹自行配对成功！',
+    shortDescription: '自动配对一对卡牌',
+    effect: { type: 'instantMatch' },
+    triggerOn: 'everyFlip'
+  }
+];
+
+export const GAME_EVENT_CONFIG = {
+  baseTriggerChance: 0.25,
+  mismatchTriggerChance: 0.45,
+  matchTriggerChance: 0.35,
+  minFlipsBetweenEvents: 2,
+  maxActiveEvents: 3
+};
+
+export const getEventById = (id) => {
+  return GAME_EVENTS.find(ev => ev.id === id);
+};
+
+export const getEventsByCategory = (category) => {
+  return GAME_EVENTS.filter(ev => ev.category === category);
+};
+
+export const getEventsByTrigger = (triggerType) => {
+  return GAME_EVENTS.filter(ev => ev.triggerOn === triggerType || ev.triggerOn === 'everyFlip');
+};
+
+export const pickRandomEvent = (triggerType, excludeIds = []) => {
+  const candidates = getEventsByTrigger(triggerType).filter(ev => !excludeIds.includes(ev.id));
+  if (candidates.length === 0) return null;
+  
+  const totalWeight = candidates.reduce((sum, ev) => sum + ev.weight, 0);
+  let random = Math.random() * totalWeight;
+  
+  for (const ev of candidates) {
+    random -= ev.weight;
+    if (random <= 0) return ev;
+  }
+  
+  return candidates[candidates.length - 1];
+};
+
+export const shouldTriggerEvent = (triggerType, flipCountSinceLastEvent) => {
+  if (flipCountSinceLastEvent < GAME_EVENT_CONFIG.minFlipsBetweenEvents) return false;
+  
+  let chance = GAME_EVENT_CONFIG.baseTriggerChance;
+  if (triggerType === 'mismatch') chance = GAME_EVENT_CONFIG.mismatchTriggerChance;
+  if (triggerType === 'match') chance = GAME_EVENT_CONFIG.matchTriggerChance;
+  
+  return Math.random() < chance;
+};

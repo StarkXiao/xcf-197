@@ -53,6 +53,19 @@ export const useScore = (baseScore = 1000) => {
     lastMatchTime.current = null;
   }, []);
 
+  const resetCombo = useCallback(() => {
+    setCombo(0);
+    lastMatchTime.current = null;
+  }, []);
+
+  const addScore = useCallback((points) => {
+    setScore(prev => prev + points);
+  }, []);
+
+  const reduceScore = useCallback((points) => {
+    setScore(prev => Math.max(0, prev - points));
+  }, []);
+
   return {
     score,
     combo,
@@ -60,6 +73,9 @@ export const useScore = (baseScore = 1000) => {
     addMatchScore,
     calculateFinalScore,
     resetScore,
-    setScore
+    setScore,
+    resetCombo,
+    addScore,
+    reduceScore
   };
 };

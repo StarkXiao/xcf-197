@@ -166,6 +166,59 @@ export const useGameLogic = (level, options = {}) => {
     }
   }, [matchedPairs, level, gameStatus]);
 
+  const getUnmatchedCards = useCallback(() => {
+    return cards.filter(c => !c.isMatched);
+  }, [cards]);
+
+  const shuffleUnmatchedCards = useCallback(() => {
+    const unmatched = cards.filter(c => !c.isMatched && !c.isFlipped);
+    const matched = cards.filter(c => c.isMatched || c.isFlipped);
+    
+    const shuffled = [...unmatched];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    
+    setCards([...matched, ...shuffled]);
+  }, [cards]);
+
+  const instantMatchPair = useCallback(() => {
+    const unmatched = cards.filter(c => !c.isMatched);
+    if (unmatched.length < 2) return null;
+    
+    const firstCard = unmatched[0];
+    const pairCard = unmatched.find(c => c.starId === firstCard.starId && c.id !== firstCard.id);
+    
+    if (!pairCard) return null;
+    
+    setIsLocked(true);
+    setCards(prev => prev.map(c =>
+      c.starId === firstCard.starId ? { ...c, isFlipped: true } : c
+    ));
+    
+    setTimeout(() => {
+      setCards(prev => prev.map(c =>
+        c.starId === firstCard.starId ? { ...c, isMatched: true } : c
+      ));
+      setMatchedPairs(prev => [...prev, firstCard.starId]);
+      setIsLocked(false);
+    }, 600);
+    
+    return [firstCard.id, pairCard.id];
+  }, [cards]);
+
+  const revealAllCards = useCallback((reveal) => {
+    setCards(prev => prev.map(c => ({
+      ...c,
+      isFlipped: reveal ? true : (c.isMatched ? true : false)
+    })));
+  }, []);
+
+  const setIsLockedExternal = useCallback((locked) => {
+    setIsLocked(locked);
+  }, []);
+
   const resetGame = useCallback(() => {
     initializedRef.current = false;
     initializeCards();
@@ -183,6 +236,11 @@ export const useGameLogic = (level, options = {}) => {
     setGameStatus,
     showHint,
     hintCards,
-    mistakeProtected
+    mistakeProtected,
+    getUnmatchedCards,
+    shuffleUnmatchedCards,
+    instantMatchPair,
+    revealAllCards,
+    setIsLockedExternal
   };
 };
