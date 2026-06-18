@@ -647,3 +647,144 @@ body {
 .star-map-bg {
   background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
 }
+
+.boss-hurt-shake {
+  animation: bossHurt 0.5s ease-out;
+}
+
+@keyframes bossHurt {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+.boss-hp-bar {
+  background-size: 200% 100%;
+  animation: bossHpShimmer 2s linear infinite;
+}
+
+@keyframes bossHpShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.boss-phase-transition {
+  animation: bossPhaseIn 0.8s ease-out;
+}
+
+@keyframes bossPhaseIn {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.boss-interrupt-btn {
+  animation: interruptPulse 0.5s ease-in-out infinite;
+}
+
+@keyframes interruptPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.8);
+  }
+}
+
+.fake-card-revealed .card-inner {
+  animation: fakeCardShake 0.6s ease-out;
+}
+
+@keyframes fakeCardShake {
+  0%, 100% { transform: rotateY(180deg); }
+  20%, 60% { transform: rotateY(180deg) translateX(-3px) rotate(-2deg); }
+  40%, 80% { transform: rotateY(180deg) translateX(3px) rotate(2deg); }
+}
+
+.fake-card-front {
+  animation: fakeCardGlow 1s ease-in-out infinite;
+}
+
+@keyframes fakeCardGlow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5), inset 0 0 10px rgba(239, 68, 68, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.8), inset 0 0 20px rgba(239, 68, 68, 0.2);
+  }
+}
+
+.boss-finale-overlay {
+  animation: finaleFadeIn 0.5s ease-out;
+}
+
+@keyframes finaleFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.finale-gather {
+  animation: finaleGather 1.5s ease-in-out;
+}
+
+@keyframes finaleGather {
+  0% { filter: brightness(0.5) blur(4px); transform: scale(0.8); }
+  100% { filter: brightness(1.5) blur(0); transform: scale(1); }
+}
+
+.finale-bow {
+  animation: finaleBow 1.5s ease-in-out;
+}
+
+@keyframes finaleBow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(20px) scale(0.95); }
+}
+
+.finale-reveal {
+  animation: finaleReveal 2s ease-out;
+}
+
+@keyframes finaleReveal {
+  0% { opacity: 0; filter: blur(10px); }
+  50% { opacity: 0.5; filter: blur(5px); }
+  100% { opacity: 1; filter: blur(0); }
+}
+
+.finale-ascend {
+  animation: finaleAscend 3s ease-out;
+}
+
+@keyframes finaleAscend {
+  0% { transform: translateY(50px); opacity: 0; }
+  50% { transform: translateY(-10px); opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.boss-finale-particle {
+  position: absolute;
+  font-size: 24px;
+  pointer-events: none;
+  animation: finaleParticleFloat 3s ease-in-out infinite;
+}
+
+@keyframes finaleParticleFloat {
+  0%, 100% {
+    transform: translateY(0) scale(1) rotate(0deg);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-30px) scale(1.2) rotate(180deg);
+    opacity: 1;
+  }
+}

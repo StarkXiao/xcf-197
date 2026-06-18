@@ -2,13 +2,15 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Card from '../components/Card';
 import Modal from '../components/Modal';
 import StrategyPanel from '../components/StrategyPanel';
+import { BossHealthBar, BossSkillCast, BossFinaleAnimation, InterruptRewardPopup } from '../components/BossUI';
 import { useGameLogic } from '../hooks/useGameLogic';
 import { useTimer } from '../hooks/useTimer';
 import { useScore } from '../hooks/useScore';
 import { useStarRailChain } from '../hooks/useStarRailChain';
 import { useGameEvents } from '../hooks/useGameEvents';
 import { useLoveLetterEnding } from '../hooks/useLoveLetterEnding';
-import { getLevelById, ITEM_EFFECT_TYPES, getItemEffectInfo, getShopItemById, getRarityInfo, getStarRailChainLevel, GAME_EVENT_CATEGORIES, LOVE_LETTER_CONFIG } from '../data/gameData';
+import { useBossBattle } from '../hooks/useBossBattle';
+import { getLevelById, ITEM_EFFECT_TYPES, getItemEffectInfo, getShopItemById, getRarityInfo, getStarRailChainLevel, GAME_EVENT_CATEGORIES, LOVE_LETTER_CONFIG, isBossLevel } from '../data/gameData';
 
 const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
   const level = getLevelById(levelId);
@@ -148,6 +150,31 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     perfectMoves,
     mistakes
   } = useLoveLetterEnding(level);
+
+  const {
+    isBoss,
+    bossConfig,
+    bossHp,
+    bossHpPercent,
+    currentPhase,
+    currentPhaseConfig,
+    phaseTransition,
+    castingSkill,
+    castProgress,
+    interruptReady,
+    fakeCardIds,
+    isFakeCard,
+    getFakeCardInfo,
+    showFinale,
+    finaleScene,
+    bossAttacked,
+    damagePopup,
+    interruptRewardPopup,
+    interruptSkill,
+    refreshFakeCards,
+    resetBoss,
+    startFinaleAnimation
+  } = useBossBattle(levelId, gameStatus, matchedPairs, level?.pairs || 0);
 
   useEffect(() => {
     loveLetterEndingRef.current = {
@@ -371,6 +398,30 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     if (gameStatus === 'idle') {
       setGameStatus('playing');
     }
+
+    if (isBoss && isFakeCard(cardId)) {
+      const flippedCountBefore = flippedCards.length;
+      const hasProtect = protectCount > 0;
+      const result = flipCard(cardId, { useMistakeProtect: hasProtect });
+      
+      if (result.mistakeProtected) {
+        setProtectCount(prev => Math.max(0, prev - 1));
+      } else {
+        onLoveLetterMismatch();
+        setTimeout(() => {
+          handleRailMistake();
+        }, 1000);
+        setTimeout(() => {
+          triggerAndApplyEvent('mismatch');
+        }, 1200);
+      }
+      
+      setEventScorePopup({ value: 100, positive: false });
+      setTimeout(() => setEventScorePopup(null), 1200);
+      
+      incrementFlipCount();
+      return;
+    }
     
     const flippedCountBefore = flippedCards.length;
     const hasProtect = protectCount > 0;
@@ -404,6 +455,56 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     }
   };
 
+  useEffect(() => {
+    if (!isBoss) return;
+
+    const handleBossSkill = (e) => {
+      const { skill, interrupted, reward } = e.detail;
+      
+      if (interrupted) {
+        if (reward) {
+          if (reward.score) addScore(reward.score);
+          if (reward.time) addTime(reward.time);
+          if (reward.combo) {
+            for (let i = 0; i < reward.combo; i++) {
+              handleRailMatch();
+            }
+          }
+        }
+      } else {
+        switch (skill.effect) {
+          case 'reduceTime':
+            reduceTime(skill.effectValue);
+            setEventTimePopup({ value: skill.effectValue, positive: false });
+            setTimeout(() => setEventTimePopup(null), 1200);
+            break;
+          case 'reduceScore':
+            const scoreLoss = Math.floor(score * skill.effectValue);
+            reduceScore(scoreLoss);
+            setEventScorePopup({ value: scoreLoss, positive: false });
+            setTimeout(() => setEventScorePopup(null), 1200);
+            break;
+          case 'shuffleCards':
+            shuffleUnmatchedCards();
+            break;
+          case 'breakCombo':
+            resetCombo();
+            handleRailMistake();
+            break;
+        }
+      }
+    };
+
+    window.addEventListener('bossSkill', handleBossSkill);
+    return () => window.removeEventListener('bossSkill', handleBossSkill);
+  }, [isBoss, reduceTime, reduceScore, shuffleUnmatchedCards, resetCombo, handleRailMistake, addScore, addTime, handleRailMatch, score]);
+
+  useEffect(() => {
+    if (!isBoss || !cards || cards.length === 0) return;
+    if (gameStatus !== 'playing') return;
+    refreshFakeCards(cards);
+  }, [isBoss, currentPhase, cards, matchedPairs.length, gameStatus, refreshFakeCards]);
+
   const handleUseHint = () => {
     if (hintCount <= 0 || !shop) return;
     
@@ -429,6 +530,9 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     resetScore();
     resetRailChain();
     resetEvents();
+    if (isBoss) {
+      resetBoss();
+    }
     setShowPauseModal(false);
     setGameEffects({});
     setHintCount(0);
@@ -498,7 +602,10 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
             第 {level.id} 关 · {level.name}
           </div>
           <div className="text-xs text-white/50">
-            已配对 {matchedPairs.length} / {level.pairs}
+            {isBoss 
+              ? `Boss战 · 已配对 ${matchedPairs.length} / ${level.pairs} · Boss血量 ${bossHp}/${bossConfig?.maxHp || 0}`
+              : `已配对 ${matchedPairs.length} / ${level.pairs}`
+            }
           </div>
         </div>
 
@@ -509,6 +616,29 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
           ⏸
         </button>
       </div>
+
+      {isBoss && (
+        <>
+          <div className="relative">
+            <BossHealthBar
+              bossConfig={bossConfig}
+              bossHp={bossHp}
+              bossHpPercent={bossHpPercent}
+              currentPhase={currentPhase}
+              currentPhaseConfig={currentPhaseConfig}
+              phaseTransition={phaseTransition}
+              bossAttacked={bossAttacked}
+              damagePopup={damagePopup}
+            />
+          </div>
+          <BossSkillCast
+            castingSkill={castingSkill}
+            castProgress={castProgress}
+            interruptReady={interruptReady}
+            onInterrupt={interruptSkill}
+          />
+        </>
+      )}
 
       {getActiveEffectIcons().length > 0 && (
         <div className="flex justify-center gap-2 mb-3 flex-wrap">
@@ -711,6 +841,15 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
                 starRailLevel={railLevel}
                 isFogged={isCardFogged(card.id)}
                 isRevealed={isCardRevealed(card.id)}
+                isFakeCard={isBoss && isFakeCard(card.id)}
+                fakeCardInfo={isBoss ? getFakeCardInfo(card.id) : null}
+                onFakeCardRevealed={isBoss ? (cardId) => {
+                  const matchedIndex = matchedPairs.length;
+                  const phaseConfig = currentPhaseConfig;
+                  const baseDamage = (bossConfig?.maxHp || 1000) / (level?.pairs || 10);
+                  const damage = Math.floor((baseDamage * 0.3) / (phaseConfig?.defenseMultiplier || 1));
+                  addScore(-100);
+                } : null}
               />
             </div>
           ))}
@@ -1010,6 +1149,17 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
           已收集 {matchedPairs.length} / {level.pairs} 块碎片
         </div>
       </Modal>
+
+      {isBoss && (
+        <>
+          <BossFinaleAnimation
+            bossConfig={bossConfig}
+            finaleScene={finaleScene}
+            showFinale={showFinale}
+          />
+          <InterruptRewardPopup reward={interruptRewardPopup} />
+        </>
+      )}
 
       <StrategyPanel
         isOpen={showPauseModal}

@@ -219,8 +219,137 @@ export const LEVELS = [
     baseScore: 5000,
     letterFragment: '我爱你，穿越时空，至死不渝。',
     stars: ['star-1', 'star-2', 'star-3', 'star-4', 'star-5', 'star-6', 'star-7', 'star-8', 'star-9', 'star-10', 'star-11', 'star-12']
+  },
+  {
+    id: 6,
+    name: '星塔守护者',
+    description: '传说中的Boss战 · 真假牌、技能打断、阶段破防',
+    pairs: 14,
+    timeLimit: 240,
+    baseScore: 10000,
+    letterFragment: '在星光的尽头，你将面对真正的考验...',
+    stars: ['star-1', 'star-2', 'star-3', 'star-4', 'star-5', 'star-6', 'star-7', 'star-8', 'star-9', 'star-10', 'star-11', 'star-12', 'star-1', 'star-2'],
+    isBossLevel: true,
+    bossConfig: {
+      name: '星塔守护者',
+      title: '永恒的星之守望',
+      icon: '👑',
+      maxHp: 1000,
+      phases: [
+        {
+          id: 1,
+          name: '觉醒之阵',
+          hpThreshold: 100,
+          description: '守护者从沉睡中苏醒，星纹开始动荡...',
+          fakeCardChance: 0.15,
+          skillInterval: 25000,
+          defenseMultiplier: 1.0,
+          bossColor: '#6366f1'
+        },
+        {
+          id: 2,
+          name: '幻影迷雾',
+          hpThreshold: 66,
+          description: '守护者释放幻影迷雾，真假牌开始交替出现...',
+          fakeCardChance: 0.3,
+          skillInterval: 20000,
+          defenseMultiplier: 1.3,
+          bossColor: '#8b5cf6'
+        },
+        {
+          id: 3,
+          name: '星怒审判',
+          hpThreshold: 33,
+          description: '守护者进入狂暴状态，技能释放更加频繁！',
+          fakeCardChance: 0.45,
+          skillInterval: 15000,
+          defenseMultiplier: 1.6,
+          bossColor: '#ec4899'
+        }
+      ],
+      skills: [
+        {
+          id: 'time_siphon',
+          name: '时光虹吸',
+          icon: '⏳',
+          description: '吸取时间，减少15秒剩余时间',
+          damage: 0,
+          effect: 'reduceTime',
+          effectValue: 15,
+          castTime: 5000,
+          interruptible: true,
+          color: '#ef4444'
+        },
+        {
+          id: 'star_confusion',
+          name: '星纹混乱',
+          icon: '🌀',
+          description: '重置所有已翻开未匹配的卡牌',
+          damage: 0,
+          effect: 'shuffleCards',
+          effectValue: 0,
+          castTime: 4000,
+          interruptible: true,
+          color: '#f59e0b'
+        },
+        {
+          id: 'combo_break',
+          name: '连击破碎',
+          icon: '💔',
+          description: '打断当前连击并重置连击数',
+          damage: 0,
+          effect: 'breakCombo',
+          effectValue: 0,
+          castTime: 3500,
+          interruptible: true,
+          color: '#ec4899'
+        },
+        {
+          id: 'phantom_strike',
+          name: '幻影打击',
+          icon: '⚡',
+          description: '对玩家造成压力，减少20%当前分数',
+          damage: 0,
+          effect: 'reduceScore',
+          effectValue: 0.2,
+          castTime: 6000,
+          interruptible: true,
+          color: '#8b5cf6'
+        }
+      ],
+      interruptReward: {
+        score: 500,
+        combo: 2,
+        time: 5
+      },
+      finaleAnimation: {
+        duration: 8000,
+        title: '星之誓言',
+        subtitle: '守护者认可了你的勇气与智慧',
+        scenes: [
+          { text: '星光汇聚...', duration: 1500, effect: 'gather' },
+          { text: '守护者俯首...', duration: 1500, effect: 'bow' },
+          { text: '星塔的秘密向你敞开！', duration: 2000, effect: 'reveal' },
+          { text: '你成为了新的星塔守护者！', duration: 3000, effect: 'ascend' }
+        ]
+      }
+    }
   }
 ];
+
+export const BOSS_LEVEL_ID = 6;
+
+export const isBossLevel = (levelId) => {
+  return levelId === BOSS_LEVEL_ID;
+};
+
+export const getBossConfig = (levelId) => {
+  const level = getLevelById(levelId);
+  return level?.bossConfig || null;
+};
+
+export const FAKE_CARD_SYMBOLS = ['👁️', '💀', '🌑', '⚫', '🕳️'];
+export const FAKE_CARD_NAMES = ['虚空之眼', '幻影骷髅', '暗月', '虚无', '深渊'];
 
 export const FULL_LETTER = `亲爱的，当你读到这封信的时候，
 我已经在星塔之巅等你很久了。

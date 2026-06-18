@@ -1,8 +1,20 @@
 import { useState, useEffect, useMemo } from 'react';
 
-const Card = ({ card, onClick, disabled, skinTheme, starRailLevel = null, isFogged = false, isRevealed = false }) => {
+const Card = ({ 
+  card, 
+  onClick, 
+  disabled, 
+  skinTheme, 
+  starRailLevel = null, 
+  isFogged = false, 
+  isRevealed = false,
+  isFakeCard = false,
+  fakeCardInfo = null,
+  onFakeCardRevealed = null
+}) => {
   const [isFlipped, setIsFlipped] = useState(card.isFlipped);
   const [isMatched, setIsMatched] = useState(card.isMatched);
+  const [fakeRevealed, setFakeRevealed] = useState(false);
 
   useEffect(() => {
     setIsFlipped(card.isFlipped);
@@ -11,6 +23,15 @@ const Card = ({ card, onClick, disabled, skinTheme, starRailLevel = null, isFogg
   useEffect(() => {
     setIsMatched(card.isMatched);
   }, [card.isMatched]);
+
+  useEffect(() => {
+    if (card.isFlipped && isFakeCard && !fakeRevealed) {
+      setFakeRevealed(true);
+      if (onFakeCardRevealed) {
+        setTimeout(() => onFakeCardRevealed(card.id), 800);
+      }
+    }
+  }, [card.isFlipped, isFakeCard, fakeRevealed, card.id, onFakeCardRevealed]);
 
   const handleClick = () => {
     if (!disabled && !isFlipped && !isMatched) {
@@ -22,6 +43,10 @@ const Card = ({ card, onClick, disabled, skinTheme, starRailLevel = null, isFogg
   const cardBorderColor = skinTheme?.cardBorder || 'rgba(255, 215, 0, 0.3)';
   const accentColor = skinTheme?.accent || '#ffd700';
   const glowColor = skinTheme?.glow || 'rgba(139, 92, 246, 0.5)';
+
+  const displayInfo = (isFlipped || isRevealed) && isFakeCard && fakeCardInfo
+    ? fakeCardInfo
+    : card.star;
 
   const railEffect = useMemo(() => {
     if (!starRailLevel || !isMatched) return null;
@@ -112,10 +137,11 @@ const Card = ({ card, onClick, disabled, skinTheme, starRailLevel = null, isFogg
         ${isMatched ? 'card-matched' : ''}
         ${railEffect ? getEffectClass() : ''}
         ${disabled ? 'pointer-events-none opacity-50' : ''}
+        ${isFakeCard && (isFlipped || isRevealed) ? 'fake-card-revealed' : ''}
       `}
       onClick={handleClick}
       disabled={disabled || isFlipped || isMatched || isFogged}
-      aria-label={isFlipped || isMatched || isRevealed ? card.star.name : '未翻开的星纹卡牌'}
+      aria-label={isFlipped || isMatched || isRevealed ? displayInfo.name : '未翻开的星纹卡牌'}
     >
       <div className="card-inner w-full h-full relative">
         {railEffect && (
@@ -142,28 +168,35 @@ const Card = ({ card, onClick, disabled, skinTheme, starRailLevel = null, isFogg
         </div>
 
         <div
-          className="card-front shadow-lg w-full h-full relative z-10"
+          className={`card-front shadow-lg w-full h-full relative z-10 ${isFakeCard && (isFlipped || isRevealed) ? 'fake-card-front' : ''}`}
           style={{
-            background: `linear-gradient(145deg, ${cardColor}ee 0%, ${adjustColor(cardColor, -20)}ee 100%)`,
-            border: `2px solid ${railEffect && isMatched ? railEffect.color : card.star.color}`
+            background: isFakeCard && (isFlipped || isRevealed)
+              ? 'linear-gradient(145deg, rgba(30, 30, 50, 0.95) 0%, rgba(15, 15, 30, 0.98) 100%)'
+              : `linear-gradient(145deg, ${cardColor}ee 0%, ${adjustColor(cardColor, -20)}ee 100%)`,
+            border: `2px solid ${isFakeCard && (isFlipped || isRevealed) ? '#ef4444' : (railEffect && isMatched ? railEffect.color : card.star.color)}`
           }}
         >
           <div className="text-center">
             <div
               className="text-5xl mb-2 transition-all duration-300"
               style={{
-                filter: `drop-shadow(0 0 10px ${railEffect && isMatched ? railEffect.color : card.star.color})`,
+                filter: `drop-shadow(0 0 10px ${isFakeCard && (isFlipped || isRevealed) ? '#ef4444' : (railEffect && isMatched ? railEffect.color : card.star.color)})`,
                 transform: railEffect && isMatched ? 'scale(1.1)' : 'scale(1)'
               }}
             >
-              {card.star.symbol}
+              {displayInfo.symbol}
             </div>
             <div
               className="text-sm font-medium"
-              style={{ color: railEffect && isMatched ? railEffect.color : card.star.color }}
+              style={{ color: isFakeCard && (isFlipped || isRevealed) ? '#ef4444' : (railEffect && isMatched ? railEffect.color : card.star.color) }}
             >
-              {card.star.name}
+              {displayInfo.name}
             </div>
+            {isFakeCard && (isFlipped || isRevealed) && (
+              <div className="text-xs mt-1 text-red-400 animate-pulse font-bold">
+                ⚠ 幻影
+              </div>
+            )}
           </div>
         </div>
 
@@ -186,11 +219,13 @@ const Card = ({ card, onClick, disabled, skinTheme, starRailLevel = null, isFogg
           <div 
             className="absolute inset-0 rounded-xl z-30 pointer-events-none dream-mirror-glow animate-pulse"
             style={{
-              boxShadow: '0 0 25px 8px rgba(139, 92, 246, 0.7), inset 0 0 20px rgba(139, 92, 246, 0.3)',
-              border: '3px solid rgba(167, 139, 250, 0.8)'
+              boxShadow: isFakeCard
+                ? '0 0 25px 8px rgba(239, 68, 68, 0.7), inset 0 0 20px rgba(239, 68, 68, 0.3)'
+                : '0 0 25px 8px rgba(139, 92, 246, 0.7), inset 0 0 20px rgba(139, 92, 246, 0.3)',
+              border: `3px solid ${isFakeCard ? 'rgba(239, 68, 68, 0.8)' : 'rgba(167, 139, 250, 0.8)'}`
             }}
           >
-            <div className="absolute top-1 right-1 text-lg">🔮</div>
+            <div className="absolute top-1 right-1 text-lg">{isFakeCard ? '💀' : '🔮'}</div>
           </div>
         )}
       </div>

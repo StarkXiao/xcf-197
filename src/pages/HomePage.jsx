@@ -397,13 +397,16 @@ const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, 
             {LEVELS.map((level) => {
               const isUnlocked = level.id <= unlockedLevel;
               const highScore = highScores[level.id] || 0;
+              const isBoss = level.isBossLevel;
 
               return (
                 <div
                   key={level.id}
                   className={`p-4 rounded-xl border-2 transition-all cursor-pointer
                     ${isUnlocked
-                      ? 'border-star-gold/30 bg-star-purple/20 hover:bg-star-purple/40 hover:border-star-gold/50'
+                      ? isBoss
+                        ? 'border-pink-500/50 bg-gradient-to-r from-pink-900/30 to-purple-900/30 hover:from-pink-900/50 hover:to-purple-900/50 hover:border-pink-500/80 rainbow-border'
+                        : 'border-star-gold/30 bg-star-purple/20 hover:bg-star-purple/40 hover:border-star-gold/50'
                       : 'border-gray-600/20 bg-gray-800/20 opacity-50 cursor-not-allowed'
                     }
                   `}
@@ -412,11 +415,16 @@ const HomePage = ({ onStartGame, onSelectLevel, onOpenArchive, onOpenStarAlbum, 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="text-xl opacity-70">
-                        {isUnlocked ? '⭐' : '🔒'}
+                        {isUnlocked ? (isBoss ? '👑' : '⭐') : '🔒'}
                       </div>
                       <div>
-                        <div className={`font-bold text-sm ${isUnlocked ? 'text-white/80' : 'text-gray-500'}`}>
+                        <div className={`font-bold text-sm ${isUnlocked ? (isBoss ? 'text-pink-400' : 'text-white/80') : 'text-gray-500'}`}>
                           第 {level.id} 关 · {level.name}
+                          {isBoss && isUnlocked && (
+                            <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-pink-500/30 text-pink-300">
+                              BOSS战
+                            </span>
+                          )}
                         </div>
                         <div className="text-xs text-white/50">
                           {level.description}
