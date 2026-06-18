@@ -53,7 +53,10 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     shuffleUnmatchedCards,
     instantMatchPair,
     revealAllCards,
-    seenStars
+    seenStars,
+    allMatched,
+    triggerBossVictory,
+    isBoss: isBossLevel
   } = useGameLogic(level, {
     perfectStart: shop?.hasPerfectStart?.(),
     hasMistakeProtect: (gameEffects[ITEM_EFFECT_TYPES.MISTAKE_PROTECT] || 0) > 0
@@ -174,7 +177,7 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
     refreshFakeCards,
     resetBoss,
     startFinaleAnimation
-  } = useBossBattle(levelId, gameStatus, matchedPairs, level?.pairs || 0);
+  } = useBossBattle(levelId, gameStatus, matchedPairs, level?.pairs || 0, allMatched, triggerBossVictory);
 
   useEffect(() => {
     loveLetterEndingRef.current = {
@@ -502,8 +505,8 @@ const GamePage = ({ levelId, onBack, onWin, onLose, shop, skinTheme }) => {
   useEffect(() => {
     if (!isBoss || !cards || cards.length === 0) return;
     if (gameStatus !== 'playing') return;
-    refreshFakeCards(cards);
-  }, [isBoss, currentPhase, cards, matchedPairs.length, gameStatus, refreshFakeCards]);
+    refreshFakeCards(cards, true);
+  }, [isBoss, currentPhase, cards, gameStatus, refreshFakeCards]);
 
   const handleUseHint = () => {
     if (hintCount <= 0 || !shop) return;

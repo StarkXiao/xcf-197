@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getBossConfig, FAKE_CARD_SYMBOLS, FAKE_CARD_NAMES } from '../data/gameData';
 
-export const useBossBattle = (levelId, gameStatus, matchedPairs, totalPairs) => {
+export const useBossBattle = (levelId, gameStatus, matchedPairs, totalPairs, allMatched = false, triggerBossVictory = null) => {
   const bossConfig = getBossConfig(levelId);
   const isBoss = !!bossConfig;
 
@@ -22,6 +22,8 @@ export const useBossBattle = (levelId, gameStatus, matchedPairs, totalPairs) => 
   const castTimerRef = useRef(null);
   const castStartRef = useRef(0);
   const lastMatchedRef = useRef(0);
+  const finaleTriggeredRef = useRef(false);
+  const currentPhaseForFakeCardsRef = useRef(1);
 
   const getPhase = useCallback((hpPercent) => {
     if (!bossConfig) return null;
@@ -189,6 +191,9 @@ export const useBossBattle = (levelId, gameStatus, matchedPairs, totalPairs) => 
       if (currentScene >= scenes.length) {
         setTimeout(() => {
           setShowFinale(false);
+          if (triggerBossVictory) {
+            triggerBossVictory();
+          }
         }, 1000);
         return;
       }
@@ -201,12 +206,23 @@ export const useBossBattle = (levelId, gameStatus, matchedPairs, totalPairs) => 
     };
 
     playScene();
-  }, [bossConfig]);
+  }, [bossConfig, triggerBossVictory]);
 
-  const refreshFakeCards = useCallback((cards) => {
-    const newFakeIds = generateFakeCards(cards);
+  const refreshFakeCards = useCallback((cards, force = false) => {
+    const phaseConfig = getCurrentPhaseConfig();
+    const currentPhaseId = phaseConfig?.id || 1;
+    
+    if (!force && currentPhaseForFakeCardsRef.current === currentPhaseId && fakeCardIds.length > 0) {
+      return;
+    }
+    
+    currentPhaseForFakeCardsRef.current = currentPhaseId;
+    const revealedCardIds = cards.filter(c => c.isFlipped || c.isMatched).map(c => c.id);
+    const unrevealedCards = cards.filter(c => !c.isFlipped && !c.isMatched);
+    
+    const newFakeIds = generateFakeCards(unrevealedCards).filter(id => !revealedCardIds.includes(id));
     setFakeCardIds(newFakeIds);
-  }, [generateFakeCards]);
+  }, [generateFakeCards, getCurrentPhaseConfig, fakeCardIds.length]);
 
   useEffect(() => {
     if (!isBoss || !bossConfig) return;
@@ -238,12 +254,13 @@ export const useBossBattle = (levelId, gameStatus, matchedPairs, totalPairs) => 
   }, [matchedPairs.length, isBoss, dealDamageToBoss]);
 
   useEffect(() => {
-    if (isBoss && bossHp <= 0 && gameStatus === 'playing') {
+    if (isBoss && bossHp <= 0 && !finaleTriggeredRef.current && (gameStatus === 'playing' || allMatched)) {
+      finaleTriggeredRef.current = true;
       setTimeout(() => {
         startFinaleAnimation();
       }, 800);
     }
-  }, [bossHp, isBoss, gameStatus, startFinaleAnimation]);
+  }, [bossHp, isBoss, gameStatus, showFinale, allMatched, startFinaleAnimation]);
 
   useEffect(() => {
     if (!isBoss || gameStatus !== 'playing') return;
@@ -265,6 +282,18 @@ export const useBossBattle = (levelId, gameStatus, matchedPairs, totalPairs) => 
     };
   }, [currentPhase, isBoss, gameStatus, triggerRandomSkill, getCurrentPhaseConfig]);
 
+  useEffect(() => {
+    if (isBoss && allMatched && bossHp > 0 && gameStatus !== 'won' && !finaleTriggeredRef.current) {
+      setBossHp(0);
+    }
+  }, [allMatched, isBoss, bossHp, gameStatus]);
+
+  useEffect(() => {
+    if (isBoss && phaseTransition && fakeCardIds.length > 0) {
+      currentPhaseForFakeCardsRef.current = 0;
+    }
+  }, [phaseTransition, isBoss, fakeCardIds.length]);
+
   const resetBoss = useCallback(() => {
     if (!bossConfig) return;
     setBossHp(bossConfig.maxHp);
@@ -280,7 +309,9 @@ export const useBossBattle = (levelId, gameStatus, matchedPairs, totalPairs) => 
     setDamagePopup(null);
     setInterruptRewardPopup(null);
     lastMatchedRef.current = 0;
-    
+    finaleTriggeredRef.current = false;
+    currentPhaseForFakeCardsRef.current = 1;
+
     if (skillTimerRef.current) {
       clearInterval(skillTimerRef.current);
       skillTimerRef.current = null;

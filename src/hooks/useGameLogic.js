@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getStarById } from '../data/gameData';
+import { getStarById, isBossLevel } from '../data/gameData';
 
 export const useGameLogic = (level, options = {}) => {
   const [cards, setCards] = useState([]);
@@ -13,6 +13,8 @@ export const useGameLogic = (level, options = {}) => {
   const [seenStars, setSeenStars] = useState([]);
 
   const initializedRef = useRef(false);
+  const isBoss = level ? isBossLevel(level.id) : false;
+  const [allMatched, setAllMatched] = useState(false);
 
   const initializeCards = useCallback(() => {
     if (!level) return;
@@ -177,9 +179,19 @@ export const useGameLogic = (level, options = {}) => {
 
   useEffect(() => {
     if (level && matchedPairs.length === level.pairs && gameStatus === 'playing') {
+      if (isBoss) {
+        setAllMatched(true);
+      } else {
+        setGameStatus('won');
+      }
+    }
+  }, [matchedPairs, level, gameStatus, isBoss]);
+
+  const triggerBossVictory = useCallback(() => {
+    if (isBoss) {
       setGameStatus('won');
     }
-  }, [matchedPairs, level, gameStatus]);
+  }, [isBoss]);
 
   const getUnmatchedCards = useCallback(() => {
     return cards.filter(c => !c.isMatched);
@@ -236,6 +248,7 @@ export const useGameLogic = (level, options = {}) => {
 
   const resetGame = useCallback(() => {
     initializedRef.current = false;
+    setAllMatched(false);
     initializeCards();
   }, [initializeCards]);
 
@@ -257,6 +270,9 @@ export const useGameLogic = (level, options = {}) => {
     instantMatchPair,
     revealAllCards,
     setIsLockedExternal,
-    seenStars
+    seenStars,
+    allMatched,
+    triggerBossVictory,
+    isBoss
   };
 };
